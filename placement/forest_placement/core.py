@@ -3,7 +3,7 @@ import math
 import numpy as np
 from numba import njit
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def sightlines(terrain, surface, valid, ox, oy, observer_z, cell, max_range, smoke_height, radius):
     """Return [bare ground, bare smoke, obstructed ground, obstructed smoke] masks.
 
@@ -62,7 +62,7 @@ def frustum(dx, dy, dz, heading, tilt, hfov, vfov):
     up = dx*np.sin(yaw)*np.sin(pitch)+dy*np.cos(yaw)*np.sin(pitch)+dz*np.cos(pitch)
     return (forward > 0) & (np.abs(right) <= forward*np.tan(np.radians(hfov/2))+1e-8) & (np.abs(up) <= forward*np.tan(np.radians(vfov/2))+1e-8)
 
-def summarize(camera_masks, forest, water, eligible, cell_area, priority=None):
+def summarize(camera_masks, forest, water, eligible, cell_area, priority=None, fov_masks=None):
     """Each forest fraction counted once in the union, regardless of camera count."""
     counts = np.sum(camera_masks, axis=0) if len(camera_masks) else np.zeros(forest.shape,dtype=np.uint8)
     seen = (counts > 0) & eligible
@@ -77,6 +77,10 @@ def summarize(camera_masks, forest, water, eligible, cell_area, priority=None):
                   priority_visible_ha=float(np.sum(forest*seen*priority,dtype=np.float64)*factor),
                   total_forest_ha=float(np.sum(forest*eligible,dtype=np.float64)*factor),
                   viewed_area_ha=float(np.count_nonzero(seen)*factor))
+    if fov_masks is not None:
+        in_fov = np.any(fov_masks, axis=0) if len(fov_masks) else np.zeros(forest.shape, dtype=bool)
+        values['outside_fov_forest_ha'] = float(np.sum(forest*(eligible & ~in_fov), dtype=np.float64)*factor)
+        values['occluded_forest_ha'] = float(np.sum(forest*(eligible & in_fov & ~seen), dtype=np.float64)*factor)
     values['water_share_pct'] = 100*values['water_view_ha']/values['viewed_area_ha'] if values['viewed_area_ha'] else 0
     return {k:round(v,3) for k,v in values.items()}, counts
 

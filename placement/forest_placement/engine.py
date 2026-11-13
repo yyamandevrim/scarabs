@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import time
 from functools import lru_cache
 from pathlib import Path
@@ -15,11 +16,11 @@ from .models import Candidate
 from .maps import write_overlay
 
 ROOT=Path(__file__).resolve().parents[1]
-PREP=ROOT/'data/prepared'
-CACHE=ROOT/'data/results'
+PREP=Path(os.environ.get('PLACEMENT_PREPARED', ROOT/'data/prepared'))
+CACHE=Path(os.environ.get('PLACEMENT_CACHE', ROOT/'data/results'))
 TO_METRIC=Transformer.from_crs(4326,3067,always_xy=True)
 TO_LONLAT=Transformer.from_crs(3067,4326,always_xy=True)
-ALGORITHM='opaque-ray-half-cell-v4-two-inputs'
+ALGORITHM='opaque-ray-half-cell-v5-blind-split'
 SCENARIOS=('bare_ground','bare_smoke','canopy_ground','canopy_smoke')
 
 @lru_cache(maxsize=2)
@@ -54,9 +55,9 @@ def analyze(candidate:Candidate,use_cache=True):
     grid=load_grid(candidate.resolution);cell=int(grid['cell']);bounds=grid['bounds']
     x,y=TO_METRIC.transform(candidate.lon,candidate.lat)
     fullrow=int((bounds[3]-y)//cell);fullcol=int((x-bounds[0])//cell)
-    if not(0<=fullrow<grid['terrain'].shape[0] and 0<=fullcol<grid['terrain'].shape[1]):raise ValueError('Aday hazırlanan veri alanı dışında.')
-    if not grid['valid'][fullrow,fullcol]:raise ValueError('Aday noktasında geçerli yükselti verisi yok.')
-    if grid['water'][fullrow,fullcol]>.5:raise ValueError('Balon çıkış noktası su üzerinde olamaz; karada bir nokta seçin.')
+    if not(0<=fullrow<grid['terrain'].shape[0] and 0<=fullcol<grid['terrain'].shape[1]):raise ValueError('Candidate is outside the prepared region.')
+    if not grid['valid'][fullrow,fullcol]:raise ValueError('No valid elevation at this point.')
+    if grid['water'][fullrow,fullcol]>.5:raise ValueError('Choose a land launch point; this cell is mostly water.')
     buffer=int(math.ceil(candidate.max_range/cell))+2
     r0=max(0,fullrow-buffer);r1=min(grid['terrain'].shape[0],fullrow+buffer+1)
     c0=max(0,fullcol-buffer);c1=min(grid['terrain'].shape[1],fullcol+buffer+1)
@@ -68,22 +69,23 @@ def analyze(candidate:Candidate,use_cache=True):
     dx,dy=xx-x,yy-y;distance=np.hypot(dx,dy)
     eligible=(distance<=candidate.max_range)
     priority=priority_mask(candidate.priority,xx,yy)
-    los=sightlines(data['terrain'],data['surface'],data['valid'],ox,oy,observer_z,cell,candidate.max_range,candidate.smoke_height,candidate.earth_radius)
+    los=sightlines(data['terrain'],data['surface'],data['valid'],ox,oy,observer_z,cell,float(candidate.max_range),float(candidate.smoke_height),float(candidate.earth_radius))
     ground_dz=data['terrain']-observer_z-distance**2/(2*candidate.earth_radius)
     smoke_dz=data['surface']+candidate.smoke_height-observer_z-distance**2/(2*candidate.earth_radius)
-    masks=[]
+    masks=[]; fovs=[]
     for i in range(4):
         dz=ground_dz if i%2==0 else smoke_dz
-        masks.append(np.array([frustum(dx,dy,dz,candidate.heading+cam.yaw,cam.tilt,cam.hfov,cam.vfov)&los[i]&eligible for cam in candidate.cameras]))
+        fovs.append(np.array([frustum(dx,dy,dz,candidate.heading+cam.yaw,cam.tilt,cam.hfov,cam.vfov)&eligible for cam in candidate.cameras]))
+        masks.append(fovs[-1]&los[i])
     active=[i for i,c in enumerate(candidate.cameras) if c.active]
     def metrics(i,indices):
-        return summarize(masks[i][indices],data['forest'],data['water'],eligible,cell*cell,priority)
+        return summarize(masks[i][indices],data['forest'],data['water'],eligible,cell*cell,priority,fovs[i][indices])
     results={};images={}
     for i,name in enumerate(SCENARIOS):
         values,counts=metrics(i,active);results[name]=values
         rgba=np.zeros((*eligible.shape,4),dtype=np.uint8)
         forest=data['forest']>0
-        for mask,color in [(eligible&forest&(counts==0),[202,104,80,150]),(eligible&forest&(counts==1),[48,177,105,195]),(eligible&forest&(counts>=2),[149,95,213,220]),(eligible&(data['water']>0)&(counts>0),[57,165,219,95])]:
+        for mask,color in [(eligible&forest&~np.any(fovs[i][active],axis=0),[148,158,163,125]),(eligible&forest&np.any(fovs[i][active],axis=0)&(counts==0),[202,104,80,190]),(eligible&forest&(counts==1),[48,177,105,195]),(eligible&forest&(counts>=2),[149,95,213,220]),(eligible&(data['water']>0)&(counts>0),[57,165,219,95])]:
             rgba[mask]=color
         imagefile=CACHE/(key+'_'+name+'.png')
         llbounds=write_overlay(rgba,localbounds,imagefile,cell)
@@ -93,8 +95,9 @@ def analyze(candidate:Candidate,use_cache=True):
         pairs.append(dict(pair=indices,label=label,**{name:metrics(i,indices)[0] for i,name in enumerate(SCENARIOS)}))
     sensitivity=[]
     for delta in [-20,-10,0,10,20]:
-        cs=[frustum(dx,dy,smoke_dz,candidate.heading+delta+candidate.cameras[i].yaw,candidate.cameras[i].tilt,candidate.cameras[i].hfov,candidate.cameras[i].vfov)&los[3]&eligible for i in active]
-        values,_=summarize(cs,data['forest'],data['water'],eligible,cell*cell,priority)
+        fs=[frustum(dx,dy,smoke_dz,candidate.heading+delta+candidate.cameras[i].yaw,candidate.cameras[i].tilt,candidate.cameras[i].hfov,candidate.cameras[i].vfov)&eligible for i in active]
+        cs=[f&los[3] for f in fs]
+        values,_=summarize(cs,data['forest'],data['water'],eligible,cell*cell,priority,fs)
         sensitivity.append(dict(drift=delta,heading=(candidate.heading+delta)%360,**values))
     clipped=bool(min(x-bounds[0],bounds[2]-x,y-bounds[1],bounds[3]-y)<candidate.max_range)
     unknown=round(float(np.sum(data['forest']*eligible*~data['valid'])*cell*cell/10000),3)
@@ -115,6 +118,11 @@ def analyze(candidate:Candidate,use_cache=True):
         uncertainty=notes,range_clipped=clipped,unknown_forest_ha=unknown,
         field_checks=dict(road_access='sahada doğrulanacak',shadow='sahada doğrulanacak',site_constraints='sahada doğrulanacak'),
         computed_seconds=round(time.perf_counter()-started,4),cached=False,data_prepared_at=meta['prepared_at'],algorithm=ALGORITHM)
+    # Bounded generated cache: 256 analyses, including their four images.
+    entries=sorted(CACHE.glob('*.json'),key=lambda p:p.stat().st_mtime)
+    for old in entries[:-255]:
+        for asset in CACHE.glob(old.stem+'*'):
+            if asset.is_file():asset.unlink(missing_ok=True)
     tmp=resultfile.with_suffix('.tmp');tmp.write_text(json.dumps(result,ensure_ascii=False));tmp.replace(resultfile)
     result['request_seconds']=round(time.perf_counter()-started,4)
     return result
