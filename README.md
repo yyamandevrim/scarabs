@@ -4,6 +4,7 @@ ACORN (Aerial Canopy Observation and Reporting Node) is a portable forest observ
 
 - [`station/`](station/README.md): Python smoke detection pipeline and local web panel. See its README for setup and operation.
 - [`placement/`](placement/README.md): Python line-of-sight analysis and offline map UI. See its README for data preparation and usage.
+- [`tools/`](tools/README.md): upload and restore scripts for large artifacts kept in object storage, with a committed manifest. See its README for usage.
 
 Hardware measurements and simulated coverage numbers are labelled separately. Simulated visibility is an estimate, not a measured detection guarantee.
 
