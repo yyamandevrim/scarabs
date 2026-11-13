@@ -1,0 +1,10 @@
+{
+  "name": "[Project name]",
+  "tagline": {
+    "en": "A field station. A wider perspective.",
+    "tr": "Bir saha istasyonu. Daha geniş bir bakış."
+  },
+  "logo": "/static/mark.svg",
+  "placeholder": true,
+  "team": "Scarabs"
+}
