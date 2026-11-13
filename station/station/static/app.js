@@ -137,10 +137,29 @@ function renderStatus(status) {
   $('#geometry').replaceChildren(...status.cameras.map(camera => text('p',
     `${labels[camera.name]}: eğim ${num(camera.tilt, 0)}° · yatay/dikey görüş ${num(camera.hfov, 0)}° / ${num(camera.vfov, 0)}°`)));
   $('#settings').textContent = `Yapılandırılan hedef: ${num(status.target_analysis_hz, 0)} analiz/sn/kamera · model girişi ${status.input_size}px. Giriş çifti yapılandırmadan seçilir.`;
+  renderModule(status.mcu);
+  $('#measured-on').textContent = status.measured_on?.label || 'Ölçüm cihazı bilgisi alınamadı';
   updateCoverage();
 }
+function renderModule(mcu) {
+  const sensor = mcu?.flame_sensor;
+  const state = $('#flame-status');
+  $('#mcu-mode').textContent = mcu?.simulated ? 'Simülasyon' : mcu?.mode === 'off' ? 'Yapılandırılmamış' : '';
+  state.textContent = sensor?.status_text || 'Alev sensörü durumu bilinmiyor';
+  state.className = sensor?.triggered ? 'triggered' : sensor?.configured && !sensor.connected ? 'lost' : '';
+  $('#flame-note').textContent = sensor?.note || 'Modüldeki kısa menzilli kızılötesi sensör. Kamera duman şüphesini doğrulamaz.';
+  const shown = mcu?.led?.shown;
+  const colours = {green: 'Yeşil', amber: 'Kehribar', blue: 'Mavi', red: 'Kırmızı', 'red→green→blue': 'Kırmızı → yeşil → mavi'};
+  const patterns = {steady: 'sabit', 'double blink every 1.2 s': '1,2 sn’de çift yanıp sönme', 'slow blink, 1 s on / 1 s off': '1 sn açık / 1 sn kapalı', 'fast blink, 5 per second': 'saniyede 5 kez yanıp sönme', 'short flash every 2 s': '2 sn’de kısa yanıp sönme', 'one 0.75 s lamp test at power-up': 'başlangıçta 0,75 sn lamba testi'};
+  $('#led-status').textContent = shown ? `Durum LED’i: ${colours[shown.colour] || shown.colour || '—'} · ${patterns[shown.pattern] || shown.pattern || '—'} · ${shown.text}` : 'Durum LED’i: okunamıyor';
+  $('#sensor-reading').textContent = sensor?.connected && Number.isFinite(sensor.level_permille) ? `Bağıl kızılötesi düzeyi: ${num(sensor.level_permille, 0)}/1000 · kalibre edilmemiştir; mesafe veya alev boyutu değildir.` : '';
+  $('#led-requested').textContent = mcu?.led?.requested ? `İstasyonun istediği LED durumu: ${mcu.led.requested.text}. Yukarıdaki durum mikrodenetleyiciden okunur.` : '';
+}
 function eventRow(event) {
-  const row = text('article', '', 'event');
+  const row = text('details', '', 'event');
+  const summary = document.createElement('summary');
+  summary.className = 'event-summary';
+  row.append(summary);
   row.dataset.eventId = event.id;
   const title = text('h3', '');
   const meta = text('p', '', 'event-meta');
@@ -148,18 +167,22 @@ function eventRow(event) {
   evidence.target = '_blank'; evidence.rel = 'noopener';
   const image = document.createElement('img');
   image.alt = 'Duman şüphesi işaretlenmiş olay görüntüsü';
+  image.loading = 'lazy';
   evidence.append(image);
   const player = text('div', '', 'clip-player');
   const video = document.createElement('video');
   video.controls = true;
   video.muted = true;
   video.playsInline = true;
-  video.preload = 'metadata';
+  video.preload = 'none';
   video.setAttribute('aria-label', 'Duman şüphesi olay klibi');
   video.addEventListener('error', () => {
     // A decoder that refuses the clip falls back to the snapshot and download.
     item.playbackFailed = video.getAttribute('src');
     renderClip(item, item.event);
+  });
+  row.addEventListener('toggle', () => {
+    if (row.open && video.preload !== 'metadata') video.preload = 'metadata';
   });
   player.append(video);
   player.hidden = true;
@@ -171,14 +194,17 @@ function eventRow(event) {
   clipBar.append(clipLabel, clip);
   const clipStatus = text('p', '', 'event-detail clip-status');
   const actions = text('div', '', 'actions');
-  row.append(title, meta, player, evidence, noImage, clipBar, clipStatus, detail, actions);
+  summary.append(title, meta);
+  const body = text('div', '', 'event-body');
+  body.append(player, evidence, noImage, clipBar, clipStatus, detail, actions);
+  row.append(body);
   const item = {row, title, meta, player, video, evidence, image, noImage, detail, clipBar, clipLabel, clip, clipStatus, actions, event, playbackFailed: null, mode: '', saving: false, savedUntil: 0};
   eventElements.set(event.id, item);
   return item;
 }
 function sourceLabel(event) {
   const camera = currentStatus?.cameras.find(candidate => candidate.name === event.camera);
-  return camera?.kind === 'usb' ? 'Kamera kaydı' : camera?.kind === 'file' ? 'Kayıtlı demo' : 'Olay kaydı';
+  return (event.source_kind || camera?.kind) === 'usb' ? 'Kamera kaydı' : (event.source_kind || camera?.kind) === 'file' ? 'Kayıtlı demo' : 'Olay kaydı';
 }
 function renderClip(item, event) {
   const clipUrl = event.clip ? `/events/${event.clip}` : null;
@@ -271,10 +297,10 @@ function renderEvents(events) {
     const item = eventElements.get(event.id) || eventRow(event);
     const isPending = event.decision === 'pending';
     item.row.className = `event ${isPending ? 'pending' : editing.has(event.id) ? 'editing' : 'decided'}`;
-    if (isNew && isPending) item.row.classList.add('new-event');
+    if (isNew && isPending && pending.indexOf(event) === 0 && ![...eventElements.values()].some(other => other !== item && other.row.open)) item.row.open = true;
     if (item.row.classList.contains('decided') && !item.video.paused) item.video.pause?.();
     item.title.textContent = `${labels[event.camera]} kamera · Duman şüphesi`;
-    item.meta.textContent = `${dateTime(event.opened_at)} · model güveni %${Math.round(event.confidence * 100)}`;
+    item.meta.textContent = `${dateTime(event.opened_at)} · son gözlem güveni %${Math.round(event.confidence * 100)}`;
     item.event = event;
     renderClip(item, event);
     item.detail.textContent = `${event.closed_at ? 'Gözlem sona erdi' : 'İzleme sürüyor'} · son gözlem ${time(event.last_seen)}`;
@@ -306,6 +332,7 @@ async function decide(id, decision) {
     await json(`/api/events/${id}/decision`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({decision})});
     decisionRevision++;
     editing.delete(id);
+    item.row.open = true;
     item.savedUntil = Date.now() + 4000;
     // A successful write is authoritative even if the next polling request fails.
     currentEvents = currentEvents.map(event => event.id === id ? {...event, decision, decided_at: Date.now() / 1000} : event);
@@ -337,11 +364,13 @@ function serverLost() {
   warning.replaceChildren(text('strong', 'İstasyon yanıt vermiyor · yeniden deneniyor'),
     text('span', lastUpdate ? `Son veri ${time(lastUpdate)}. Görüntü, ölçüm ve karar listesi güncel değil.` : 'Görüntü, ölçüm ve karar listesi alınamıyor.'));
   $('#coverage').textContent = 'Giriş durumları bilinmiyor';
+  $('#measured-on').textContent = 'Ölçüm cihazı bilgisi alınamıyor';
+  renderModule(null);
   for (const item of cameraElements.values()) updateCamera(item.camera, false);
   $('#cameras').setAttribute('aria-busy', 'true');
   $('#event-count').textContent = 'Kayıtlar alınamıyor';
   $('#event-count').classList.remove('has-pending');
-  $('#events').replaceChildren(text('p', 'Bağlantı bekleniyor… Karar listesi yeniden yüklenecek.', 'empty skeleton'));
+  $('#events').replaceChildren(text('p', 'Bağlantı bekleniyor… Karar listesi yeniden yüklenecek.', 'empty'));
   $('#events').setAttribute('aria-busy', 'true');
   $('#history').hidden = true;
 }

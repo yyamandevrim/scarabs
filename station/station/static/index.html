@@ -3,20 +3,23 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{station_title}}</title>
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="/static/tokens.css">
 <link rel="stylesheet" href="/static/style.css">
 <script src="/static/app.js" defer></script>
 </head>
 <body>
 <header class="station-bar">
   <h1 title="{{station_title}}" aria-label="{{station_title}}">{{station_wordmark}}</h1>
+  <span class="station-section">Gözlem istasyonu</span>
   <p id="connection" role="status">İstasyona bağlanılıyor…</p>
   <a id="pending-summary" href="#event-panel">Kararlar yükleniyor…</a>
 </header>
 <main>
   <div id="system-warning" class="system-warning" role="alert" hidden></div>
   <section id="event-panel" class="event-panel" aria-labelledby="event-title">
-    <div class="section-heading"><h2 id="event-title">Duman şüphesi</h2><p id="event-count">Kayıtlar yükleniyor…</p></div>
-    <p class="event-note">Kararınız şüphe kaydına işlenir.</p>
+    <div class="queue-head"><div class="section-heading"><h2 id="event-title">Duman şüphesi</h2><p id="event-count">Kayıtlar yükleniyor…</p></div>
+    <p class="event-note">Kararınız şüphe kaydına işlenir.</p></div>
     <div id="events" aria-label="Karar bekleyen kayıtlar" aria-busy="true"><p class="empty skeleton">Kayıtlar yükleniyor…</p></div>
     <details id="history" class="history" hidden><summary>Değerlendirilen kayıtlar <span id="history-count"></span></summary><div id="history-events"></div></details>
   </section>
@@ -26,7 +29,14 @@
       <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
       <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
     </div>
+    <p id="measured-on" class="measured-on">Ölçüm cihazı bekleniyor…</p>
     <div id="inactive-cameras" class="inactive-cameras"></div>
+    <section class="module-state" aria-labelledby="module-title">
+      <div class="section-heading"><h2 id="module-title">Modüldeki sensör ve LED</h2><span id="mcu-mode"></span></div>
+      <div id="flame-status" role="status">Alev sensörü verisi bekleniyor…</div>
+      <p id="led-status">Durum LED’i: —</p>
+      <details class="sensor-details"><summary>Yerel sensörün kapsamı</summary><p id="flame-note">Modüldeki kısa menzilli kızılötesi sensör. Kamera duman şüphesini doğrulamaz.</p><p id="sensor-reading"></p><p id="led-requested"></p></details>
+    </section>
     <details class="configuration"><summary>Kamera yapılandırması</summary><div id="geometry">Yapılandırma yükleniyor…</div><p id="settings"></p></details>
   </section>
 </main>

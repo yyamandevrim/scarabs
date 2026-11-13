@@ -309,3 +309,45 @@ test('deciding pauses a playing clip', async () => {
   await flush();
   assert.equal(video.pausedByPanel, true);
 });
+
+test('large queue starts with one open record and polling preserves the reviewed disclosure', async () => {
+  const p = await panel(Array.from({length: 60}, (_, i) => event({id: `queue-${i}`, opened_at: 1700000000 - i * 60})));
+  assert.equal(p.$('#event-count').textContent, '60 karar bekliyor');
+  assert.equal(p.window.document.querySelectorAll('#events .event[open]').length, 1);
+  const reviewed = p.$('[data-event-id="queue-12"]');
+  p.$('#events .event').open = false;
+  reviewed.open = true;
+  p.state.events.unshift(event({id: 'new-arrival'}));
+  await p.refresh();
+  assert.equal(reviewed.open, true);
+  assert.equal(p.$('[data-event-id="new-arrival"]').open, false);
+  assert.equal(p.window.document.querySelectorAll('#events .event[open]').length, 1);
+});
+
+test('machine label accompanies measurements and confidence is explicitly latest', async () => {
+  const p = await panel([event()]);
+  p.state.status.measured_on = {label: 'Ölçüm bu cihazda: Test CPU · Linux · UNO Q değil'};
+  await p.refresh();
+  assert.match(p.$('#measured-on').textContent, /Test CPU/);
+  assert.match(p.$('.event-meta').textContent, /son gözlem güveni %88/);
+});
+
+test('local flame and observed LED are separate from smoke events and go unknown on server loss', async () => {
+  const p = await panel();
+  p.state.status.mcu = {mode: 'simulated', simulated: true,
+    flame_sensor: {configured: true, connected: true, triggered: true, status_text: 'Alev sensörü tetiklendi', level_permille: 700, note: 'Yerel kısa menzilli sensör; kamera duman şüphesini doğrulamaz.'},
+    led: {shown: {colour: 'red', pattern: 'fast blink, 5 per second', text: 'Alev sensörü tetiklendi'}, requested: {text: 'Normal gözlem'}}};
+  await p.refresh();
+  assert.equal(p.$('#flame-status').textContent, 'Alev sensörü tetiklendi');
+  assert.equal(p.$('#mcu-mode').textContent, 'Simülasyon');
+  assert.match(p.$('#led-status').textContent, /Kırmızı.*saniyede 5/);
+  assert.doesNotMatch(p.$('#led-status').textContent, /Normal gözlem/);
+  assert.match(p.$('#led-requested').textContent, /Normal gözlem/);
+  assert.match(p.$('#sensor-reading').textContent, /700\/1000.*kalibre edilmemiştir/);
+  assert.equal(p.$('#event-count').textContent, '0 karar bekliyor');
+  p.state.fail = true;
+  await p.refresh();
+  assert.match(p.$('#flame-status').textContent, /bilinmiyor/);
+  assert.equal(p.$('#led-status').textContent, 'Durum LED’i: okunamıyor');
+  assert.equal(p.$('#sensor-reading').textContent, '');
+});
