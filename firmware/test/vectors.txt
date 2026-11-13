@@ -1,0 +1,88 @@
+# Shared behaviour vectors for firmware/acorn_mcu/acorn_logic.h.
+# Run by firmware/test/test_logic.cpp (the real firmware code, compiled on the host)
+# and by station/tests/test_mcu.py (the Python simulated MCU), so both stay identical.
+#
+# Default settings: 12-bit ADC, analog inverted (more IR = lower voltage),
+# trigger 150 ms, release 1000 ms, LED flame hold 3000 ms, Linux timeout 5000 ms.
+#
+# "scenario NAME" starts fresh logic.
+# Step: t_ms raw digital linux_state -> triggered led level
+#   linux_state: "-" = no message at this time, otherwise the state Linux sends.
+#   led: 1 normal, 2 smoke pending, 3 degraded, 4 flame, 5 linux silent.
+#   level: expected relative IR level 0..1000, "-" = not checked.
+
+scenario single_noisy_sample_does_not_trigger
+0     4095 0 1 -> 0 1 0
+10    4095 1 - -> 0 1 0
+20    4095 0 - -> 0 1 0
+400   4095 0 - -> 0 1 0
+
+scenario sustained_digital_triggers_after_150ms_then_holds
+0     4095 1 1 -> 0 1 -
+100   4095 1 - -> 0 1 -
+149   4095 1 - -> 0 1 -
+150   4095 1 - -> 1 4 -
+200   4095 0 - -> 1 4 -
+1199  4095 0 - -> 1 4 -
+1200  4095 0 - -> 0 4 -
+4199  4095 0 - -> 0 4 -
+4200  4095 0 - -> 0 1 -
+
+scenario brief_flicker_restarts_release_timer
+0     4095 1 1 -> 0 1 -
+150   4095 1 - -> 1 4 -
+200   4095 0 - -> 1 4 -
+600   4095 1 - -> 1 4 -
+700   4095 0 - -> 1 4 -
+1600  4095 0 - -> 1 4 -
+1700  4095 0 - -> 0 4 -
+
+scenario gap_in_trigger_restarts_trigger_timer
+0     4095 1 1 -> 0 1 -
+100   4095 0 - -> 0 1 -
+110   4095 1 - -> 0 1 -
+259   4095 1 - -> 0 1 -
+260   4095 1 - -> 1 4 -
+
+scenario linux_never_heard_is_silent
+0     4095 0 - -> 0 5 -
+3000  4095 0 - -> 0 5 -
+
+scenario linux_timeout
+100   4095 0 2 -> 0 2 -
+5099  4095 0 - -> 0 2 -
+5100  4095 0 - -> 0 5 -
+6000  4095 0 3 -> 0 3 -
+6001  4095 0 - -> 0 3 -
+
+scenario every_requested_state
+0     4095 0 1 -> 0 1 -
+10    4095 0 2 -> 0 2 -
+20    4095 0 3 -> 0 3 -
+30    4095 0 4 -> 0 4 -
+40    4095 0 9 -> 0 3 -
+50    4095 0 0 -> 0 3 -
+60    4095 0 5 -> 0 3 -
+
+scenario flame_beats_smoke_pending_and_degraded
+0     4095 1 2 -> 0 2 -
+150   4095 1 - -> 1 4 -
+160   4095 1 3 -> 1 4 -
+
+scenario flame_shown_without_linux
+0     4095 1 - -> 0 5 -
+150   4095 1 - -> 1 4 -
+1150  4095 0 - -> 1 4 -
+2150  4095 0 - -> 0 4 -
+5150  4095 0 - -> 0 5 -
+
+scenario analog_level_smoothing
+0     4095 0 1 -> 0 1 0
+10    0    0 - -> 0 1 125
+20    0    0 - -> 0 1 234
+30    4095 0 - -> 0 1 205
+
+scenario constant_levels
+0     0    0 1 -> 0 1 1000
+10    0    0 - -> 0 1 1000
+20    2048 0 - -> 0 1 937

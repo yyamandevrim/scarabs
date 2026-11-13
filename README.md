@@ -5,6 +5,7 @@ ACORN (Aerial Canopy Observation and Reporting Node) is a portable forest observ
 - [`station/`](station/README.md): Python smoke detection pipeline and local web panel. See its README for setup and operation.
 - [`placement/`](placement/README.md): Python line-of-sight analysis and offline map UI. See its README for data preparation and usage.
 - [`tools/`](tools/README.md): upload and restore scripts for large artifacts kept in object storage, with a committed manifest. See its README for usage.
+- [`firmware/`](firmware/README.md): MCU sketch designed for the Arduino UNO Q's local KY-026 flame sensor and RGB status LED, with wiring and bring-up instructions. Host logic checks pass; nothing has been run on the board.
 
 ## What has been verified so far
 
