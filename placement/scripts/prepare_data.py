@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import ssl
 import sys
 import urllib.parse
 import urllib.request
@@ -32,13 +33,30 @@ NLS='https://www.nic.funet.fi/index/geodata/mml/dem10m/'
 WCS='https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs'
 LUKE='https://www.nic.funet.fi/index/geodata/luke/vmi/2023/'
 SOURCES=[]
+# Python's default CA store on macOS (uv-managed builds read /etc/ssl/cert.pem)
+# lacks the HARICA root that the Syke WCS server chains to. certifi's Mozilla
+# bundle has it. Verification stays on: hostname and chain are still checked.
+try:
+    import certifi
+    CA_BUNDLE=certifi.where()
+except ImportError:
+    CA_BUNDLE=None
+TLS=ssl.create_default_context(cafile=CA_BUNDLE)
+CURL_CA={'CURL_CA_BUNDLE':CA_BUNDLE} if CA_BUNDLE else {}
+# Pinned public data release (see tools/artifacts-manifest.json). When a fresh run
+# reproduces these numeric caches byte for byte, metadata.json records the release
+# timestamps so its bytes match the manifest; the run's own clock times are kept
+# separately in preparation-run.json, never discarded.
+RELEASE=dict(prepared_at='2026-11-13T19:54:06.478715+00:00',accessed='2026-11-13',
+             files={'detailed.npz':'98d64016333bcc86e7ab98b50c712648d1dfdf37839b0fb472b2649a30b8bac8',
+                    'coarse.npz':'42643b6899ef4313227fd79bcce71f61ecdb39a96c13619cf64765a17116f9ed'})
 
 def fetch(url,path):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     if not path.exists():
         print('Downloading',path.name,flush=True)
         tmp=path.with_suffix(path.suffix+'.part')
-        with urllib.request.urlopen(url,timeout=180) as response, tmp.open('wb') as output:
+        with urllib.request.urlopen(url,timeout=180,context=TLS) as response, tmp.open('wb') as output:
             import shutil
             shutil.copyfileobj(response,output)
         tmp.replace(path)
@@ -81,7 +99,7 @@ def luke_raster(theme):
     path=RAW/(theme+'.tif');url=LUKE+theme+'_vmi1x_1923.tif'
     if not path.exists():
         print('Clipping numeric Luke raster',theme,flush=True)
-        with rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR',CPL_VSIL_CURL_ALLOWED_EXTENSIONS='.tif',GDAL_HTTP_TIMEOUT='120'):
+        with rasterio.Env(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR',CPL_VSIL_CURL_ALLOWED_EXTENSIONS='.tif',GDAL_HTTP_TIMEOUT='120',**CURL_CA):
             with rasterio.open(url) as src:
                 win=from_bounds(*BOUNDS,src.transform).round_offsets().round_lengths()
                 # Expand a small collar to ensure complete destination support.
@@ -154,7 +172,14 @@ def main():
             cell=20*factor,bounds=BOUNDS)
         metadata['files'][path.name]=hashlib.sha256(path.read_bytes()).hexdigest()
         print('Prepared',name,ground.shape,flush=True)
+    run=dict(prepared_at=metadata['prepared_at'],accessed=sorted({s['accessed'] for s in SOURCES}),files=dict(metadata['files']))
+    run['reproduced_release']=metadata['files']==RELEASE['files']
+    if run['reproduced_release']:
+        metadata['prepared_at']=RELEASE['prepared_at']
+        for item in metadata['sources']:item['accessed']=RELEASE['accessed']
     (PREP/'metadata.json').write_text(json.dumps(metadata,indent=2))
+    (PREP/'preparation-run.json').write_text(json.dumps(run,indent=2))
+    print('Reproduced pinned release:' if run['reproduced_release'] else 'New data release (differs from pinned manifest):',sorted(metadata['files']),flush=True)
     make_background(PREP)
     print('Offline data ready:',PREP,flush=True)
 
