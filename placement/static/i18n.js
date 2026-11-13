@@ -5,6 +5,7 @@
  if(!['en','tr'].includes(lang))lang='en';
  document.documentElement.lang=lang;
  let dictionary={}, brand=null, observer;
+ const assetVersion=document.body.dataset.assetVersion||'';
  window.placementText=(en,tr)=>lang==='tr'?tr:en;
  const originals=new WeakMap();
  const translate=(value,to)=>{
@@ -30,8 +31,8 @@
    document.querySelectorAll('[aria-label], [title], [alt]').forEach(el=>{
      for(const attr of ['aria-label','title','alt']){const current=el.getAttribute(attr);if(current===null)continue;const canonical=translate(current,'en');el.setAttribute(attr,lang==='en'?canonical:translate(canonical,'tr'));}
    });
-   document.querySelectorAll('[data-product-desktop]').forEach(e=>{const path='/static/placement-preview-'+lang+'.png';if(e.getAttribute('src')!==path)e.src=path});
-   document.querySelectorAll('[data-product-phone]').forEach(e=>{const path='/static/placement-preview-phone-'+lang+'.png';if(e.getAttribute('srcset')!==path)e.srcset=path});
+   document.querySelectorAll('[data-product-desktop]').forEach(e=>{const path='/static/placement-preview-'+lang+'.png?v='+assetVersion;if(e.getAttribute('src')!==path)e.src=path});
+   document.querySelectorAll('[data-product-phone]').forEach(e=>{const path='/static/placement-preview-phone-'+lang+'.png?v='+assetVersion;if(e.getAttribute('srcset')!==path)e.srcset=path});
    document.querySelectorAll('.language').forEach(b=>{b.textContent=lang==='en'?'Türkçe':'English';b.setAttribute('aria-label',lang==='en'?'Switch to Turkish':'İngilizceye geç')});
    if(brand){
      document.querySelectorAll('[data-brand-name]').forEach(e=>e.textContent=brand.name);
@@ -48,7 +49,7 @@
    try{localStorage.setItem('language',lang)}catch{}
    render();window.dispatchEvent(new Event('languagechange'));render();
  }));
- Promise.allSettled([fetch('/static/translations.json').then(r=>r.json()),fetch('/api/brand').then(r=>r.json())]).then(([d,b])=>{
+ Promise.allSettled([fetch('/static/translations.json?v='+assetVersion).then(r=>r.json()),fetch('/api/brand').then(r=>r.json())]).then(([d,b])=>{
    dictionary=d.status==='fulfilled'?d.value:{};brand=b.status==='fulfilled'?b.value:null;observer=new MutationObserver(render);render();window.dispatchEvent(new Event('languagechange'));
  });
 })();

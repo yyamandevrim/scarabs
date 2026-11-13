@@ -1,5 +1,6 @@
 """Identical offline/public ASGI app. Public compute has bounded inputs and budgets."""
 import json
+import hashlib
 import os
 import re
 import threading
@@ -32,12 +33,18 @@ async def policy(request,call_next):
     response.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
     response.headers['X-Content-Type-Options']='nosniff'
     response.headers['Referrer-Policy']='same-origin'
+    if request.url.path in ('/','/map','/api/brand') or request.url.path.startswith('/static/'):
+        response.headers['Cache-Control']='no-cache'
     return response
 
 def branded_page(filename):
     # Render identity before JavaScript starts; brand.json remains the only source.
     identity=json.loads((ROOT/'brand.json').read_text())
     page=(ROOT/'static'/filename).read_text()
+    assets=sorted(p for p in (ROOT/'static').iterdir() if p.suffix in ('.js','.css','.json','.svg'))
+    revision=hashlib.sha256(b''.join(p.read_bytes() for p in assets)).hexdigest()[:12]
+    page=page.replace('<body','<body data-asset-version="'+revision+'"',1)
+    page=re.sub(r'(/static/[^"?]+\.(?:js|css|png))"',lambda match:match.group(1)+'?v='+revision+'"',page)
     page=page.replace('data-brand-icon href="data:,"','data-brand-icon href="'+escape(identity['logo'],quote=True)+'"')
     page=page.replace('data-brand-logo', 'data-brand-logo src="'+escape(identity['logo'],quote=True)+'"')
     for field,key in [('name','name'),('team','team')]:
