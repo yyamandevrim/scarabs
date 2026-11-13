@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 from .alarm import Detection
+from . import overlay_text
 
 class SmokeDetector:
     def __init__(self, model: Path, input_size=640, confidence=.35, nms_iou=.45, threads=2):
@@ -71,13 +72,15 @@ def annotate(frame, detections):
         scale = max(.6, w / 1066)
         thickness = max(1, round(w / 640))
         padding = max(4, round(w / 160))
-        label = f"Duman suphesi %{round(detection.confidence * 100)}"
-        (tw, th), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, scale, thickness)
+        # Snapshot and clip show the detection that opened the event: its
+        # confidence is the event's alarm_confidence.
+        label = f"Duman şüphesi %{round(detection.confidence * 100)}"
+        (tw, th), baseline = overlay_text.text_size(label, scale, thickness)
         lx = max(0, min(x1, w - tw - 2 * padding))
         ly = max(th + padding, y1 - padding)
         ly = min(ly, h - baseline - padding)
         cv2.rectangle(image, (x1, y1), (x2, y2), amber, thickness)
         cv2.rectangle(image, (lx, ly - th - padding), (min(w - 1, lx + tw + 2 * padding), ly + baseline + padding), amber, -1)
-        # OpenCV's built-in font has no Turkish glyphs; the panel uses full Turkish.
-        cv2.putText(image, label, (lx + padding, ly), cv2.FONT_HERSHEY_SIMPLEX, scale, ink, thickness, cv2.LINE_AA)
+        # The Hershey font has no Turkish glyphs; overlay_text draws ş/ü as base letter + mark.
+        overlay_text.put_text(image, label, (lx + padding, ly), scale, ink, thickness)
     return image
