@@ -1,0 +1,47 @@
+{
+  "verified_on": "2026-11-13",
+  "browser": "T3 shared preview, 1280x800",
+  "checks": [
+    "Initial offline map and preset comparison",
+    "Heading 180 to 0 updated coastal visible forest",
+    "Left+right pair selected; centre grey and disconnected; zero overlap",
+    "Three-corner priority polygon submitted; inland visible priority forest became positive",
+    "Explicit three-camera reference labelled in comparison header",
+    "Detailed resolution selected; restored left+centre with right input disabled"
+  ],
+  "physical_wifi_disabled": false,
+  "final_page": {
+    "active": [
+      {
+        "active": true,
+        "disabled": false
+      },
+      {
+        "active": true,
+        "disabled": false
+      },
+      {
+        "active": false,
+        "disabled": true
+      }
+    ],
+    "external": [],
+    "reference": false,
+    "resolution": "detailed",
+    "resourceURLs": [
+      "http://localhost:8787/static/vendor/leaflet.css",
+      "http://localhost:8787/static/style.css",
+      "http://localhost:8787/static/vendor/leaflet.js",
+      "http://localhost:8787/static/app.js",
+      "http://localhost:8787/api/config",
+      "http://localhost:8787/maps/map.json",
+      "http://localhost:8787/maps/background.png",
+      "http://localhost:8787/api/analyze",
+      "http://localhost:8787/results/7cece12b5aa64c59ada7f58a_canopy_smoke.png",
+      "http://localhost:8787/results/1901ba66aadf08876dff900f_canopy_smoke.png",
+      "http://localhost:8787/results/9eb6227bd0b053394ebabfad_canopy_smoke.png"
+    ],
+    "status": "Hazır · Kıyı · Haukilahti: 0 sn (önbellek)",
+    "visible": "771,1"
+  }
+}
