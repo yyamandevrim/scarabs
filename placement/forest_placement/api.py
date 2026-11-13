@@ -7,7 +7,7 @@ from pydantic import BaseModel,Field
 from .engine import ROOT, PREP, CACHE, analyze, metadata
 from .models import Candidate,PRESETS
 
-app=FastAPI(title='Orman Gözlem · Yerleşim Simülasyonu')
+app=FastAPI(title='Orman Gözlem · Yerleşim Simülasyonu',docs_url=None,redoc_url=None)
 app.mount('/static',StaticFiles(directory=ROOT/'static'),name='static')
 PREP.mkdir(parents=True,exist_ok=True);CACHE.mkdir(parents=True,exist_ok=True)
 app.mount('/maps',StaticFiles(directory=PREP),name='maps')
