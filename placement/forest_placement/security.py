@@ -5,7 +5,10 @@ import json
 import time
 
 class PublicLimits:
-    def __init__(self, app, per_client=12, global_limit=60, window=60, max_body=32768, proxy_hops=0):
+    # A visitor exploring the map sends one or two analyses per (debounced) change;
+    # 90/min/client is far above that pace. The single analysis slot (HTTP 503
+    # with Retry-After) still bounds compute; these budgets only stop floods.
+    def __init__(self, app, per_client=90, global_limit=360, window=60, max_body=32768, proxy_hops=0):
         self.app, self.per_client, self.global_limit = app, per_client, global_limit
         self.window, self.max_body, self.proxy_hops = window, max_body, proxy_hops
         self.clients = OrderedDict()

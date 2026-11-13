@@ -25,7 +25,16 @@ app=FastAPI(title='Forest observation placement simulation',docs_url=None,redoc_
 app.mount('/static',StaticFiles(directory=ROOT/'static'),name='static')
 CACHE.mkdir(parents=True,exist_ok=True)
 lock=threading.BoundedSemaphore(1)
-app.add_middleware(PublicLimits,proxy_hops=int(os.environ.get('PLACEMENT_PROXY_HOPS','0')))
+def rate_limits_enabled(env=os.environ):
+    """Public deployment only: the laptop/offline demo is never throttled.
+
+    PLACEMENT_RATE_LIMIT=1/0 overrides; otherwise PLACEMENT_PRODUCTION=1 (Modal) enables it."""
+    flag=env.get('PLACEMENT_RATE_LIMIT')
+    if flag is not None:return flag.strip().lower() in ('1','true','yes','on')
+    return env.get('PLACEMENT_PRODUCTION')=='1'
+
+if rate_limits_enabled():
+    app.add_middleware(PublicLimits,proxy_hops=int(os.environ.get('PLACEMENT_PROXY_HOPS','0')))
 
 @app.middleware('http')
 async def policy(request,call_next):
