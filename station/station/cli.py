@@ -59,6 +59,11 @@ def main():
     bench.add_argument("--frames",type=int,default=60)
     bench.add_argument("--stride",type=int,default=25)
     bench.add_argument("--warmup",type=int,default=3)
+    archive=sub.add_parser("archive-events",help="Stop the server first. Move events and evidence to data/archive/ (or delete them) for a clean panel")
+    archive.add_argument("--delete",action="store_true",help="Permanently delete instead of archiving")
+    archive.add_argument("--yes",action="store_true",help="Do not ask for confirmation")
+    for command,text in (("unplug","Simulate a live dropout of a recorded (file) camera source"),("replug","Restore a source hidden by unplug")):
+        sub.add_parser(command,help=text).add_argument("slot",choices=("left","centre","right"))
     args=parser.parse_args()
     try:
         config=load_config(args.config)
@@ -69,11 +74,29 @@ def main():
             from .runtime import Station
             from .web import create_app
             uvicorn.run(create_app(Station(config)),host=args.host,port=args.port)
+        elif args.command=="archive-events":
+            from .maintenance import archive_events, event_summary
+            summary=event_summary(config.data_dir)
+            word="DELETE" if args.delete else "ARCHIVE"
+            if not args.yes:
+                print(f"{config.data_dir}: {summary['events']} events, {summary['media_files']} evidence files.")
+                print("Permanently delete them?" if args.delete else "Move them to data/archive/ (kept, not shown in the panel)?")
+                try:
+                    answer=input(f"Type {word} to continue: ")
+                except EOFError:
+                    answer=""
+                if answer.strip()!=word:
+                    parser.exit(1,"Cancelled; nothing changed.\n")
+            result=archive_events(config.data_dir,delete=args.delete)
+            print(json.dumps(result,indent=2))
+        elif args.command in ("unplug","replug"):
+            from . import maintenance
+            print(getattr(maintenance,args.command)(config,args.slot))
         else:
             if args.frames < 1 or args.stride < 1 or args.warmup < 0:
                 parser.error("frames and stride must be positive; warmup cannot be negative")
             benchmark(config,args.clip,args.frames,args.stride,args.warmup)
-    except (ValueError,FileNotFoundError) as exc:
+    except (ValueError,FileNotFoundError,RuntimeError) as exc:
         parser.exit(2,f"Configuration/startup error: {exc}\n")
 
 if __name__=="__main__":

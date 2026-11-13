@@ -1,6 +1,7 @@
 """Independent capture workers: one latest frame, bounded compressed evidence ring."""
 from collections import deque
 from dataclasses import dataclass
+from pathlib import Path
 from threading import Event, Lock, Thread
 import time
 import cv2
@@ -44,6 +45,10 @@ class CaptureWorker:
         # No raw-frame queue. This ring is compressed and used only for event evidence.
         self.ring = deque(maxlen=max(2, int((config.pre_seconds+config.post_seconds+2)*config.clip_fps)+2))
         self.factory = factory or self._open
+        # A source path that vanishes while running (file removed/renamed, USB
+        # by-path/by-id link gone on unplug) is reported as lost within this interval.
+        self.watched = Path(camera.source) if factory is None else None
+        self.watch_interval = .5
 
     def _open(self):
         if self.camera.kind == "usb":
@@ -92,11 +97,21 @@ class CaptureWorker:
                 fps = fps if 0 < fps <= 120 else 25
                 next_frame = time.monotonic()
                 last_sample, previous = 0.0, None
+                next_check = time.monotonic()+self.watch_interval
                 while not self.stop_event.is_set():
+                    if self.watched is not None and time.monotonic() >= next_check:
+                        next_check = time.monotonic()+self.watch_interval
+                        if not self.watched.exists():
+                            raise OSError("Source path disappeared (file removed or device unplugged)")
                     ok, image = cap.read()
                     if not ok:
                         if self.camera.kind == "file" and self.camera.loop:
-                            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                            # Reopen by path instead of seeking the open handle, so a file
+                            # that was removed or replaced is noticed at the loop point too.
+                            cap.release()
+                            cap = self.factory()
+                            if not cap.isOpened():
+                                raise OSError("Cannot reopen source at loop restart")
                             ok, image = cap.read()
                         if not ok:
                             raise OSError("Source disconnected or end of unreadable clip")

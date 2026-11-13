@@ -5,6 +5,17 @@ import sqlite3
 from threading import RLock
 import uuid
 
+KINDS = ("smoke", "flame_sensor")
+TITLES = {"smoke": "Duman şüphesi", "flame_sensor": "Alev sensörü tetiklendi"}
+# Columns added after the first release. Existing databases gain them on open;
+# old rows keep NULL where the value was never recorded (it is not invented).
+MIGRATIONS = (
+    ("kind", "TEXT NOT NULL DEFAULT 'smoke'"),
+    ("details", "TEXT"),
+    ("alarm_confidence", "REAL"),
+    ("peak_confidence", "REAL"),
+)
+
 class EventStore:
     def __init__(self, root: Path):
         self.root = Path(root)
@@ -20,17 +31,40 @@ class EventStore:
             confidence REAL NOT NULL, snapshot TEXT, clip TEXT,
             decision TEXT NOT NULL DEFAULT 'pending' CHECK(decision IN ('pending','confirmed','rejected')),
             decided_at REAL, media_error TEXT)""")
+        self._migrate()
         self.db.commit()
+
+    def _migrate(self):
+        with self.lock, self.db:
+            existing = {row["name"] for row in self.db.execute("PRAGMA table_info(events)")}
+            for name, ddl in MIGRATIONS:
+                if name not in existing:
+                    self.db.execute(f"ALTER TABLE events ADD COLUMN {name} {ddl}")
 
     def create(self, camera, detection, now):
         event_id = uuid.uuid4().hex
         with self.lock, self.db:
-            self.db.execute("INSERT INTO events(id,camera,opened_at,last_seen,box,confidence) VALUES(?,?,?,?,?,?)", (event_id,camera,now,now,json.dumps(detection.box),detection.confidence))
+            self.db.execute("INSERT INTO events(id,camera,opened_at,last_seen,box,confidence,alarm_confidence,peak_confidence) VALUES(?,?,?,?,?,?,?,?)", (event_id,camera,now,now,json.dumps(detection.box),detection.confidence,detection.confidence,detection.confidence))
         return event_id
+
+    def create_flame(self, now, details):
+        # Local flame-sensor trigger: no camera, box or model confidence.
+        event_id = uuid.uuid4().hex
+        with self.lock, self.db:
+            self.db.execute("INSERT INTO events(id,kind,camera,opened_at,last_seen,box,confidence,details) VALUES(?,'flame_sensor','',?,?,'null',0,?)", (event_id,now,now,json.dumps(details)))
+        return event_id
+
+    def update_flame(self, event_id, now, details):
+        with self.lock, self.db:
+            self.db.execute("UPDATE events SET last_seen=?,details=? WHERE id=? AND kind='flame_sensor'", (now,json.dumps(details),event_id))
+
+    def pending_count(self, kind="smoke"):
+        with self.lock:
+            return self.db.execute("SELECT COUNT(*) FROM events WHERE kind=? AND decision='pending'", (kind,)).fetchone()[0]
 
     def extend(self, event_id, detection, now):
         with self.lock, self.db:
-            self.db.execute("UPDATE events SET last_seen=?,box=?,confidence=? WHERE id=?", (now,json.dumps(detection.box),detection.confidence,event_id))
+            self.db.execute("UPDATE events SET last_seen=?,box=?,confidence=?,peak_confidence=MAX(COALESCE(peak_confidence,?),?) WHERE id=?", (now,json.dumps(detection.box),detection.confidence,detection.confidence,detection.confidence,event_id))
 
     def close_event(self, event_id, now):
         with self.lock, self.db:
@@ -52,14 +86,26 @@ class EventStore:
             cursor = self.db.execute("UPDATE events SET decision=?,decided_at=? WHERE id=?", (decision,now,event_id))
             return cursor.rowcount > 0
 
-    def events(self, limit=200):
+    def events(self, limit=200, kind="smoke"):
+        """Newest events of one kind ("smoke", "flame_sensor") or "all"."""
+        if kind != "all" and kind not in KINDS:
+            raise ValueError(f"kind must be one of {', '.join(KINDS)} or all")
         with self.lock:
-            rows = self.db.execute("SELECT * FROM events ORDER BY opened_at DESC LIMIT ?", (limit,)).fetchall()
+            if kind == "all":
+                rows = self.db.execute("SELECT * FROM events ORDER BY opened_at DESC LIMIT ?", (limit,)).fetchall()
+            else:
+                rows = self.db.execute("SELECT * FROM events WHERE kind=? ORDER BY opened_at DESC LIMIT ?", (kind,limit)).fetchall()
         result = []
         for row in rows:
             item = dict(row)
             item["box"] = json.loads(item["box"])
-            item["title"] = "Duman şüphesi"
+            item["details"] = json.loads(item["details"]) if item["details"] else None
+            item["title"] = TITLES[item["kind"]]
+            if item["kind"] == "smoke":
+                # confidence is kept for compatibility and equals latest_confidence.
+                item["latest_confidence"] = item["confidence"]
+            else:
+                item.update(camera=None, confidence=None, alarm_confidence=None, peak_confidence=None, latest_confidence=None)
             result.append(item)
         return result
 

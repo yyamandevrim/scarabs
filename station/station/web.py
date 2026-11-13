@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from . import identity
+from .mcu_bridge import register_routes as register_mcu_routes
 
 class Decision(BaseModel):
     decision: Literal["confirmed", "rejected"]
@@ -48,8 +49,9 @@ def create_app(station, manage_lifecycle=True):
         return station.status()
 
     @app.get("/api/events")
-    def events():
-        return station.store.events()
+    def events(kind: Literal["smoke", "flame_sensor", "all"] = "smoke"):
+        # Default stays camera "suspected smoke" only; flame-sensor triggers are a separate kind.
+        return station.store.events(kind=kind)
 
     @app.post("/api/events/{event_id}/decision")
     def decide(event_id: str, body: Decision):
@@ -79,5 +81,6 @@ def create_app(station, manage_lifecycle=True):
         media_type = {".jpg":"image/jpeg", ".webm":"video/webm", ".avi":"video/x-msvideo"}[path.suffix]
         return FileResponse(path, media_type=media_type, filename=filename if path.suffix == ".avi" else None)
 
+    register_mcu_routes(app, station)
     app.mount("/static", StaticFiles(directory=static), name="static")
     return app

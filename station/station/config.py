@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 import tomllib
+from .mcu_protocol import McuConfig
 
 SLOTS = ("left", "centre", "right")
 
@@ -39,6 +40,7 @@ class Config:
     clip_width: int = 640
     ort_threads: int = 2
     led_path: str | None = None
+    mcu: McuConfig = field(default_factory=McuConfig)
 
     def __post_init__(self):
         if sorted(c.name for c in self.cameras) != sorted(SLOTS):
@@ -78,4 +80,5 @@ def load_config(path: str | Path) -> Config:
         if camera.kind == "file":
             camera.source = str((base / camera.source).resolve())
         cameras.append(camera)
+    options["mcu"] = McuConfig(**raw.get("mcu", {}))
     return Config(cameras=cameras, **options)

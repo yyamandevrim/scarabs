@@ -7,11 +7,13 @@ from threading import Event, Lock, Thread
 import logging
 import time
 import cv2
-from . import clip
+from . import clip, datalock
 from .alarm import EventTracker
 from .capture import CaptureWorker
 from .detector import SmokeDetector, annotate
 from .led import LedHook
+from .machine import machine_identity
+from .mcu_bridge import McuBridge
 from .storage import EventStore
 
 class Station:
@@ -22,6 +24,8 @@ class Station:
         self.workers = {c.name: CaptureWorker(c, config, factory=(lambda c=c: capture_factory(c)) if capture_factory else None) for c in config.cameras if c.active}
         self.trackers = {name: EventTracker(config.similarity_iou, config.event_timeout) for name in self.workers}
         self.led = LedHook(config.led_path)
+        self.mcu = McuBridge(self, config.mcu)
+        self.data_lock = None
         self.stop_event = Event()
         self.lock = Lock()
         self.metrics = {name: {"analyses":0, "preprocess_ms":None, "inference_ms":None, "analysis_ms":None, "analysis_hz":0.0, "pipeline_error":None} for name in self.workers}
@@ -32,12 +36,14 @@ class Station:
         self.thread = None
 
     def start(self):
+        self.data_lock = datalock.acquire(self.config.data_dir)
         self.store.close_previous(time.time())
         self.store.prune(time.time(), self.config.retention_days)
         for worker in self.workers.values():
             worker.start()
         self.thread = Thread(target=self._run, name="shared-detector", daemon=True)
         self.thread.start()
+        self.mcu.start()
 
     def stop(self):
         self.stop_event.set()
@@ -54,6 +60,9 @@ class Station:
             for event in tracker.events:
                 self.store.close_event(event.id, now)
         self.led.set_alarm(False)
+        self.mcu.stop()
+        datalock.release(self.data_lock)
+        self.data_lock = None
 
     def status(self):
         now = time.time()
@@ -71,7 +80,7 @@ class Station:
                 item.update(state)
                 item.update(connected=connected, status="connected" if connected else "disconnected", status_text="bağlı" if connected else "bağlantı koptu")
             cameras.append(item)
-        return {"cameras": cameras, "target_analysis_hz":self.config.analysis_hz, "input_size":self.config.input_size, "confidence_threshold":self.config.confidence, "offline":True}
+        return {"cameras": cameras, "target_analysis_hz":self.config.analysis_hz, "input_size":self.config.input_size, "confidence_threshold":self.config.confidence, "offline":True, "measured_on":machine_identity(), "mcu":self.mcu.status()}
 
     def jpeg(self, name):
         worker = self.workers.get(name)

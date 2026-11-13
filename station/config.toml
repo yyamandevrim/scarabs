@@ -18,6 +18,12 @@ ort_threads = 2
 # Optional Linux LED brightness path; absent means no-op.
 # led_path = "/sys/class/leds/YOUR_LED/brightness"
 
+[mcu]
+# UNO Q microcontroller (KY-026 local flame sensor + status LED), see firmware/README.md.
+# "simulated": in-process model of the sketch for this Mac demo; the API marks it simulated.
+# "router": the real board via arduino-router. "off": no microcontroller.
+mode = "simulated"
+
 [cameras.left]
 active = true
 kind = "file"
