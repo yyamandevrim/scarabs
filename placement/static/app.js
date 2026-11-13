@@ -63,7 +63,7 @@ function renderSummary(){
  if(ranked.length===2){const order=ranked.map((i,k)=>`${k+1} ${siteName(candidates[i])}`).join(', ');localized($('ranking'),`Ranking by ${priorityMode?'visible priority forest':'total visible forest'} (smoke-target scenario): ${order}`,`Sıralama, ${priorityMode?'görünür öncelikli orman':'toplam görünür orman'} (duman hedefi senaryosu): ${order}`);}else $('ranking').textContent='';
  const stale=[...dirty].some(i=>results[i]),missing=[0,1].filter(i=>!results[i]).map(i=>siteName(candidates[i])).join(', ');document.body.classList.toggle('stale',stale);
  if(lastError)state(lastError+(results.some(Boolean)?' Results are for previous settings.':''),true);else if(stale)state('Updating · results are for previous settings.');else if(missing)state(busy?`Calculating ${missing}…`:'— means not computed. Recalculate both sites to begin.',false,busy?`${missing} hesaplanıyor…`:'— hesaplanmadı demektir. Başlamak için iki konumu yeniden hesaplayın.');else state('');
- 
+
 }
 
 // --- Charts ------------------------------------------------------------------
