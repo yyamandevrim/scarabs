@@ -1,0 +1,126 @@
+[
+  {
+    "phase": "empty-jit-cache",
+    "startup_seconds": 0.6159,
+    "requests": [
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "coarse",
+        "cached": false,
+        "http_seconds": 0.0814,
+        "compute_seconds": 0.0793
+      },
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "coarse",
+        "cached": true,
+        "http_seconds": 0.0015,
+        "compute_seconds": 0.0793
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "coarse",
+        "cached": false,
+        "http_seconds": 0.0629,
+        "compute_seconds": 0.0611
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "coarse",
+        "cached": true,
+        "http_seconds": 0.0014,
+        "compute_seconds": 0.0611
+      },
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "detailed",
+        "cached": false,
+        "http_seconds": 0.4003,
+        "compute_seconds": 0.3984
+      },
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "detailed",
+        "cached": true,
+        "http_seconds": 0.0014,
+        "compute_seconds": 0.3984
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "detailed",
+        "cached": false,
+        "http_seconds": 0.4507,
+        "compute_seconds": 0.4487
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "detailed",
+        "cached": true,
+        "http_seconds": 0.0019,
+        "compute_seconds": 0.4487
+      }
+    ]
+  },
+  {
+    "phase": "image-like-jit-cache",
+    "startup_seconds": 0.4124,
+    "requests": [
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "coarse",
+        "cached": false,
+        "http_seconds": 0.08,
+        "compute_seconds": 0.0779
+      },
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "coarse",
+        "cached": true,
+        "http_seconds": 0.0015,
+        "compute_seconds": 0.0779
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "coarse",
+        "cached": false,
+        "http_seconds": 0.0598,
+        "compute_seconds": 0.0581
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "coarse",
+        "cached": true,
+        "http_seconds": 0.0014,
+        "compute_seconds": 0.0581
+      },
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "detailed",
+        "cached": false,
+        "http_seconds": 0.3981,
+        "compute_seconds": 0.3962
+      },
+      {
+        "preset": "Coast \u00b7 Haukilahti",
+        "resolution": "detailed",
+        "cached": true,
+        "http_seconds": 0.0014,
+        "compute_seconds": 0.3962
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "detailed",
+        "cached": false,
+        "http_seconds": 0.4004,
+        "compute_seconds": 0.3986
+      },
+      {
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "detailed",
+        "cached": true,
+        "http_seconds": 0.0015,
+        "compute_seconds": 0.3986
+      }
+    ]
+  }
+]
