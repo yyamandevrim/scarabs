@@ -191,7 +191,7 @@ test('server loss removes connected states, stale figures, empty all-clear and d
   await p.refresh();
   assert.match(p.$('#system-warning').textContent, /İstasyon yanıt vermiyor.*Son veri/);
   assert.equal(p.$('#connection').textContent, 'İstasyon bağlantısı yok');
-  assert.equal(p.$('#pending-summary').textContent, 'Karar sayısı —');
+  assert.equal(p.$('#pending-summary').textContent, 'Kayıtlara erişilemiyor');
   assert.equal(p.window.document.title, `Bağlantı yok — ${stationTitle}`);
   assert.equal(p.$('.camera-state').textContent, 'Durum bilinmiyor');
   assert.equal(p.$('.camera-info').textContent, 'Ölçülen · —');
@@ -351,4 +351,28 @@ test('local flame and observed LED are separate from smoke events and go unknown
   assert.match(p.$('#flame-status').textContent, /bilinmiyor/);
   assert.equal(p.$('#led-status').textContent, 'Durum LED’i: okunamıyor');
   assert.equal(p.$('#sensor-reading').textContent, '');
+});
+
+test('pending total has one visible home and older records disclose without hiding a watched clip', async () => {
+  const events = Array.from({length: 60}, (_, i) => event({id: `ordered-${i}`, opened_at: 1700000000 - i * 60}));
+  const p = await panel(events);
+  assert.equal(p.$('#pending-summary').textContent, 'Kayıtları incele');
+  assert.equal(p.$('#event-count').textContent, '60 karar bekliyor');
+  assert.equal(p.window.document.querySelectorAll('#events .event:not([hidden])').length, 4);
+  assert.equal(p.$('#older-toggle').textContent, 'Önceki 56 kaydı göster');
+  assert.match(p.$('[data-event-id="ordered-0"] h3').textContent, /^En yeni/);
+  assert.match(p.$('[data-event-id="ordered-59"] h3').textContent, /^En eski yanıtsız/);
+  p.$('#older-toggle').click();
+  assert.equal(p.window.document.querySelectorAll('#events .event[hidden]').length, 0);
+  const reviewing = p.$('[data-event-id="ordered-20"]');
+  reviewing.open = true;
+  const video = reviewing.querySelector('video');
+  p.$('#older-toggle').click();
+  assert.equal(reviewing.hidden, false);
+  await p.refresh();
+  assert.equal(reviewing.querySelector('video'), video);
+  assert.equal(reviewing.open, true);
+  p.$('#queue-oldest').click();
+  assert.equal(p.$('[data-event-id="ordered-59"]').open, true);
+  assert.equal(p.$('[data-event-id="ordered-59"]').hidden, false);
 });

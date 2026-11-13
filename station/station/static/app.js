@@ -10,6 +10,7 @@ let currentStatus = null;
 let currentEvents = [];
 let lastUpdate = null;
 let refreshing = false;
+let showOlderPending = false;
 let decisionRevision = 0;
 const $ = selector => document.querySelector(selector);
 const text = (tag, value, className) => {
@@ -86,7 +87,8 @@ function updateCamera(camera, requestFrame = true) {
   }
   item.info.replaceChildren();
   if (connected && !camera.pipeline_error) {
-    item.info.append(text('span', 'Ölçülen', 'metric-label'));
+    const device = currentStatus?.measured_on?.board_model || currentStatus?.measured_on?.cpu_model;
+    item.info.append(text('span', device ? `Ölçülen · ${device}` : 'Ölçülen', 'metric-label'));
     const values = text('p', '', 'metric-values');
     const measured = camera.analyses > 0;
     for (const value of [
@@ -281,12 +283,12 @@ function renderActions(item, event) {
   item.actions.append(message);
 }
 function renderEvents(events) {
-  const pending = events.filter(event => event.decision === 'pending');
+  const pending = events.filter(event => event.decision === 'pending').sort((a,b)=>b.opened_at-a.opened_at);
   const history = events.filter(event => event.decision !== 'pending');
   $('#event-count').textContent = `${pending.length} karar bekliyor`;
   $('#event-count').classList.toggle('has-pending', pending.length > 0);
-  $('#pending-summary').textContent = `${pending.length} karar bekliyor`;
-  $('#pending-summary').classList.toggle('has-pending', pending.length > 0);
+  $('#pending-summary').textContent = 'Kayıtları incele';
+  $('#pending-summary').classList.remove('has-pending');
   document.title = pending.length ? `(${pending.length}) Duman şüphesi — ${[...new Set(pending.map(event => labels[event.camera]))].join(', ')} — ${stationTitle}` : stationTitle;
   $('#events').querySelectorAll('.empty').forEach(element => element.remove());
   for (const [id, item] of eventElements) {
@@ -299,7 +301,11 @@ function renderEvents(events) {
     item.row.className = `event ${isPending ? 'pending' : editing.has(event.id) ? 'editing' : 'decided'}`;
     if (isNew && isPending && pending.indexOf(event) === 0 && ![...eventElements.values()].some(other => other !== item && other.row.open)) item.row.open = true;
     if (item.row.classList.contains('decided') && !item.video.paused) item.video.pause?.();
-    item.title.textContent = `${labels[event.camera]} kamera · Duman şüphesi`;
+    const position = isPending && event === pending[0] ? 'En yeni · ' : isPending && event === pending[pending.length-1] ? 'En eski yanıtsız · ' : '';
+    item.title.textContent = `${position}${labels[event.camera]} kamera · Duman şüphesi`;
+    item.row.dataset.queuePosition = isPending && event === pending[pending.length-1] && pending.length > 1 ? 'oldest' : isPending && event === pending[0] ? 'newest' : '';
+    const keepVisible = pending.indexOf(event) < 3 || event === pending[pending.length-1] || item.row.open || item.row.contains(document.activeElement);
+    item.row.hidden = isPending && !showOlderPending && !keepVisible;
     item.meta.textContent = `${dateTime(event.opened_at)} · son gözlem güveni %${Math.round(event.confidence * 100)}`;
     item.event = event;
     renderClip(item, event);
@@ -312,6 +318,11 @@ function renderEvents(events) {
     if (target.children[index] !== item.row) target.insertBefore(item.row, target.children[index] || null);
   }
   if (!pending.length) $('#events').append(text('p', events.length ? 'Karar bekleyen kayıt yok.' : 'Henüz duman şüphesi kaydı yok.', 'empty'));
+  const olderCount = [...$('#events').children].filter(row => row.hidden).length;
+  $('#queue-controls').hidden = pending.length < 2;
+  $('#older-toggle').hidden = !olderCount && !showOlderPending;
+  $('#older-toggle').textContent = showOlderPending ? 'Eski kayıtları daralt' : `Önceki ${olderCount} kaydı göster`;
+  $('#older-toggle').setAttribute('aria-expanded', String(showOlderPending));
   $('#events').setAttribute('aria-busy', 'false');
   $('#history').hidden = !history.length;
   $('#history-count').textContent = `(${history.length})`;
@@ -320,6 +331,19 @@ function renderEvents(events) {
     $('#history').dataset.initialized = 'true';
   }
 }
+function jumpToPending(oldest) {
+  const pending = currentEvents.filter(event=>event.decision==='pending').sort((a,b)=>a.opened_at-b.opened_at);
+  const event = oldest ? pending[0] : pending[pending.length-1];
+  if (!event) return;
+  const item = eventElements.get(event.id);
+  item.row.open = true;
+  renderEvents(currentEvents);
+  item.row.scrollIntoView?.({block:'nearest'});
+  item.row.querySelector('summary').focus({preventScroll:true});
+}
+$('#queue-newest').onclick = () => jumpToPending(false);
+$('#queue-oldest').onclick = () => jumpToPending(true);
+$('#older-toggle').onclick = () => {showOlderPending=!showOlderPending;renderEvents(currentEvents);};
 async function decide(id, decision) {
   const item = eventElements.get(id);
   if (!item || item.saving || !online) return;
@@ -357,7 +381,9 @@ function serverLost() {
   document.title = `Bağlantı yok — ${stationTitle}`;
   $('#connection').textContent = 'İstasyon bağlantısı yok';
   $('#connection').className = 'lost';
-  $('#pending-summary').textContent = 'Karar sayısı —';
+  $('#pending-summary').textContent = 'Kayıtlara erişilemiyor';
+  $('#queue-controls').hidden = true;
+  $('#older-toggle').hidden = true;
   $('#pending-summary').classList.remove('has-pending');
   const warning = $('#system-warning');
   warning.hidden = false;

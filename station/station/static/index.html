@@ -13,13 +13,15 @@
   <h1 title="{{station_title}}" aria-label="{{station_title}}">{{station_wordmark}}</h1>
   <span class="station-section">Gözlem istasyonu</span>
   <p id="connection" role="status">İstasyona bağlanılıyor…</p>
-  <a id="pending-summary" href="#event-panel">Kararlar yükleniyor…</a>
+  <a id="pending-summary" href="#event-panel">Kayıtları incele</a>
 </header>
 <main>
   <div id="system-warning" class="system-warning" role="alert" hidden></div>
   <section id="event-panel" class="event-panel" aria-labelledby="event-title">
     <div class="queue-head"><div class="section-heading"><h2 id="event-title">Duman şüphesi</h2><p id="event-count">Kayıtlar yükleniyor…</p></div>
-    <p class="event-note">Kararınız şüphe kaydına işlenir.</p></div>
+    <p class="event-note">Kararınız şüphe kaydına işlenir.</p>
+    <div id="queue-controls" class="queue-controls" hidden><button id="queue-newest" type="button">En yeni</button><button id="queue-oldest" type="button">En eski yanıtsız</button></div>
+    <button id="older-toggle" class="older-toggle" type="button" aria-expanded="false" aria-controls="events" hidden></button></div>
     <div id="events" aria-label="Karar bekleyen kayıtlar" aria-busy="true"><p class="empty skeleton">Kayıtlar yükleniyor…</p></div>
     <details id="history" class="history" hidden><summary>Değerlendirilen kayıtlar <span id="history-count"></span></summary><div id="history-events"></div></details>
   </section>
