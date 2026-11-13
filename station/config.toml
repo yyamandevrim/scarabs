@@ -1,0 +1,55 @@
+[station]
+model = "models/smoke.onnx"
+data_dir = "data"
+analysis_hz = 1.0
+input_size = 640
+confidence = 0.35
+similarity_iou = 0.25
+nms_iou = 0.45
+event_timeout = 12.0
+retry_seconds = 2.0
+stale_seconds = 3.0
+retention_days = 7.0
+pre_seconds = 4.0
+post_seconds = 4.0
+clip_fps = 5.0
+clip_width = 640
+ort_threads = 2
+# Optional Linux LED brightness path; absent means no-op.
+# led_path = "/sys/class/leds/YOUR_LED/brightness"
+
+[cameras.left]
+active = true
+kind = "file"
+source = "media/smoke.ogv"
+yaw = -70.0
+tilt = 0.0
+hfov = 80.0
+vfov = 50.0
+width = 1280
+height = 720
+loop = true
+
+[cameras.centre]
+active = true
+kind = "file"
+source = "media/fog.webm"
+yaw = 0.0
+tilt = 0.0
+hfov = 80.0
+vfov = 50.0
+width = 1280
+height = 720
+loop = true
+
+[cameras.right]
+active = false
+kind = "file"
+source = "media/cloud.webm"
+yaw = 70.0
+tilt = 0.0
+hfov = 80.0
+vfov = 50.0
+width = 1280
+height = 720
+loop = true
