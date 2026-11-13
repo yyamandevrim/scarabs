@@ -4,14 +4,14 @@ ACORN (Aerial Canopy Observation and Reporting Node) is a portable forest observ
 
 - [`station/`](station/README.md): Python smoke detection pipeline and local web panel. See its README for setup and operation.
 - [`placement/`](placement/README.md): Python line-of-sight analysis and offline map UI. See its README for data preparation and usage.
-- [`ground/`](ground/README.md): offline receiver dashboard for compact alert packets over simulated LoRa transport, with optional Wi-Fi evidence collection. Real radio operation remains unverified.
+- [`ground/`](ground/README.md): LoRa-only remote dashboard for compact alert packets over simulated transport, with optional Wi-Fi evidence collection.
 - [`tools/`](tools/README.md): upload and restore scripts for large artifacts kept in object storage, with a committed manifest. See its README for usage.
-- [`firmware/`](firmware/README.md): MCU sketch designed for the Arduino UNO Q's local KY-026 flame sensor and RGB status LED, with wiring and bring-up instructions. Host logic checks pass; nothing has been run on the board.
+- [`firmware/`](firmware/README.md): MCU sketch designed for the Arduino UNO Q's local KY-026 flame sensor and RGB status LED, with wiring and bring-up instructions.
 
 ## What has been verified so far
 
 - **Verified on a Mac:** the detection pipeline and operator panel have been run on an Apple M5 Mac against recorded clips. The only measured inference figure comes from that Mac, not from the board.
-- **Pending on hardware:** nothing has been run on the Arduino UNO Q yet. On-board detection, inference timing, live camera capture and field operation are still to be tested.
+- **Verified on the UNO Q:** the station software has now been run on a real UNO Q with the microcontroller bridge and the KY-026 flame sensor responding, using recorded clips instead of cameras; inference speed on the board, USB cameras, the access-point mode and any real LoRa radio remain unverified.
 - **Simulated, not measured:** placement coverage figures are geometric estimates, not a measured detection guarantee.
 
 Model weights, downloaded datasets, map tiles, video clips, and generated event evidence are kept out of git.
