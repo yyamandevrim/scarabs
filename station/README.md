@@ -44,6 +44,8 @@ uv run --offline --frozen forest-station --config config.toml serve --host 0.0.0
 
 Copy the downloaded `models/` and `media/` directories to the board instead of fetching again if desired. Install Linux dependencies on Linux: do not copy the Mac `.venv`. `--host 0.0.0.0` permits a browser on the station's local network to connect to `http://BOARD_LOCAL_IP:8080`; a local display can use `127.0.0.1`. The default host is loopback. The prototype has no authentication, so expose it only on the intended local demo network.
 
+Before judging board speed, stop the server and run the smoke `benchmark` command in [Tests and measured Mac results](#tests-and-measured-mac-results) **on the UNO Q**. Published timings below are Apple M5 Mac measurements only. For the KY-026, RGB LED, sketch upload and real bridge config, follow the [complete hardware installation checklist](../firmware/README.md#install-on-the-arduino-uno-q--first-time-checklist). The checked-in `[mcu] mode = "simulated"` is a hardware-free demo; switch your board config to `router` before presenting it as hardware telemetry.
+
 ### Map USB cameras to mounted slots
 
 ```sh
@@ -89,14 +91,16 @@ Switching the active pair requires a config edit and restart. Yaw, tilt, horizon
 Clips play inline in the panel: an HTML `<video>` with native controls, the annotated snapshot as its poster and an **İndir** download link. The label reads **“Kayıtlı demo · olay klibi”** for file sources.
 
 - **Why WebM/VP8.** The pinned `opencv-python-headless` 4.14 wheels bundle FFmpeg with libvpx on both macOS ARM64 and **Linux ARM64**. VP8 therefore needs no system `ffmpeg` binary and no extra package, and works fully offline. H.264/MP4 was rejected: the Mac wheel bundles x264, but inspection of the `manylinux_2_28_aarch64` wheel's libavcodec found no x264 or OpenH264 encoder. The only H.264 encoder there is `h264_v4l2m2m`, which needs a hardware codec driver that has not been verified on the UNO Q. VP9 and AV1 cost several times to ~50× more CPU than VP8. No `ffmpeg` binary is used or required.
-- **Browsers.** VP8 WebM played inline on this Mac in Safari 27.0.1, Playwright Chromium 156 and Playwright Firefox (see the verification notes). iOS/iPadOS Safari and Google Chrome-branded builds were not tested.
-- **CPU cost.** One evidence thread encodes at most one clip at a time from the already-compressed 640px/5 fps ring, so detection never waits on it. On Linux that thread is reniced to +10 so capture and inference win any contention. Overload records an explicit missing-clip error instead of queuing. Measured on the **Mac (Apple M5)** with real smoke footage: 0.43–0.82 s wall time per event (6 real smoke events, 31–40 frames at 640×360, measured while both cameras were being analysed; includes JPEG decode, box drawing and a decode check of the output). The UNO Q figure is **unmeasured**. Expect it to be several times slower but still a few seconds of one core per event, off the detection thread.
+- **Browsers.** Clips were confirmed playing inline on this Mac in **Safari 27.0.1** and **Playwright Chromium 156**: playback ran past 1.5 s, `readyState` reached 4, the frame was 640×360, there were no media errors and no external requests. Firefox has documented VP8 WebM support, but it was **not tested** here because Playwright's Firefox build would not launch on this macOS. Google Chrome-branded builds and iOS/iPadOS Safari were not tested either.
+- **CPU cost.** One evidence thread encodes at most one clip at a time from the already-compressed 640px/5 fps ring, so detection never waits on it. On Linux that thread is reniced to +10 so capture and inference win any contention. Overload records an explicit missing-clip error instead of queuing. Measured on the **Mac (Apple M5)** with real smoke footage: 0.43–0.82 s wall time per event (6 real smoke events, 31–40 frames at 640×360, measured while both cameras were being analysed; includes JPEG decode, box drawing and a decode check of the output). The UNO Q figure is **unmeasured**; measure encode time and its effect on sustained inference on the actual board before making a performance claim.
 - **Fallback without the encoder.** If the VP8 writer cannot open, or its output does not decode, the same event is written as an **MJPEG AVI** with OpenCV's built-in writer, which needs no FFmpeg. The panel then shows the annotated snapshot, the download link and the message *“Bu klip tarayıcıda oynatılamaz (.avi) · işaretli görüntü gösteriliyor, klip indirilip yerel oynatıcıda açılabilir”*. A browser that reports no VP8 support, or fails to decode the clip, gets the same snapshot-plus-download view with *“Bu tarayıcı klibi oynatamıyor”*. If both writers fail, the event keeps its snapshot and records the error, and the panel shows **“Klip kaydedilemedi”**.
 - **Legacy events.** Events recorded before this change keep their `.avi` clips. They stay listed and decidable, and show the AVI fallback view. The server log line `Event clip …: WebM/VP8, N frames, encoded in X ms` reports each event's format and encode time. OpenCV prints a harmless `tag … 'VP80' is not supported … webm` notice when it opens the VP8 writer.
 
 ### Optional LED hook
 
-`station/led.py` defines `LedHook.set_alarm(enabled)`. With no `led_path`, it is a no-op. If configured, it writes `1`/`0` to a Linux LED brightness file; a missing/unwritable path disables the hook without stopping detection. No UNO Q MCU bridge or physical LED control has been verified. A board-specific adapter can implement the same interface later. LoRa and solar are omitted.
+The MCU status LED and local KY-026 now use the implemented RouterBridge client (`station/mcu_bridge.py`, `mcu_link.py`), with a tested in-process simulation. See the [panel API contract](#microcontroller-and-local-flame-sensor-api-for-the-panel-designer) and [hardware guide/LED table](../firmware/README.md#led-state-table). The sketch compiles for UNO Q; actual bridge, sensor and LED operation on the board remain unverified.
+
+The separate legacy `station/led.py` interface, `LedHook.set_alarm(enabled)`, is still available: no `led_path` means no-op; a configured Linux LED brightness file receives `1`/`0`, with missing/unwritable paths disabling this hook without stopping detection. It is a binary smoke-alarm hook, not the MCU's multi-state RGB driver. Leave it unset when using the MCU scheme, avoiding another writer to the same LED. LoRa and solar are omitted.
 
 ## Model provenance and licence
 
@@ -129,13 +133,26 @@ The fog source page asserts the uploader's CC BY-SA 4.0 licence but also has a p
 
 ## Offline demo sequence
 
-1. Complete dependency and model/media downloads. Keep `left` and `centre` active, `right` inactive. Stop any previous server.
+1. Complete dependency and model/media downloads on reliable internet before the venue demo. Keep `left` and `centre` active, `right` inactive. Stop any previous server; if you want a clean panel, use [archive-events](#start-with-a-clean-event-list) below. If Wikimedia returns HTTP 429, wait a minute and rerun the footage fetcher; finished files are hash-checked and skipped.
 2. Disconnect the station's internet uplink (Wi-Fi can remain on a local network if another device is viewing). Start with `uv run --offline --frozen forest-station --config config.toml serve` and open `http://127.0.0.1:8080`.
-3. Show the **two** active feeds and the right mounted/inactive slot. The smoke source starts at a visible plume; an event should open after roughly three analyses. Show “Duman şüphesi,” the highlighted snapshot, the local clip and measured analysis times.
+3. Show the **two** active feeds and the right mounted/inactive slot. The smoke source starts at a visible plume; an event should open after roughly three analyses. Show “Duman şüphesi,” the highlighted snapshot, the local clip and measured analysis times. Say “measured on this Apple M5 Mac, not on the UNO Q” for the laptop demo; `/api/status.measured_on` identifies the running host. Label simulated MCU data as simulated.
 4. Choose **Doğrula** or **Reddet**. Restart the server and show that the decision remains. The repeating clip can produce another event after the first smoke disappears long enough to close; this is expected.
 5. Fog is the default negative. To compare cloud or glare, stop the server, make a `negative.local.toml` copy, change only `cameras.centre.source` to `media/cloud.webm` or `media/glare.webm`, and restart with `--config negative.local.toml`. Keep only two active flags.
 6. **On the board:** unplug one of the two active USB cameras. Its slot must say “bağlantı koptu”; the other active feed keeps processing, and the third remains “takılı, bağlı değil.” Reconnect the same port and watch retry recovery. This physical step has not been tested without the board.
-7. **On the Mac:** the real-video integration test stops one capture worker and checks that the other continues. For an interactive unreadable-file/retry demonstration, rename `media/smoke.ogv` to `media/smoke.ogv.disabled` while serving. The already-open file can play until EOF (up to 54 seconds); after that, the left slot loses its source while fog continues. Rename it back to restore capture. Do not run the footage fetcher while it is renamed.
+7. **On the Mac, live file dropout:** keep the server running. In another terminal in `station/`, run `uv run --offline --frozen forest-station --config config.toml unplug centre`. It renames the centre source to `.unplugged`; capture checks path existence every 0.5 s, so allow about 1–2 s for the panel to show “bağlantı koptu” while left continues and right stays inactive. Run `uv run --offline --frozen forest-station --config config.toml replug centre` to restore it; allow the default 2 s retry plus a panel poll. Use the same config as the server. These commands only accept active **file** sources; they do not detach USB hardware. Always replug before running the footage fetcher. A looping file also reopens its path at EOF, rather than keeping an old file handle forever.
+
+### Start with a clean event list
+
+Stop the server with Ctrl+C first. From `station/`, use the config whose event directory you intend to reset:
+
+```sh
+uv run --offline --frozen forest-station --config config.toml archive-events
+# Inspect the summary, then type ARCHIVE at the prompt.
+```
+
+This moves the event database (including any WAL/SHM files) and evidence directory into `data/archive/<UTC timestamp>/`, under that config's `data_dir`. It preserves the records on disk while the next server starts with an empty event list. It includes **both smoke and flame-sensor records**, and refuses if a station server holds that data directory. Prior archives, model and footage are kept. Do not delete the whole data directory to clear the panel.
+
+For intentional permanent removal, `archive-events --delete` requires typing `DELETE`; adding `--yes` skips the respective confirmation, so use it only in an intentional scripted reset. Start the server again after archiving. The repeating smoke clip can create fresh pending records within seconds; this is not a failed reset.
 
 ## Tests and measured Mac results
 
@@ -155,9 +172,11 @@ npm ci --ignore-scripts
 npm test
 ```
 
-These tests cover loading, recorded/live labels, pending counts, source highlighting, both decisions and correction, failed writes, focus preservation during polling, camera/analysis failure, server loss and recovery, and different active pairs.
+The **24 panel tests** cover loading, recorded/live labels, pending counts, source highlighting, both decisions and correction, failed writes, focus preservation during polling, camera/analysis failure, server loss and recovery, different active pairs, clip playback/fallback, large queues, machine/confidence labels and separate local-flame/LED states.
 
-Verification on **Apple M5, ARM64 Mac, macOS 27.0.1, Python 3.11.15**, CPUExecutionProvider only. The suite includes 38 unit/API cases and 3 real-video integration cases: smoke paired separately with fog, cloud and glare. It covers three-of-five voting with misses and unrelated regions, configurable similarity, extension/expiry, latest-frame replacement, camera failure and retry, unaffected second camera, inactive slots, all active pairs, max-two validation, persistence of both decisions, retention of rows/media, preprocessing geometry/RGB/NMS, wrong-model rejection, local assets, and HTTP endpoints.
+Verification on **Apple M5, ARM64 Mac, macOS 27.0.1, Python 3.11.15**, CPUExecutionProvider only: **104 pytest cases passed: 101 unit/API and 3 real-video integration cases**, smoke paired separately with fog, cloud and glare. This includes WebM/VP8 encoding, AVI fallback, no-encoder failure and legacy AVI events; MCU simulation/protocol, fake-router reconnect/timeout, storage migration and flame-event separation; live file dropout/recovery, Turkish overlays, opening/peak/latest confidence, host identity and archive safety. It also covers three-of-five voting with misses and unrelated regions, configurable similarity, extension/expiry, latest-frame replacement, unaffected second camera, inactive slots, all active pairs, max-two validation, decisions, retention, preprocessing/RGB/NMS, wrong-model rejection, local assets and HTTP endpoints. Real-video tests skip explicitly when model/media are missing.
+
+The pure C++ firmware suite passes **150 checks** and its shared vectors are also tested against the Python simulation. Run it independently from `firmware/test/` with `c++ -std=c++17 -Wall -Wextra -I../acorn_mcu test_logic.cpp -o /tmp/acorn-test-logic` then `/tmp/acorn-test-logic vectors.txt`. The sketch also compiles with Arduino CLI 1.6.0, Zephyr core 1.1.0 and RouterBridge 0.4.4; it has never been flashed here.
 
 The actual uvicorn server was also run on this Mac with smoke + fog for 98 analyses per camera. A smoke event was observed, evidence downloaded over HTTP and decoded, and a confirmation persisted. The browser loaded both active feeds, three slot cards, the event list and the inactive message with **zero external resource requests and zero console errors**. Measured analysis rates near the end were 1.00/s left and 0.99/s centre. Internet was not physically disabled on the host; the end-to-end tests explicitly forbid socket connections, and the browser audit checks same-origin-only requests.
 
@@ -178,15 +197,56 @@ At approximately 1 Hz across each complete downloaded video: smoke detected in *
 
 ## HTTP API
 
-- `GET /api/status`: three slots, active/connected states, geometry and per-active-camera measurements.
+- `GET /api/status`: three slots, active/connected states, geometry, per-active-camera measurements, `measured_on` host identity and the `mcu` object described below.
 - `GET /api/cameras/left/frame.jpg` (also `centre`, `right`): latest annotated frame; 503 when disconnected, 404 when inactive.
-- `GET /api/events`: newest 200 events, title, timestamps, normalized box, confidence, media names, decision.
+- `GET /api/events`: newest 200 **smoke** events by default, title, timestamps, normalized box, confidence fields, media names, decision. `?kind=smoke|flame_sensor|all` selects kinds; invalid kinds return 422. Existing camera-only clients can retain the default.
 - `POST /api/events/EVENT_ID/decision` with JSON `{"decision":"confirmed"}` or `{"decision":"rejected"}`; invalid values return 422, unknown IDs 404.
 - `GET /events/GENERATED_FILENAME.jpg`, `.webm` or legacy `.avi`: local event evidence. WebM is served inline as `video/webm` with HTTP Range support; AVI is served as a download. Arbitrary filesystem paths are not served.
 
+Smoke records have `alarm_confidence` (opening detection, matching snapshot/clip overlays), `peak_confidence` (highest recorded confidence) and `latest_confidence` (same as legacy `confidence`). All are model scores on `0..1`, not proof of fire. Label them **opening / peak / latest**, rather than presenting mismatched values as the same measurement. Old rows retain `null` for opening/peak values that were not recorded; do not infer an opening score from the latest one. Row box coordinates still track the latest detection; evidence retains the opening box.
+
+`/api/status.measured_on` contains `system`, `os_release`, `architecture`, `cpu_model`, `board_model`, `is_uno_q` and display `label`. Show the host next to measured inference figures. No hostname or username is included. UNO Q identification currently checks whether Linux's device-tree model contains “UNO Q”; that exact board string is unverified, so a failed match on a real board is not proof it is another machine. No Mac timings become board timings by connecting a board to the laptop.
+
+## Microcontroller and local flame sensor API for the panel designer
+
+**Implemented backend contract; UI integration is separate.** `GET /api/mcu` returns the same MCU object included at `/api/status.mcu`. Poll either once per second. `[mcu] mode` is `off`, `simulated` or `router`; the checked-in config is `simulated`. Wiring, voltage limits, upload, config switch and the full LED table are in [firmware/README.md](../firmware/README.md).
+
+| Object / fields | Meaning and display rule |
+|---|---|
+| `mode`, `simulated` | Always show a **simulation** badge when true, including LED state and sensor events. `off` is unconfigured, not normal. |
+| `link` in router mode | `transport`, `socket`, `router_connected`, `registered`, `mcu_acknowledged_at`, `mcu_protocol`, `unanswered_requests`, `last_error`; also `rejected_readings` and `mcu_uptime_ms`. Distinguish router connection from actual fresh MCU telemetry. |
+| `link` in simulated/off mode | Simulation has `transport: "simulated"`, `linux_messages_ignored`; off has `transport: "off"`. Do not assume router-only keys exist. |
+| `flame_sensor` identity | `kind: "local_flame_sensor"`, `model: "Joy-IT KY-026"`, `scope: "station_local_short_range"`, `note`, `simulated`. Keep the local/short-range note visible; it never confirms a camera suspicion. |
+| Sensor availability | `configured`, `connected`, `status_text`, `last_update` (Unix seconds), `open_event_id`. `connected` means telemetry arrived within `reading_timeout` (default 3 s), **not** electrical presence of the module. |
+| Sensor readings | `raw`, `smoothed_raw`, `adc_bits`, `level_permille` (`0..1000`), `level` (`0..1`), `level_note`, `digital_active`, `triggered`. `digital_active` is polarity-normalized; `triggered` includes debounce. Intensity is uncalibrated, not probability, range or fire size. |
+| Missing/stale readings | Reading values and `led.shown` become `null` when unavailable; `triggered` becomes false. Render **unavailable**, not “no flame”, zero intensity or green. `last_update` can remain the old timestamp. |
+| `led.requested` | Station's requested `{code,name,colour,pattern,text}`, initially nullable. This is an instruction, not hardware feedback. |
+| `led.shown` | Last state **reported by the MCU** in the same descriptor shape, nullable when stale. It is a logical state, not optical verification that the LED lights. On-board LED4 uses yellow for the descriptor's PWM amber state. |
+| `led.mcu_hears_station`, `led.simulated` | MCU heartbeat judgement (nullable when stale), and whether the LED report is simulated. Local trigger/hold or missing heartbeat can override the request. |
+
+LED codes are `0 boot`, `1 normal`, `2 smoke_pending`, `3 degraded`, `4 flame_sensor`, `5 linux_silent`. Use the returned name/pattern/text as well as colour. Priority is local flame/hold, then Linux silence, then station request. Within station requests, fresh flame outranks pending smoke, which outranks camera degradation, then normal. An unreviewed, closed smoke event still requests `smoke_pending`.
+
+`GET /api/events?kind=flame_sensor` returns independent rows titled **“Alev sensörü tetiklendi”**, with `kind: "flame_sensor"`, `camera: null`, `box: null`, all confidence fields `null`, and no fabricated camera media. Use `details.source` (`"simulated"` or `"hardware"`) for the simulation badge. `details` includes `sensor`, `trigger_reading`, `peak_level_permille`, `peak_level`; on closure it adds `closed_reason` (`sensor_cleared`, `sensor_disconnected` or `station_stopped`) and, when supplied, `last_reading`. Reading details include sequence, uptime, raw/smoothed/relative level, ADC bits and digital/trigger flags. One sensor activation creates one event; release, lost telemetry or station stop closes it. Ordinary pending/confirmed/rejected operator annotations use the existing decision endpoint; **confirmed is an operator annotation, never an automatic confirmed-fire claim**. Smoke feed highlighting and smoke counts must remain smoke-only. SQLite migrations add the kind/details/confidence columns without deleting legacy smoke rows.
+
+For the hardware-free demo, `POST /api/mcu/simulate` accepts optional JSON booleans `flame` and `linux_silent`. It returns immediately with `{ok:true, simulated:true, flame:…, linux_silent:…}` (omitted inputs appear as null); poll for the debounced result. It returns **409** outside simulated mode. Examples while the demo server is running:
+
+```sh
+curl -s http://127.0.0.1:8080/api/mcu
+curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"flame":true}'
+# Wait at least one second, then read the independent event list.
+curl -s 'http://127.0.0.1:8080/api/events?kind=flame_sensor'
+curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"flame":false}'
+# Trigger release takes about 1 s; red LED state holds another 3 s.
+curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"linux_silent":true}'
+# With no local trigger/hold, allow 5 s for linux_silent.
+curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"linux_silent":false}'
+```
+
+Simulation applies no signal to the board. Keep titles distinct: cameras **“Duman şüphesi”**, local sensor **“Alev sensörü tetiklendi”**. The KY-026 responds to nearby IR, including sunlight/other IR sources; its approximate metre-scale scope is not a guaranteed detection range. Never fuse these two event kinds into a claim of confirmed fire.
+
 ## Known issues and unverified work
 
-- No UNO Q or real USB cameras were available: ARM64 Debian installation, persistent-device mapping, physical unplug/replug, actual two-input bandwidth, measured board performance, memory/thermal limits and MCU/LED behaviour remain unverified. The same Python path is implemented for Linux USB capture, with a default no-op LED hook.
+- No UNO Q or real USB cameras were available: ARM64 Debian installation, persistent-device mapping, physical unplug/replug, actual two-input bandwidth, measured board performance, memory/thermal limits and MCU/LED behaviour remain unverified. The Linux USB path and MCU router client are implemented; only simulation/fake-router tests and sketch compilation have run. See the firmware guide's hardware checklist before wiring or claiming a board result.
 - The Mac camera-loss check is a software simulation. V4L2 driver-specific blocking/hanging behaviour cannot be established here; a frame-age watchdog marks stale feeds disconnected, but a driver stuck forever inside `read()` may need process/driver recovery on real hardware.
 - No physical internet switch-off was performed. Runtime network independence is checked by denied-socket integration tests and the browser's local-only request audit. The initial downloads require internet.
 - WebM/VP8 encoding on the UNO Q itself, its per-event CPU time, and iOS Safari playback are unverified. Legacy or fallback AVI clips still need a separate player. Evidence can have shortened pre/post context at startup, loss or shutdown. No audio is saved.
