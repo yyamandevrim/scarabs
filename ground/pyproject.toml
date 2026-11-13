@@ -1,0 +1,25 @@
+[project]
+name = "acorn-ground"
+version = "0.1.0"
+description = "Offline ACORN LoRa ground receiver"
+requires-python = ">=3.11,<3.14"
+dependencies = ["forest-station", "fastapi>=0.115,<1", "uvicorn>=0.32,<1", "httpx>=0.27,<1"]
+
+[tool.uv.sources]
+forest-station = { path = "../station", editable = true }
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]
+
+[project.scripts]
+acorn-ground = "ground.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["ground"]

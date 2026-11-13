@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ACORN — Ground</title><link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
+<body>
+<header><div><h1>ACORN <span data-i18n="ground">Ground</span></h1><p>LoRa link (simulated transport)</p></div><button id="language" aria-label="Change language">Türkçe</button></header>
+<main>
+<div class="topline"><div><h2 data-i18n="observation">Remote observation</h2><p id="station-state" aria-live="polite">Waiting for a LoRa packet…</p></div><label class="demo-toggle"><input type="checkbox" id="demo-toggle"><span data-i18n="enableDemo">Show Wi-Fi demo</span></label></div>
+<section class="workspace" aria-label="LoRa observations">
+<div class="direction"><div class="section-title"><h3 data-i18n="directions">Approximate directions</h3><select id="station-select" aria-label="Station"></select></div><canvas id="compass" width="640" height="560" role="img" aria-label="Station camera sectors and approximate smoke bearing"></canvas><p class="direction-note" data-i18n="directionNote">Direction from configured heading and camera field of view. No distance or fire location is measured.</p><div id="camera-status" class="camera-status"></div></div>
+<div class="queue"><div class="section-title"><h3 data-i18n="alerts">Received alerts</h3><span id="alert-count"></span></div><div id="alerts" aria-live="polite"></div></div>
+</section>
+<details class="link-details"><summary data-i18n="linkDetails">Link details · calculated radio values</summary><div id="link-details"></div><p data-i18n="linkNote">Airtime uses configured PHY settings. Remaining duty budget is the sender's calculated value at its latest packet, not a live measurement. Sequence gaps cannot reveal losses before the first packet or after the last. No delivery is guaranteed.</p></details>
+<p class="local-note" data-i18n="ackNote">Acknowledgements stay on this laptop. They do not send a decision to the station. Battery: not measured.</p>
+<p id="collection-message" class="local-note" role="status" aria-live="polite"></p>
+<section id="demo" hidden class="demo-area"><div class="section-title"><div><h2 data-i18n="demoTitle">Demo only: shown over Wi-Fi, not available over LoRa</h2><p data-i18n="demoNote">Close-range station connection. These images are fetched separately from the LoRa link.</p></div></div><p id="wifi-message" aria-live="polite"></p><div id="live-feeds"></div><div id="evidence"></div></section>
+</main><footer>ACORN · Scarabs · Junction 2026, Helsinki</footer>
+</body></html>
