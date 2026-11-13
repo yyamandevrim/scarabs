@@ -1,6 +1,6 @@
 # Verification report — public dynamic site and blind-forest audit
 
-Verified 2026-11-13 on this Apple M5 Mac, Python 3.12.10. **77 pytest tests pass** (68 placement + 9 artifact tests), zero failed/skipped. The original 36 remain included. One upstream Starlette/httpx deprecation warning remains. The browser assertion script separately checks both rendered languages on landing and map at desktop and phone widths.
+Verified 2026-11-13 on this Apple M5 Mac, Python 3.12.10. **82 pytest tests pass** (73 placement + 9 artifact tests), zero failed/skipped. The original 36 remain included. One upstream Starlette/httpx deprecation warning remains. The browser assertion script separately checks both rendered languages on landing and map at desktop and phone widths.
 
 ## Finding: height insensitivity is real in this geometric scenario
 
