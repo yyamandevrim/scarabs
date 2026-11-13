@@ -1,4 +1,4 @@
-# Placement product
+# ACORN launch point map
 
 ## Register
 product
@@ -10,7 +10,7 @@ A hackathon jury comparing launch points in a two-minute demonstration, and oper
 Compare simulated forest visibility from a tethered balloon with three mounted cameras and two active inputs. Show which candidate and camera pair yield more visible forest under the chosen geometry.
 
 ## Brand Personality
-Precise, calm, candid. Project identity is provisional and comes only from brand.json; Scarabs is the team.
+Precise, calm, candid. The product is ACORN (Aerial Canopy Observation and Reporting Node); identity comes only from brand.json, the logo is still a placeholder, and Scarabs is the team.
 
 ## Anti-references
 Generic dashboard cards, marketing slogans, decorative badges, illustrative product substitutes, tiny grey figures and ambiguous zeros.

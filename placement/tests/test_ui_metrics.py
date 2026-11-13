@@ -45,3 +45,27 @@ def test_asset_revision_prevents_mixed_frontend_versions(tmp_path,monkeypatch):
         two=re.search(r'metrics.js\?v=([a-f0-9]+)',client.get('/map').text).group(1)
         assert one!=two
         assert client.get('/static/metrics.js').headers['Cache-Control']=='no-cache'
+
+
+def test_map_script_never_coerces_missing_metrics_to_zero():
+    # The 7,335 ha blind total once showed beside 0/0 parts because the old
+    # formatter used `value??0` against a backend that predated the split.
+    import re
+    script=(ROOT/'static/app.js').read_text()
+    assert not re.search(r'\?\?\s*0(?![.\d])|\|\|\s*0(?![.\d])',script)
+    assert 'M.blind(' in script and 'M.share(' in script
+
+
+def test_identity_names_product_team_and_event():
+    import json
+    from fastapi.testclient import TestClient
+    from forest_placement.api import app
+    brand=json.loads((ROOT/'brand.json').read_text())
+    assert brand['name']=='ACORN' and brand['expansion']=='Aerial Canopy Observation and Reporting Node'
+    assert brand['team']=='Scarabs' and brand['event'].startswith('Junction 2026')
+    assert brand['challenge']=='Green European Renaissance'
+    with TestClient(app) as client:
+        for path in ('/','/map'):
+            page=client.get(path).text
+            assert '<title>ACORN · ' in page
+            assert '<span data-brand-team>Scarabs</span>' in page

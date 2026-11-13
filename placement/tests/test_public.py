@@ -105,7 +105,7 @@ def test_language_assets_cover_landing_and_map():
             html=client.get(page).text
             assert 'lang="en"' in html and 'class="language"' in html and '/static/i18n.js' in html
         translations=client.get('/static/translations.json').json()
-        assert translations['Open the map']=='Haritayı aç'
+        assert translations['Open the launch point map']=='Kalkış noktası haritasını aç'
         assert translations['Outside FOV']=='Görüş dışında'
         assert translations['Occluded in FOV']=='Görüş içinde perdelenmiş'
         js=client.get('/static/i18n.js').text

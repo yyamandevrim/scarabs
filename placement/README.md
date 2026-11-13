@@ -1,6 +1,6 @@
-# Forest observation station placement
+# ACORN launch point map
 
-An English-first project website and offline geometric visibility simulator with a Turkish toggle for the Green European Renaissance prototype. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
+**ACORN — Aerial Canopy Observation and Reporting Node.** This is the English-first project website and offline geometric visibility simulator (Turkish toggle) for ACORN, built by team Scarabs for the Green European Renaissance challenge at Junction 2026, Helsinki. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
 
 **The two-camera input change is implemented.** The module carries three cameras at −70°, 0°, +70°, but normal requests allow at most two active cameras. The default is **left + centre**. The disconnected sector remains visible in grey as **“bağlı değil”**. Every primary metric, heading sensitivity and priority ranking uses only the active cameras. The three pairs are compared side by side; all three cameras are available only as **“üç kamera, referans”**.
 
@@ -8,7 +8,7 @@ Coverage is **simulated geometric visibility**, not optical smoke-detection rang
 
 ## Public website and artifact handoff
 
-The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity is configured in [`brand.json`](brand.json), with an explicit `[Project name]` placeholder; **Scarabs is the team**, not the product.
+The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The logo is a dashed placeholder mark (`static/mark.svg`) until one is chosen; change the `logo` path to swap it. **Scarabs is the team**, not the product.
 
 See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the exact Modal token → one-time data load → deploy commands, public API limits, storage/JIT decisions and account-free checks. See [`../tools/README.md`](../tools/README.md) for the checksum-pinned IronShard dry-run/upload/restore workflow and redistribution notices. **No deployment or upload was performed.**
 

@@ -17,8 +17,8 @@
 .occluded{background:var(--map-occluded)}
 .overlap{background:var(--map-overlap)}
 .water{background:var(--map-water)}
-.map-footnote,.map-help{max-width:none;font-size:var(--type-small);color:var(--muted)}
-.map-help{margin-top:var(--space-1)}
+.map-help{max-width:none;font-size:var(--type-small);color:var(--muted)}
+.map-help{margin-top:0}
 .leaflet-container{background:var(--map-background);font-family:var(--font);font-size:var(--type-small)}
 .leaflet-control-attribution,.leaflet-control-scale-line,.leaflet-control-layers{font-size:var(--type-small)!important}
 .leaflet-control-layers,.leaflet-bar{box-shadow:none!important;border:1px solid var(--line)!important;border-radius:var(--radius-inner)!important}
@@ -78,7 +78,10 @@ fieldset p{font-size:var(--type-small);color:var(--muted);margin:var(--space-2) 
 .headline-site p{font-size:var(--type-small);color:var(--muted);margin-top:var(--space-1)}
 #verdict{font-size:var(--type-title);max-width:65ch;margin-top:var(--space-4)}
 .ranking{font-size:var(--type-small);color:var(--muted);margin-top:var(--space-2)}
-.stale .headline-figures,.stale #verdict,.stale #ranking,.results.stale .comparison-layout{opacity:.45}
+.headline-site.stale,.stale #verdict,.stale #ranking,.stale #pair-summary,.results.stale .comparison-layout{opacity:.45;transition:opacity var(--motion-overlay)}
+.headline-value.missing{color:var(--muted);font-weight:400}
+.pair-summary{font-size:var(--type-label);margin-top:var(--space-3);max-width:72ch}
+.pair-summary:empty{display:none}
 .stale #result-state{font-weight:600;color:var(--ink)}
 .updated .headline-value{animation:metric-feedback var(--motion-feedback) ease-out}
 @keyframes metric-feedback{from{background:var(--selected)}
@@ -90,20 +93,22 @@ to{background:transparent}
 .table-wrap h2,.pair-panel h2{margin-bottom:var(--space-3)}
 table{width:100%;border-collapse:collapse;font-size:var(--type-label)}
 caption{text-align:left;font-size:var(--type-small);color:var(--muted);padding-bottom:var(--space-4);max-width:72ch}
-th,td{text-align:right;padding:var(--space-2);font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:var(--space-2);font-variant-numeric:tabular-nums;vertical-align:baseline}
 th:first-child,td:first-child{text-align:left;padding-left:0}
 thead th{font-size:var(--type-small);font-weight:600;border-bottom:1px solid var(--line)}
 tbody th{font-size:var(--type-small);font-weight:400;color:var(--muted)}
 th:nth-child(2),td:nth-child(2){font-size:var(--type-small);color:var(--muted)}
 td:first-child{font-size:var(--type-small);color:var(--muted)}
-tr.band td{padding-top:var(--space-6)}
-tr.main-metric td{font-weight:600}
-td[title]{text-decoration:underline dotted var(--line);text-underline-offset:var(--space-1)}
+tr.band>*{padding-top:var(--space-6)}
+tr.main-metric td:nth-child(n+3){font-weight:600}
+td[title]{color:var(--muted)}
+.pair-panel.empty .sensitivity,.pair-panel.empty .pairs{display:none}
+.pair-panel.empty #pair-gain{color:var(--muted);font-weight:400}
 .table-wrap>.small{margin-top:var(--space-4)}
 .pair-panel>p{font-size:var(--type-small);color:var(--muted);margin-bottom:var(--space-3)}
 #pair-gain{font-size:var(--type-body);font-weight:600;color:var(--ink);margin:var(--space-4) 0}
-.pairs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2)}
-.pair-card{padding:var(--space-3) var(--space-2);background:transparent;border:1px solid transparent;border-bottom:2px solid var(--line);border-radius:var(--radius-inner) var(--radius-inner) 0 0;text-align:left}
+.pairs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);align-items:stretch}
+.pair-card{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:var(--space-3) var(--space-2);background:transparent;border:1px solid transparent;border-bottom:2px solid var(--line);border-radius:var(--radius-inner) var(--radius-inner) 0 0;text-align:left}
 .pair-card.chosen{border-color:var(--accent)}
 .pair-card.best{background:var(--selected);border-bottom-color:var(--accent)}
 .pair-card strong{display:block;font-size:var(--type-small);min-height:36px}
@@ -136,7 +141,6 @@ td[title]{text-decoration:underline dotted var(--line);text-underline-offset:var
 .map-shell{height:320px}
 .map-toolbar{left:56px;right:52px;top:var(--space-3)}
 .map-toolbar button{font-size:var(--type-small);padding:var(--space-2)}
-.map-footnote{margin-top:var(--space-4);font-size:var(--type-small);margin-bottom:var(--space-1)}
 .map-help{margin-top:0}
 .legend{gap:var(--space-2) var(--space-3)}
 .result-summary{padding-top:var(--space-5)}

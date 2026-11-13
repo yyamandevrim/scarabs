@@ -4,12 +4,16 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 rows=json.loads((root/'blind-audit.json').read_text())
 lines=['# Verification report — public dynamic site and blind-forest audit','',
-'Verified 2026-11-13 on this Apple M5 Mac, Python 3.12.10. **71 pytest tests pass** (62 placement + 9 artifact tests), zero failed/skipped. The original 36 remain included. One upstream Starlette/httpx deprecation warning remains. The browser assertion script separately checks both rendered languages on landing and map at desktop and phone widths.','',
+'Verified 2026-11-13 on this Apple M5 Mac, Python 3.12.10. **77 pytest tests pass** (68 placement + 9 artifact tests), zero failed/skipped. The original 36 remain included. One upstream Starlette/httpx deprecation warning remains. The browser assertion script separately checks both rendered languages on landing and map at desktop and phone widths.','',
 '## Finding: height insensitivity is real in this geometric scenario','',
 'No LOS/height defect was found. The former blind total mixed forest outside the active camera frusta with forest hidden along sightlines inside them. With the default smoke target 50 m above the obstruction surface, 500–700 m observers look down over most intermediate terrain/canopy. Low-height controls produce large occlusion, particularly in inland Nuuksio. At 100 m, coast smoke occlusion is already zero; a claim that both low heights must be strongly occluded everywhere would be incorrect.','',
 'The small 500–700 m differences mostly reflect target points crossing the tilted 3D frustum boundaries, plus raster sampling. Raising the observer shifts vertical and horizontal frustum coordinates; it does not guarantee a larger fixed-camera footprint. This result is specific to the elevated smoke-point scenario, not a general claim about forest-floor visibility or optical smoke detection. Bare-ground results show considerably stronger height sensitivity.','',
 'Baseline: left + centre active; offsets −70°/0°/+70°, tilt 10° down, HFOV 80°, VFOV 50°, range 12 km, smoke 50 m above canopy. Coast: 60.159 / 24.773, heading 180°. Inland: 60.293 / 24.557, heading 20°. All area values below are **simulated hectares**. No priority polygon; range disks clipped only to the prepared rectangle.','',
 '`blind_forest_ha = outside_fov_forest_ha + occluded_forest_ha` (rounding ±0.003 ha). FOV is the union of the active full 3D frusta, before applying LOS. Each forest fraction is counted once. The split is scenario-specific and present for all pairs, reference and heading sensitivities. Unknown-elevation forest is zero in these prepared grids. For other datasets, unknown rays remain unverified rather than proven occlusion and trigger the existing explicit warning.','',
+'## Interface finding: blind total beside two zero parts',
+'',
+'A design review saw a 7,335 ha blind total next to 0 outside FOV and 0 occluded. The engine always returns the split (`blind = outside + occluded`, checked for every scenario, pair, reference and heading). The screen came from a mixed version: a long-running server predating the split, a newer page, and a formatter that turned missing values into 0 (`value??0`). The coast value itself is real: 7,334.48 ha outside FOV + 0.00 ha occluded. The map now renders any missing or inconsistent part as “—” (not computed), rounds parts before adding so the displayed sum is exact, and versions every static asset so a browser cannot mix old and new files. Regression tests: `tests/ui_metrics.cjs`, `tests/test_ui_metrics.py`.',
+'',
 '## Canopy-obstructed smoke: detailed 40 m','',
 '| Preset | AGL m | Visible | Outside active FOV | Occluded inside FOV | Blind total |','| --- | ---: | ---: | ---: | ---: | ---: |']
 for r in rows:
@@ -45,7 +49,7 @@ lines+=['','## Implementation and checks','',
 '## Not verified, omitted or intentionally provisional','',
 '- No Modal account access, Linux image build, deployment, Volume upload, public IP forwarding test, scale-to-zero/resume or cloud latency measurement. Owner commands are in [DEPLOYMENT.md](DEPLOYMENT.md).',
 '- No IronShard upload/download, endpoint compatibility or judge bucket-read policy tested. AGPL model licence and upstream editable-weight/training-source links provided; a complete corresponding-source archive was not independently audited. Fog is deliberately excluded pending provenance review.',
-'- `[Project name]` and the logo remain explicit replaceable identity placeholders. Roadmap mission modes are proposed, not implemented.',
+'- The name is ACORN; the logo remains an explicit replaceable placeholder in `brand.json`. Roadmap mission modes are proposed, not implemented.',
 '- Existing physical limits remain: no UNO Q/USB/tether/field validation; no optical detection range, weather, calibration or smoke dynamics. No building heights; 5.47% of forest canopy values assumed; real NLS 2019 / CORINE 2024 / Luke 2023 vintages differ. No ecological impact quantities are claimed.',
 '- Station code, root README and root .gitignore were not edited. No git state-changing commands were run. No physical Wi-Fi-disconnection test. Station screenshots were optional and were not added.','']
 (root/'VERIFICATION.md').write_text('\n'.join(lines))

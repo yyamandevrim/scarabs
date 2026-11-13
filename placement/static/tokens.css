@@ -1,15 +1,16 @@
 :root {
-  --ink: #252a27;
-  --muted: #5c625c;
-  --paper: #f7f7f3;
+  color-scheme: light;
+  --ink: #222923;
+  --muted: #61665f;
+  --paper: #f6f5f1;
   --surface: #ffffff;
-  --surface-alt: #efefea;
-  --line: #d9dcd5;
+  --surface-alt: #eeeee8;
+  --line: #d6d8d0;
   --accent: #164d43;
   --accent-hover: #103d35;
   --selected: #e7efea;
-  --failure: #a52d2d;
-  --failure-bg: #fbeeee;
+  --failure: #a0392e;
+  --failure-bg: #fff0ed;
   --map-visible: #009e73;
   --map-outside: #8f969c;
   --map-occluded: #b87850;
@@ -24,6 +25,7 @@
   --type-body: 16px;
   --type-title: 20px;
   --type-heading: 32px;
+  --type-heading-compact: 28px;
   --type-figure: 40px;
   --space-1: 4px;
   --space-2: 8px;

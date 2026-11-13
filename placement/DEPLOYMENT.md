@@ -67,7 +67,7 @@ SDK **1.6.4** imports the app and validates decorators locally; CLI help command
 
 ## Identity and language
 
-Edit only [brand.json](brand.json) to replace `[Project name]`, the two taglines and the logo path. The logo asset can live in `static/`; both pages, document title and favicon read the config. Scarabs appears only as the team credit.
+Edit only [brand.json](brand.json) to change the name (ACORN), expansion, the two taglines, team/event credit or the logo path; the logo is still a placeholder. The logo asset can live in `static/`; both pages, document title and favicon read the config. Scarabs appears only as the team credit.
 
 English is the default. The Turkish toggle covers both pages and dynamic map labels/results, persists in localStorage, and preserves map/candidate state. The app uses only same-origin local CSS, scripts, fonts and map assets. Without JavaScript the landing's English content remains readable; the live map requires JavaScript and the backend.
 
