@@ -30,3 +30,10 @@ test('headline precision follows quick versus detailed resolution',()=>{
  assert.equal(m.headline(12511.8,40),'12,512');
  assert.equal(m.number(12523.56,'tr'),'12.524');
 });
+
+test('absent priority area is uncomputed even if a legacy response contains zero',()=>{
+ const old={input:{priority:null},metrics:{canopy_smoke:{priority_visible_ha:0}}};
+ assert.equal(m.priorityValue(old,'canopy_smoke'),null);
+ const calculated={input:{priority:[[24,60],[25,60],[24,61]]},metrics:{canopy_smoke:{priority_visible_ha:0}}};
+ assert.equal(m.priorityValue(calculated,'canopy_smoke'),0);
+});

@@ -18,6 +18,7 @@
  function bestPair(pairs,scenario,priority=false){
   return pairs.filter(p=>valid(p[scenario]?.visible_forest_ha)&&(!priority||valid(p[scenario]?.priority_visible_ha))).sort((a,b)=>(priority?b[scenario].priority_visible_ha-a[scenario].priority_visible_ha:0)||b[scenario].visible_forest_ha-a[scenario].visible_forest_ha)[0]||null;
  }
- const api={valid,number,headline,blind,bestPair};root.PlacementMetrics=api;
+ function priorityValue(result,scenario){return result?.input?.priority?result.metrics?.[scenario]?.priority_visible_ha:null;}
+ const api={valid,number,headline,blind,bestPair,priorityValue};root.PlacementMetrics=api;
  if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
