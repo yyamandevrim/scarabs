@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+from html import escape
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from station.auth import same_origin
@@ -54,7 +55,7 @@ def create_app(receiver, wifi, listener=None):
 
     @app.get('/')
     def index():
-        return FileResponse(static/'index.html')
+        return HTMLResponse((static/'index.html').read_text().replace('{{transport_label}}', escape(receiver.transport_label)))
 
     @app.get('/api/state')
     def state():

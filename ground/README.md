@@ -22,7 +22,7 @@ The secret-entry example uses macOS zsh (for bash use `read -rs -p 'Station pane
 
 Open **http://127.0.0.1:8092**. The station serves on **8091**, never the existing 8080/8787 demo ports. Start the receiver before the station so the first packets are heard. Set `[lora] enabled = true` in an ignored station `*.local.toml`, then run the station as described in its [Communication section](../station/README.md#communication).
 
-The radio calculator defaults to SF10, BW125000, CR1 (4/5). Match station settings with `--sf`, `--bandwidth` and `--coding-rate`. See [the complete packet specification and airtime table](../station/station/lora/PACKETS.md). Only a simulated receiver is wired into the CLI; real modem integration is intentionally unavailable until selected and tested.
+The radio calculator defaults to SF10, BW125000, CR1 (4/5). Match station settings with `--sf`, `--bandwidth` and `--coding-rate`. See [the complete packet specification and airtime table](../station/station/lora/PACKETS.md). `--transport serial --serial-port DEVICE` selects the serial skeleton and deliberately raises `NotImplementedError` until a modem is selected and implemented. Both adapters feed the same receiver; transport labelling follows the adapter, without dashboard changes.
 
 ## What the operator sees
 

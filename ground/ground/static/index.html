@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ACORN — Ground</title><link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
 <body>
-<header><div><h1>ACORN <span data-i18n="ground">Ground</span></h1><p>LoRa link (simulated transport)</p></div><button id="language" aria-label="Change language">Türkçe</button></header>
+<header><div><h1>ACORN <span data-i18n="ground">Ground</span></h1><p id="transport-label">{{transport_label}}</p></div><button id="language" aria-label="Change language">Türkçe</button></header>
 <main>
 <div class="topline"><div><h2 data-i18n="observation">Remote observation</h2><p id="station-state" aria-live="polite">Waiting for a LoRa packet…</p></div><label class="demo-toggle"><input type="checkbox" id="demo-toggle"><span data-i18n="enableDemo">Show Wi-Fi demo</span></label></div>
 <section class="workspace" aria-label="LoRa observations">

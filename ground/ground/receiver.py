@@ -39,12 +39,13 @@ class SequenceTracker:
         return self.expired_missing+len(self.gaps)
 
 class Receiver:
-    def __init__(self, root, radio, stale_after=660, lost_after=1200):
+    def __init__(self, root, radio, stale_after=660, lost_after=1200, transport_label='LoRa link (simulated transport)'):
         if not 0 < stale_after < lost_after:
             raise ValueError('Require 0 < stale < lost thresholds')
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
         self.radio, self.stale_after, self.lost_after = radio, stale_after, lost_after
+        self.transport_label = transport_label
         self.lock = RLock()
         self.stations = {}
         self.alerts = {}
@@ -117,7 +118,7 @@ class Receiver:
                 stations.append(item)
             alerts = [dict(a, acknowledged_at=self.acks.get(key)) for key, a in self.alerts.items()]
             return dict(stations=stations, alerts=sorted(alerts, key=lambda a: a['timestamp'], reverse=True), invalid_packets=self.invalid,
-                        radio=asdict(self.radio), transport='LoRa link (simulated transport)')
+                        radio=asdict(self.radio), transport=self.transport_label)
 
     def acknowledge(self, station, event, now=None):
         key = (station, event)
@@ -136,6 +137,7 @@ class Receiver:
 class Listener:
     def __init__(self, receiver, link):
         self.receiver, self.link = receiver, link
+        self.receiver.transport_label = link.label
         self.stop_event = Event()
         self.thread = Thread(target=self.run, name='lora-receiver', daemon=True)
         self.error = None
