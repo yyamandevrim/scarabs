@@ -48,3 +48,6 @@ artifacts/
 *.webm
 *.ogv
 *.mkv
+# Partial downloads and temporary runtime output
+*.tmp
+*.part
