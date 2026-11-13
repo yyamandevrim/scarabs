@@ -5,7 +5,8 @@ import re
 import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from html import escape
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict
 from .engine import ROOT, PREP, CACHE, analyze, metadata
@@ -33,11 +34,22 @@ async def policy(request,call_next):
     response.headers['Referrer-Policy']='same-origin'
     return response
 
+def branded_page(filename):
+    # Render identity before JavaScript starts; brand.json remains the only source.
+    identity=json.loads((ROOT/'brand.json').read_text())
+    page=(ROOT/'static'/filename).read_text()
+    page=page.replace('data-brand-icon href="data:,"','data-brand-icon href="'+escape(identity['logo'],quote=True)+'"')
+    page=page.replace('data-brand-logo', 'data-brand-logo src="'+escape(identity['logo'],quote=True)+'"')
+    for field,key in [('name','name'),('team','team')]:
+        page=page.replace('<span data-brand-'+field+'></span>', '<span data-brand-'+field+'>'+escape(identity[key])+'</span>')
+    page=page.replace('<span data-brand-tagline></span>','<span data-brand-tagline>'+escape(identity['tagline']['en'])+'</span>')
+    return HTMLResponse(page)
+
 @app.get('/')
-def index():return FileResponse(ROOT/'static/landing.html')
+def index():return branded_page('landing.html')
 
 @app.get('/map')
-def map_page():return FileResponse(ROOT/'static/index.html')
+def map_page():return branded_page('index.html')
 
 @app.get('/api/brand')
 def brand():return json.loads((ROOT/'brand.json').read_text())

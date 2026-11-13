@@ -14,13 +14,14 @@ from shapely.geometry import Polygon
 from .core import frustum, sightlines, summarize
 from .models import Candidate
 from .maps import write_overlay
+from .palette import map_color
 
 ROOT=Path(__file__).resolve().parents[1]
 PREP=Path(os.environ.get('PLACEMENT_PREPARED', ROOT/'data/prepared'))
 CACHE=Path(os.environ.get('PLACEMENT_CACHE', ROOT/'data/results'))
 TO_METRIC=Transformer.from_crs(4326,3067,always_xy=True)
 TO_LONLAT=Transformer.from_crs(3067,4326,always_xy=True)
-ALGORITHM='opaque-ray-half-cell-v5-blind-split'
+ALGORITHM='opaque-ray-half-cell-v6-map-palette'
 SCENARIOS=('bare_ground','bare_smoke','canopy_ground','canopy_smoke')
 
 @lru_cache(maxsize=2)
@@ -85,7 +86,7 @@ def analyze(candidate:Candidate,use_cache=True):
         values,counts=metrics(i,active);results[name]=values
         rgba=np.zeros((*eligible.shape,4),dtype=np.uint8)
         forest=data['forest']>0
-        for mask,color in [(eligible&forest&~np.any(fovs[i][active],axis=0),[148,158,163,125]),(eligible&forest&np.any(fovs[i][active],axis=0)&(counts==0),[202,104,80,190]),(eligible&forest&(counts==1),[48,177,105,195]),(eligible&forest&(counts>=2),[149,95,213,220]),(eligible&(data['water']>0)&(counts>0),[57,165,219,95])]:
+        for mask,color in [(eligible&forest&~np.any(fovs[i][active],axis=0),map_color('outside',125)),(eligible&forest&np.any(fovs[i][active],axis=0)&(counts==0),map_color('occluded',190)),(eligible&forest&(counts==1),map_color('visible',195)),(eligible&forest&(counts>=2),map_color('overlap',220)),(eligible&(data['water']>0)&(counts>0),map_color('water',95))]:
             rgba[mask]=color
         imagefile=CACHE/(key+'_'+name+'.png')
         llbounds=write_overlay(rgba,localbounds,imagefile,cell)
