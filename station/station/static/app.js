@@ -1,66 +1,316 @@
 'use strict';
-const labels = {left:'Sol',centre:'Orta',right:'Sağ'};
-const decisions = {pending:'Değerlendirme bekliyor',confirmed:'Operatör doğruladı',rejected:'Operatör reddetti'};
+const labels = {left: 'Sol', centre: 'Orta', right: 'Sağ'};
+const decisions = {confirmed: 'Operatör doğruladı', rejected: 'Operatör reddetti'};
 const cameraElements = new Map();
-let eventSignature = '';
-const text = (tag, value, className) => { const e=document.createElement(tag); e.textContent=value; if(className)e.className=className; return e; };
-const num = (value,digits=1) => Number.isFinite(value)?value.toFixed(digits):'—';
-async function json(url,options){const r=await fetch(url,options);if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();}
-function cameraCard(camera){
-  const card=document.createElement('article');
-  const top=text('div','','camera-top');
-  top.append(text('h3',`${labels[camera.name]} · ${camera.yaw}°`),text('span','','badge'));
-  const wrap=text('div','','image-wrap');
-  const image=document.createElement('img');image.alt=`${labels[camera.name]} kamera görüntüsü`;image.hidden=true;
-  const placeholder=text('p','','placeholder');wrap.append(image,placeholder);
-  const info=text('div','','camera-info');
-  card.append(top,wrap,info);document.querySelector('#cameras').append(card);
-  const item={card,badge:top.lastChild,image,placeholder,info,busy:false};
-  image.onload=()=>{item.busy=false;};image.onerror=()=>{item.busy=false;image.hidden=true;placeholder.hidden=false;placeholder.textContent='Görüntü bekleniyor…';};
-  cameraElements.set(camera.name,item);return item;
+const eventElements = new Map();
+const editing = new Set();
+let online = false;
+let currentStatus = null;
+let currentEvents = [];
+let lastUpdate = null;
+let refreshing = false;
+let decisionRevision = 0;
+const $ = selector => document.querySelector(selector);
+const text = (tag, value, className) => {
+  const element = document.createElement(tag);
+  element.textContent = value;
+  if (className) element.className = className;
+  return element;
+};
+const num = (value, digits = 1) => Number.isFinite(value)
+  ? value.toLocaleString('tr-TR', {minimumFractionDigits: digits, maximumFractionDigits: digits}) : '—';
+const time = value => value ? new Date(value * 1000).toLocaleTimeString('tr-TR') : '—';
+const dateTime = value => new Date(value * 1000).toLocaleString('tr-TR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+async function json(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(url, {...options, signal: controller.signal});
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } finally { clearTimeout(timeout); }
 }
-function updateCamera(camera){
-  const item=cameraElements.get(camera.name)||cameraCard(camera);
-  item.card.className=`camera ${camera.status}`;
-  item.badge.className=`badge ${camera.status}`;item.badge.textContent=camera.status_text;
-  item.placeholder.hidden=camera.connected;
-  item.image.hidden=!camera.connected;
-  item.placeholder.textContent=camera.active?'Bağlantı koptu · yeniden deneniyor':'Takılı, bağlı değil · bu giriş etkin değil';
-  item.info.replaceChildren(text('p',`Eğim ${camera.tilt}° · Yatay / dikey görüş ${camera.hfov}° / ${camera.vfov}°`));
-  if(camera.active){
-    item.info.append(text('p',`Ölçülen analiz: ${num(camera.analysis_ms)} ms · çıkarım: ${num(camera.inference_ms)} ms`));
-    item.info.append(text('p',`Ölçülen analiz hızı: ${num(camera.analysis_hz,2)} /sn · görüntü hızı: ${num(camera.capture_fps)} kare/sn`));
-    if(camera.pipeline_error)item.info.append(text('p','Analiz hatası · yerel günlükleri kontrol edin'));
-    if(camera.connected&&!item.busy){item.busy=true;item.image.src=`/api/cameras/${camera.name}/frame.jpg?t=${Date.now()}`;}
-  }else{item.info.append(text('p','İki giriş sınırı · etkin kamera çifti yapılandırmadan seçilir'));}
+function cameraCard(camera) {
+  const card = text('article', '', 'camera');
+  const top = text('div', '', 'camera-top');
+  const title = text('h3', '');
+  const state = text('span', '', 'camera-state');
+  top.append(title, state);
+  const wrap = text('div', '', 'image-wrap');
+  const image = document.createElement('img');
+  image.alt = `${labels[camera.name]} kamera görüntüsü`;
+  image.hidden = true;
+  const placeholder = text('p', 'Görüntü bekleniyor…', 'placeholder');
+  wrap.append(image, placeholder);
+  const source = text('p', '', 'source-label');
+  const info = text('div', '', 'camera-info');
+  card.append(top, wrap, source, info);
+  const item = {card, title, state, image, placeholder, source, info, busy: false, frameFailed: false, camera};
+  image.onload = () => {
+    item.busy = false;
+    if (!online || !item.camera.connected) return;
+    const recovered = item.frameFailed;
+    item.frameFailed = false;
+    image.hidden = false;
+    placeholder.hidden = true;
+    if (recovered) updateCamera(item.camera, false);
+    updateCoverage();
+  };
+  image.onerror = () => {
+    item.busy = false;
+    if (!online || !item.camera.connected) return;
+    item.frameFailed = true;
+    updateCamera(item.camera, false);
+    updateCoverage();
+  };
+  cameraElements.set(camera.name, item);
+  return item;
 }
-async function decide(id,decision,button){
-  button.disabled=true;
-  try{await json(`/api/events/${id}/decision`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision})});eventSignature='';document.querySelector('#action-status').textContent='Karar bu cihazda kaydedildi.';}
-  catch(e){document.querySelector('#action-status').textContent='Karar kaydedilemedi. Yeniden deneyin.';}
-  finally{button.disabled=false;}
+function updateCamera(camera, requestFrame = true) {
+  const item = cameraElements.get(camera.name) || cameraCard(camera);
+  item.camera = camera;
+  const connected = online && camera.connected && !item.frameFailed;
+  const suspicion = currentEvents.filter(event => event.camera === camera.name && !event.closed_at);
+  item.card.className = `camera${!online ? ' unavailable' : !connected ? ' disconnected' : ''}${online && suspicion.length ? ' suspected' : ''}`;
+  item.title.textContent = `${labels[camera.name]} · ${num(camera.yaw, 0)}°`;
+  item.state.textContent = !online ? 'Durum bilinmiyor' : !connected ? 'Bağlantı koptu' : suspicion.length
+    ? `Duman şüphesi · %${Math.round(Math.max(...suspicion.map(event => event.confidence)) * 100)}` : 'Görüntü alınıyor';
+  item.source.textContent = camera.kind === 'file' ? 'Kayıtlı demo · yerel analiz' : 'Canlı kamera · yerel analiz';
+  if (!connected) {
+    item.image.hidden = true;
+    item.image.removeAttribute('src');
+    item.busy = false;
+    item.placeholder.hidden = false;
+    item.placeholder.textContent = online ? 'Görüntü alınamıyor · yeniden deneniyor' : 'İstasyon verisi bekleniyor…';
+  }
+  item.info.replaceChildren();
+  if (connected && !camera.pipeline_error) {
+    item.info.append(text('span', 'Ölçülen', 'metric-label'));
+    const values = text('p', '', 'metric-values');
+    const measured = camera.analyses > 0;
+    for (const value of [
+      `Analiz ${num(measured ? camera.analysis_ms : null)} ms`,
+      `çıkarım ${num(measured ? camera.inference_ms : null)} ms`,
+      `${num(measured ? camera.analysis_hz : null, 2)} analiz/sn`,
+      `${num(camera.capture_fps)} kare/sn`
+    ]) values.append(text('span', value));
+    item.info.append(values);
+  } else {
+    item.info.append(text('p', camera.pipeline_error && online ? 'Analiz kullanılamıyor · yerel günlükleri kontrol edin' : 'Ölçülen · —', camera.pipeline_error && online ? 'pipeline-error' : ''));
+  }
+  if (online && camera.connected && requestFrame && !item.busy) {
+    item.busy = true;
+    item.image.src = `/api/cameras/${camera.name}/frame.jpg?t=${Date.now()}`;
+  }
+  return item;
 }
-function renderEvents(events){
-  const signature=JSON.stringify(events);if(signature===eventSignature)return;eventSignature=signature;
-  const target=document.querySelector('#events');target.replaceChildren();document.querySelector('#event-count').textContent=events.length;
-  if(!events.length){target.append(text('p','Henüz duman şüphesi kaydı yok.','empty'));return;}
-  for(const event of events){
-    const row=text('article','','event');
-    if(event.snapshot){const a=document.createElement('a');a.href=`/events/${event.snapshot}`;a.target='_blank';a.rel='noopener';const img=document.createElement('img');img.src=a.href;img.alt='Duman şüphesi işaretlenmiş olay görüntüsü';a.append(img);row.append(a);}else row.append(text('p','Görüntü kaydı bekleniyor'));
-    const content=document.createElement('div');content.append(text('h3','Duman şüphesi'),text('p',`${labels[event.camera]} kamera · ${new Date(event.opened_at*1000).toLocaleString('tr-TR')}`),text('p',`Model güven skoru: %${Math.round(event.confidence*100)} · ${event.closed_at?'gözlem sona erdi':'izleme sürüyor'}`),text('p',`Son gözlem: ${new Date(event.last_seen*1000).toLocaleTimeString('tr-TR')}`));
-    if(event.clip){const link=text('a','Olay klibini indir (.avi)');link.href=`/events/${event.clip}`;content.append(link);}else content.append(text('p',event.media_error?'Klip kaydedilemedi':'Olay klibi hazırlanıyor…'));
-    const actions=text('div','','actions');actions.append(text('p',decisions[event.decision],'decision'));
-    for(const [choice,label]of [['confirmed','Doğrula'],['rejected','Reddet']]){const button=text('button',label,choice==='rejected'?'reject':'');button.addEventListener('click',()=>decide(event.id,choice,button));actions.append(button);}
-    row.append(content,actions);target.append(row);
+function updateCoverage() {
+  if (!online || !currentStatus) return;
+  const active = currentStatus.cameras.filter(camera => camera.active);
+  const receiving = active.filter(camera => camera.connected && !cameraElements.get(camera.name)?.frameFailed);
+  $('#coverage').textContent = `${receiving.length}/${active.length} etkin giriş görüntü alıyor`;
+  const warning = $('#system-warning');
+  const failed = active.filter(camera => !receiving.includes(camera));
+  const pipelineFailed = receiving.filter(camera => camera.pipeline_error);
+  warning.hidden = !failed.length && !pipelineFailed.length && active.length > 0;
+  if (!warning.hidden) {
+    const title = !receiving.length ? 'Gözlem kullanılamıyor' : failed.length ? 'Gözlem kapsamı azaldı' : 'Analiz kesintisi';
+    const reason = failed.length ? `${failed.map(camera => labels[camera.name]).join(', ')} kamera bağlantısı koptu. Yeniden deneniyor.`
+      : pipelineFailed.length ? `${pipelineFailed.map(camera => labels[camera.name]).join(', ')} kamerada görüntü var; duman analizi çalışmıyor.` : 'Etkin kamera girişi yok.';
+    warning.replaceChildren(text('strong', `${title} · ${receiving.length}/${active.length} giriş`), text('span', reason));
   }
 }
-async function refresh(){
-  try{
-    const [status,events]=await Promise.all([json('/api/status'),json('/api/events')]);
-    status.cameras.forEach(updateCamera);renderEvents(events);
-    document.querySelector('#connection').textContent='Yerel istasyona bağlı · görüntüler saniyede bir yenilenir';
-    document.querySelector('#settings').textContent=`Hedef analiz: ${status.target_analysis_hz} /sn/kamera · model girişi ${status.input_size}px`;
-  }catch(e){document.querySelector('#connection').textContent='İstasyonla bağlantı koptu · yeniden deneniyor';for(const item of cameraElements.values()){item.image.hidden=true;item.placeholder.hidden=false;item.placeholder.textContent='İstasyonla bağlantı koptu';item.busy=false;}}
-  setTimeout(refresh,1000);
+function renderStatus(status) {
+  const active = status.cameras.filter(camera => camera.active);
+  $('#cameras').querySelectorAll('.loading').forEach(element => element.remove());
+  for (const [name, item] of cameraElements) {
+    if (!active.some(camera => camera.name === name)) { item.card.remove(); cameraElements.delete(name); }
+  }
+  for (const camera of active) {
+    const item = updateCamera(camera);
+    if (item.card.parentNode !== $('#cameras')) $('#cameras').append(item.card);
+  }
+  $('#cameras').setAttribute('aria-busy', 'false');
+  $('#inactive-cameras').replaceChildren(...status.cameras.filter(camera => !camera.active)
+    .map(camera => text('p', `${labels[camera.name]} · ${num(camera.yaw, 0)}° · takılı, bağlı değil`)));
+  $('#geometry').replaceChildren(...status.cameras.map(camera => text('p',
+    `${labels[camera.name]}: eğim ${num(camera.tilt, 0)}° · yatay/dikey görüş ${num(camera.hfov, 0)}° / ${num(camera.vfov, 0)}°`)));
+  $('#settings').textContent = `Yapılandırılan hedef: ${num(status.target_analysis_hz, 0)} analiz/sn/kamera · model girişi ${status.input_size}px. Giriş çifti yapılandırmadan seçilir.`;
+  updateCoverage();
 }
-refresh();
+function eventRow(event) {
+  const row = text('article', '', 'event');
+  row.dataset.eventId = event.id;
+  const title = text('h3', '');
+  const meta = text('p', '', 'event-meta');
+  const evidence = text('a', '', 'evidence');
+  evidence.target = '_blank'; evidence.rel = 'noopener';
+  const image = document.createElement('img');
+  image.alt = 'Duman şüphesi işaretlenmiş olay görüntüsü';
+  evidence.append(image);
+  const noImage = text('p', 'Görüntü kaydı bekleniyor…', 'event-detail');
+  const detail = text('p', '', 'event-detail');
+  const clip = text('a', 'Olay klibini indir (.avi)', 'evidence-link');
+  const clipStatus = text('p', '', 'event-detail');
+  const actions = text('div', '', 'actions');
+  row.append(title, meta, evidence, noImage, detail, clip, clipStatus, actions);
+  const item = {row, title, meta, evidence, image, noImage, detail, clip, clipStatus, actions, mode: '', saving: false, savedUntil: 0};
+  eventElements.set(event.id, item);
+  return item;
+}
+function renderActions(item, event) {
+  const mode = event.decision === 'pending' || editing.has(event.id) ? 'editing' : 'decided';
+  const signature = `${mode}:${event.decision}:${event.decided_at}`;
+  if (item.mode === signature) return;
+  item.mode = signature;
+  item.actions.replaceChildren();
+  item.actions.append(text('p', mode === 'editing' ? 'Karar bekliyor' : `${decisions[event.decision]} · ${time(event.decided_at)}`, 'decision'));
+  if (mode === 'editing') {
+    for (const [choice, label] of [['confirmed', 'Doğrula'], ['rejected', 'Reddet']]) {
+      const button = text('button', label, choice === 'rejected' ? 'reject' : 'confirm');
+      button.type = 'button';
+      button.addEventListener('click', () => decide(event.id, choice));
+      item.actions.append(button);
+    }
+    if (event.decision !== 'pending') {
+      item.actions.firstChild.textContent = 'Kararı değiştir';
+      const cancel = text('button', 'Vazgeç', 'cancel');
+      cancel.type = 'button';
+      cancel.onclick = () => { editing.delete(event.id); renderEvents(currentEvents); item.actions.querySelector('button')?.focus(); };
+      item.actions.append(cancel);
+    }
+  } else {
+    const change = text('button', 'Değiştir', 'change');
+    change.type = 'button';
+    change.setAttribute('aria-label', `${labels[event.camera]} kamera kararını değiştir`);
+    change.onclick = () => { editing.add(event.id); renderEvents(currentEvents); item.actions.querySelector('button')?.focus(); };
+    item.actions.append(change);
+  }
+  const message = text('p', '', 'inline-status');
+  message.setAttribute('role', 'status');
+  if (item.savedUntil > Date.now()) message.textContent = 'Bu cihazda kaydedildi.';
+  item.actions.append(message);
+}
+function renderEvents(events) {
+  const pending = events.filter(event => event.decision === 'pending');
+  const history = events.filter(event => event.decision !== 'pending');
+  $('#event-count').textContent = `${pending.length} karar bekliyor`;
+  $('#event-count').classList.toggle('has-pending', pending.length > 0);
+  $('#pending-summary').textContent = `${pending.length} karar bekliyor`;
+  $('#pending-summary').classList.toggle('has-pending', pending.length > 0);
+  document.title = pending.length ? `(${pending.length}) Duman şüphesi — ${[...new Set(pending.map(event => labels[event.camera]))].join(', ')}` : 'Orman Gözlem İstasyonu';
+  $('#events').querySelectorAll('.empty').forEach(element => element.remove());
+  for (const [id, item] of eventElements) {
+    if (!events.some(event => event.id === id)) { item.row.remove(); eventElements.delete(id); editing.delete(id); }
+  }
+  for (const event of [...pending, ...history]) {
+    const isNew = !eventElements.has(event.id);
+    const item = eventElements.get(event.id) || eventRow(event);
+    const isPending = event.decision === 'pending';
+    item.row.className = `event ${isPending ? 'pending' : editing.has(event.id) ? 'editing' : 'decided'}`;
+    if (isNew && isPending) item.row.classList.add('new-event');
+    item.title.textContent = `${labels[event.camera]} kamera · Duman şüphesi`;
+    item.meta.textContent = `${dateTime(event.opened_at)} · model güveni %${Math.round(event.confidence * 100)}`;
+    item.evidence.hidden = !event.snapshot;
+    item.noImage.hidden = !!event.snapshot;
+    if (event.snapshot) {
+      const url = `/events/${event.snapshot}`;
+      item.evidence.setAttribute('href', url);
+      if (item.image.getAttribute('src') !== url) item.image.src = url;
+    }
+    item.detail.textContent = `${event.closed_at ? 'Gözlem sona erdi' : 'İzleme sürüyor'} · son gözlem ${time(event.last_seen)}`;
+    item.clip.hidden = !event.clip;
+    item.clipStatus.hidden = !!event.clip;
+    if (event.clip) item.clip.href = `/events/${event.clip}`;
+    else item.clipStatus.textContent = event.media_error ? 'Klip kaydedilemedi' : 'Olay klibi hazırlanıyor…';
+    renderActions(item, event);
+    const target = isPending ? $('#events') : $('#history-events');
+    // Keep existing rows and controls in place while measurements poll.
+    const group = isPending ? pending : history;
+    const index = group.indexOf(event);
+    if (target.children[index] !== item.row) target.insertBefore(item.row, target.children[index] || null);
+  }
+  if (!pending.length) $('#events').append(text('p', events.length ? 'Karar bekleyen kayıt yok.' : 'Henüz duman şüphesi kaydı yok.', 'empty'));
+  $('#events').setAttribute('aria-busy', 'false');
+  $('#history').hidden = !history.length;
+  $('#history-count').textContent = `(${history.length})`;
+  if (!pending.length && history.length && !$('#history').dataset.initialized) {
+    $('#history').open = true;
+    $('#history').dataset.initialized = 'true';
+  }
+}
+async function decide(id, decision) {
+  const item = eventElements.get(id);
+  if (!item || item.saving || !online) return;
+  item.saving = true;
+  item.actions.querySelectorAll('button').forEach(button => { button.disabled = true; });
+  const message = item.actions.querySelector('.inline-status');
+  message.classList.remove('error');
+  message.textContent = 'Kaydediliyor…';
+  try {
+    await json(`/api/events/${id}/decision`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({decision})});
+    decisionRevision++;
+    editing.delete(id);
+    item.savedUntil = Date.now() + 4000;
+    // A successful write is authoritative even if the next polling request fails.
+    currentEvents = currentEvents.map(event => event.id === id ? {...event, decision, decided_at: Date.now() / 1000} : event);
+    if (online) {
+      renderEvents(currentEvents);
+      $('#history').open = true;
+      item.actions.querySelector('button')?.focus({preventScroll: true});
+    }
+    setTimeout(() => {
+      if (item.savedUntil <= Date.now()) item.actions.querySelector('.inline-status').textContent = '';
+    }, 4000);
+  } catch (error) {
+    message.classList.add('error');
+    message.textContent = 'Karar kaydedilemedi. Yeniden deneyin.';
+  } finally {
+    item.saving = false;
+    item.actions.querySelectorAll('button').forEach(button => { button.disabled = false; });
+  }
+}
+function serverLost() {
+  online = false;
+  document.title = 'Bağlantı yok — Orman Gözlem İstasyonu';
+  $('#connection').textContent = 'İstasyon bağlantısı yok';
+  $('#connection').className = 'lost';
+  $('#pending-summary').textContent = 'Karar sayısı —';
+  $('#pending-summary').classList.remove('has-pending');
+  const warning = $('#system-warning');
+  warning.hidden = false;
+  warning.replaceChildren(text('strong', 'İstasyon yanıt vermiyor · yeniden deneniyor'),
+    text('span', lastUpdate ? `Son veri ${time(lastUpdate)}. Görüntü, ölçüm ve karar listesi güncel değil.` : 'Görüntü, ölçüm ve karar listesi alınamıyor.'));
+  $('#coverage').textContent = 'Giriş durumları bilinmiyor';
+  for (const item of cameraElements.values()) updateCamera(item.camera, false);
+  $('#cameras').setAttribute('aria-busy', 'true');
+  $('#event-count').textContent = 'Kayıtlar alınamıyor';
+  $('#event-count').classList.remove('has-pending');
+  $('#events').replaceChildren(text('p', 'Bağlantı bekleniyor… Karar listesi yeniden yüklenecek.', 'empty skeleton'));
+  $('#events').setAttribute('aria-busy', 'true');
+  $('#history').hidden = true;
+}
+async function refresh() {
+  if (refreshing) return;
+  refreshing = true;
+  const revision = decisionRevision;
+  try {
+    const [status, events] = await Promise.all([json('/api/status'), json('/api/events')]);
+    // A poll started before a successful write must not restore the old decision.
+    if (revision !== decisionRevision) return;
+    currentStatus = status;
+    currentEvents = events;
+    online = true;
+    lastUpdate = Date.now() / 1000;
+    $('#connection').textContent = `İstasyon bağlı · ${time(lastUpdate)}`;
+    $('#connection').className = '';
+    renderEvents(events);
+    renderStatus(status);
+  } catch (error) { serverLost(); }
+  finally { refreshing = false; }
+}
+async function poll() {
+  await refresh();
+  setTimeout(poll, 1000);
+}
+poll();

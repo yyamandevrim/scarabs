@@ -1,0 +1,219 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {Window} from 'happy-dom';
+
+const html = readFileSync(new URL('../station/static/index.html', import.meta.url), 'utf8');
+const script = readFileSync(new URL('../station/static/app.js', import.meta.url), 'utf8');
+const camera = (name, active = true) => ({
+  name, active, connected: active, kind: 'file', yaw: name === 'left' ? -70 : name === 'right' ? 70 : 0,
+  tilt: 0, hfov: 80, vfov: 50, analyses: 10, analysis_ms: 54.8, inference_ms: 53.1,
+  analysis_hz: 0.98, capture_fps: 25.5, pipeline_error: null
+});
+const event = (overrides = {}) => ({
+  id: '0123456789abcdef0123456789abcdef', camera: 'left', opened_at: 1700000000,
+  last_seen: 1700000005, closed_at: null, confidence: .88, decision: 'pending',
+  decided_at: null, snapshot: '0123456789abcdef0123456789abcdef.jpg', clip: null,
+  media_error: null, ...overrides
+});
+const flush = async () => { for (let i = 0; i < 4; i++) await new Promise(resolve => setImmediate(resolve)); };
+async function panel(events = [], options = {}) {
+  const window = new Window({url: 'http://127.0.0.1/', settings: {disableCSSFileLoading: true, disableJavaScriptFileLoading: true, enableImageFileLoading: false, handleDisabledFileLoadingAsSuccess: true}});
+  const state = {events, status: {cameras: [camera('left'), camera('centre'), camera('right', false)], target_analysis_hz: 1, input_size: 640}, fail: false, postFail: false, posts: []};
+  window.setTimeout = () => 1;
+  window.clearTimeout = () => {};
+  window.fetch = async (url, init) => {
+    if (options.loading) return new Promise(() => {});
+    if (state.fail) throw new Error('server lost');
+    if (init?.method === 'POST') {
+      if (state.postFail) throw new Error('write failed');
+      const decision = JSON.parse(init.body).decision;
+      state.posts.push({url, decision});
+      state.events = state.events.map(item => ({...item, decision, decided_at: Date.now() / 1000}));
+      return {ok: true, json: async () => ({ok: true, decision})};
+    }
+    return {ok: true, json: async () => structuredClone(url === '/api/status' ? state.status : state.events)};
+  };
+  window.document.write(html);
+  window.eval(`${script}\nwindow.testRefresh = refresh;`);
+  await flush();
+  return {window, state, $: selector => window.document.querySelector(selector), refresh: async () => { await window.testRefresh(); await flush(); }};
+}
+
+test('loading never claims no events or a connected station', async () => {
+  const p = await panel([], {loading: true});
+  assert.match(p.$('#events').textContent, /yükleniyor/);
+  assert.equal(p.$('#events').getAttribute('aria-busy'), 'true');
+  assert.match(p.$('#connection').textContent, /bağlanılıyor/);
+  assert.equal(p.$('#cameras').children.length, 2);
+  assert.doesNotMatch(p.$('#events').textContent, /Henüz/);
+  assert.ok(p.$('#event-panel').compareDocumentPosition(p.$('.observation')) & 4);
+});
+
+test('normal has two feeds, one inactive status row, local demo labels and measured figures', async () => {
+  const p = await panel();
+  assert.equal(p.$('#cameras').children.length, 2);
+  assert.match(p.$('#inactive-cameras').textContent, /Sağ.*takılı, bağlı değil/);
+  assert.equal(p.window.document.querySelectorAll('.source-label').length, 2);
+  assert.match(p.$('.source-label').textContent, /Kayıtlı demo/);
+  assert.match(p.$('.camera-info').textContent, /Ölçülen.*54,8 ms/);
+  assert.match(p.$('#events').textContent, /Henüz duman şüphesi kaydı yok/);
+  assert.equal(p.$('#system-warning').hidden, true);
+});
+
+test('pending count excludes decisions, includes closed records still awaiting a decision', async () => {
+  const p = await panel([event({closed_at: 1700000010}), event({id: 'other', decision: 'rejected', decided_at: 1700000010})]);
+  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  assert.equal(p.$('#history-count').textContent, '(1)');
+  assert.match(p.window.document.title, /\(1\) Duman şüphesi/);
+  assert.equal(p.$('.camera').classList.contains('suspected'), true); // other record remains open
+});
+
+test('open suspicion identifies the source camera and stops marking it once closed', async () => {
+  const p = await panel([event()]);
+  assert.match(p.$('.camera-state').textContent, /Duman şüphesi · %88/);
+  assert.equal(p.$('.camera').classList.contains('suspected'), true);
+  p.state.events[0].closed_at = 1700000010;
+  await p.refresh();
+  assert.equal(p.$('.camera').classList.contains('suspected'), false);
+});
+
+for (const [decision, selector, label] of [['confirmed', '.confirm', 'Operatör doğruladı'], ['rejected', '.reject', 'Operatör reddetti']]) {
+  test(`${decision} persists then replaces both buttons with decision, time and change action`, async () => {
+    const p = await panel([event()]);
+    p.$(selector).click();
+    await flush();
+    assert.equal(p.state.posts[0].decision, decision);
+    assert.equal(p.$('#event-count').textContent, '0 karar bekliyor');
+    assert.equal(p.$('#events .event'), null);
+    assert.equal(p.$('#history').open, true);
+    assert.match(p.$('.decision').textContent, new RegExp(`${label} · \\d`));
+    assert.equal(p.$('.confirm'), null);
+    assert.equal(p.$('.reject'), null);
+    assert.equal(p.$('.event').classList.contains('decided'), true);
+    assert.match(p.$('.inline-status').textContent, /kaydedildi/);
+    await p.refresh();
+    assert.match(p.$('.decision').textContent, new RegExp(label));
+    p.$('.change').click();
+    assert.ok(p.$('.confirm'));
+    assert.ok(p.$('.reject'));
+    p.$('.cancel').click();
+    assert.ok(p.$('.change'));
+    assert.equal(p.$('.confirm'), null);
+  });
+}
+
+test('failed decision stays pending, shows retry feedback, and restores controls', async () => {
+  const p = await panel([event()]);
+  p.state.postFail = true;
+  p.$('.confirm').click();
+  await flush();
+  assert.match(p.$('.inline-status').textContent, /kaydedilemedi/);
+  assert.equal(p.$('.confirm').disabled, false);
+  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  p.state.postFail = false;
+  p.$('.reject').click();
+  await flush();
+  assert.match(p.$('.decision').textContent, /reddetti/);
+});
+
+test('an older in-flight poll cannot undo a successful operator decision', async () => {
+  const p = await panel([event()]);
+  const fetch = p.window.fetch;
+  let release;
+  p.window.fetch = async (url, init) => {
+    const response = await fetch(url, init);
+    if (url !== '/api/events') return response;
+    const snapshot = await response.json();
+    await new Promise(resolve => { release = resolve; });
+    return {ok: true, json: async () => snapshot};
+  };
+  const polling = p.refresh();
+  await flush();
+  p.$('.confirm').click();
+  await flush();
+  release();
+  await polling;
+  assert.match(p.$('.decision').textContent, /Operatör doğruladı/);
+  assert.equal(p.$('.confirm'), null);
+});
+
+test('poll updates retain focused controls and an in-progress correction', async () => {
+  const p = await panel([event({decision: 'confirmed', decided_at: 1700000010})]);
+  p.$('.change').click();
+  const button = p.$('.reject');
+  button.focus();
+  p.state.events[0].last_seen++;
+  await p.refresh();
+  assert.equal(p.$('.reject'), button);
+  assert.equal(p.window.document.activeElement, button);
+});
+
+test('camera drop warns of reduced coverage, clears its measurements and leaves the other feed working', async () => {
+  const p = await panel();
+  p.state.status.cameras[1].connected = false;
+  await p.refresh();
+  assert.equal(p.$('#system-warning').hidden, false);
+  assert.match(p.$('#system-warning').textContent, /Gözlem kapsamı azaldı · 1\/2.*Orta/);
+  const dropped = p.$('.camera.disconnected');
+  assert.match(dropped.textContent, /Bağlantı koptu/);
+  assert.equal(dropped.querySelector('img').hidden, true);
+  assert.equal(dropped.querySelector('.camera-info').textContent, 'Ölçülen · —');
+  assert.match(p.$('.camera:not(.disconnected) .camera-info').textContent, /54,8 ms/);
+  p.state.status.cameras[1].connected = true;
+  await p.refresh();
+  assert.equal(p.$('#system-warning').hidden, true);
+});
+
+test('all active sources lost states observation unavailable', async () => {
+  const p = await panel();
+  p.state.status.cameras.forEach(item => { item.connected = false; });
+  await p.refresh();
+  assert.match(p.$('#system-warning').textContent, /Gözlem kullanılamıyor · 0\/2/);
+});
+
+test('JPEG failure also reduces coverage until an image loads again', async () => {
+  const p = await panel();
+  p.$('.camera img').onerror();
+  assert.match(p.$('#system-warning').textContent, /Gözlem kapsamı azaldı · 1\/2/);
+  p.$('.camera img').onload();
+  assert.equal(p.$('#system-warning').hidden, true);
+});
+
+test('server loss removes connected states, stale figures, empty all-clear and decision controls; recovery restores them', async () => {
+  const p = await panel([event()]);
+  p.state.fail = true;
+  await p.refresh();
+  assert.match(p.$('#system-warning').textContent, /İstasyon yanıt vermiyor.*Son veri/);
+  assert.equal(p.$('#connection').textContent, 'İstasyon bağlantısı yok');
+  assert.equal(p.$('#pending-summary').textContent, 'Karar sayısı —');
+  assert.equal(p.$('.camera-state').textContent, 'Durum bilinmiyor');
+  assert.equal(p.$('.camera-info').textContent, 'Ölçülen · —');
+  assert.equal(p.$('.camera img').getAttribute('src'), null);
+  assert.match(p.$('#events').textContent, /Bağlantı bekleniyor/);
+  assert.doesNotMatch(p.$('#events').textContent, /Henüz/);
+  assert.equal(p.$('.confirm'), null);
+  assert.equal(p.$('#history').hidden, true);
+  p.state.fail = false;
+  await p.refresh();
+  assert.equal(p.$('#system-warning').hidden, true);
+  assert.ok(p.$('.confirm'));
+  assert.equal(p.$('#events').getAttribute('aria-busy'), 'false');
+});
+
+test('USB sources use a live label and any configured active pair works', async () => {
+  const p = await panel();
+  p.state.status.cameras = [camera('left', false), {...camera('centre'), kind: 'usb'}, camera('right')];
+  await p.refresh();
+  assert.equal(p.$('#cameras').children.length, 2);
+  assert.match(p.$('#inactive-cameras').textContent, /Sol/);
+  assert.equal(p.$('.source-label').textContent, 'Canlı kamera · yerel analiz');
+});
+
+test('pipeline errors are a failure warning, not a measured zero or a healthy analysis', async () => {
+  const p = await panel();
+  p.state.status.cameras[0].pipeline_error = 'inference failed';
+  await p.refresh();
+  assert.match(p.$('#system-warning').textContent, /Analiz kesintisi/);
+  assert.match(p.$('.camera-info').textContent, /Analiz kullanılamıyor/);
+});

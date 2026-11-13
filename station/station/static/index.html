@@ -8,14 +8,28 @@
 <script src="/static/app.js" defer></script>
 </head>
 <body>
-<header><div><p class="eyebrow">GREEN EUROPEAN RENAISSANCE · YEREL İSTASYON</p><h1>Ormanı gözlüyoruz.</h1><p>Erken işaretler, yerinde değerlendirme.</p></div><div class="offline"><span></span>Çevrimdışı çalışır<small>Görüntüler bu cihazda işlenir</small></div></header>
+<header class="station-bar">
+  <h1>Orman Gözlem İstasyonu</h1>
+  <p id="connection" role="status">İstasyona bağlanılıyor…</p>
+  <a id="pending-summary" href="#event-panel">Kararlar yükleniyor…</a>
+</header>
 <main>
-<div class="section-heading"><h2>Kamera görünümleri</h2><p>3 takılı kamera · en fazla 2 etkin giriş</p></div>
-<p id="connection" role="status">İstasyona bağlanılıyor…</p>
-<section id="cameras" class="cameras" aria-label="Kameralar"></section>
-<div class="section-heading events-heading"><div><p class="eyebrow">OPERATÖR DEĞERLENDİRMESİ</p><h2>Gözlem kayıtları <span id="event-count">0</span></h2></div><p>Şüphe bir uyarıdır. Her kayıt değerlendirme bekler.</p></div>
-<p id="action-status" role="status"></p>
-<section id="events" aria-label="Duman şüphesi kayıtları"><p class="empty">Henüz duman şüphesi kaydı yok.</p></section>
+  <div id="system-warning" class="system-warning" role="alert" hidden></div>
+  <section id="event-panel" class="event-panel" aria-labelledby="event-title">
+    <div class="section-heading"><h2 id="event-title">Duman şüphesi</h2><p id="event-count">Kayıtlar yükleniyor…</p></div>
+    <p class="event-note">Kararınız şüphe kaydına işlenir.</p>
+    <div id="events" aria-label="Karar bekleyen kayıtlar" aria-busy="true"><p class="empty skeleton">Kayıtlar yükleniyor…</p></div>
+    <details id="history" class="history" hidden><summary>Değerlendirilen kayıtlar <span id="history-count"></span></summary><div id="history-events"></div></details>
+  </section>
+  <section class="observation" aria-labelledby="feed-title">
+    <div class="section-heading"><h2 id="feed-title">Kamera görüntüleri</h2><p id="coverage">Giriş bilgileri yükleniyor…</p></div>
+    <div id="cameras" class="cameras" aria-busy="true">
+      <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
+      <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
+    </div>
+    <div id="inactive-cameras" class="inactive-cameras"></div>
+    <details class="configuration"><summary>Kamera yapılandırması</summary><div id="geometry">Yapılandırma yükleniyor…</div><p id="settings"></p></details>
+  </section>
 </main>
-<footer>Yerel kayıt · CPU üzerinde analiz · Deneysel prototip <span id="settings"></span></footer>
+<footer><span>Yerel işleme ve kayıt · İnternet gerektirmez</span><span>Deneysel prototip · Uyarılar operatör değerlendirmesi gerektirir</span></footer>
 </body></html>

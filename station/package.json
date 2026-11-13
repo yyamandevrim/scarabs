@@ -1,0 +1,7 @@
+{
+  "name": "forest-station-panel-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {"test": "node --test tests/panel.test.mjs"},
+  "devDependencies": {"happy-dom": "21.0.4"}
+}

@@ -6,3 +6,4 @@ models/
 media/
 data/
 *.local.toml
+node_modules/
