@@ -339,6 +339,7 @@ test('local flame and observed LED are separate from smoke events and go unknown
     led: {shown: {colour: 'red', pattern: 'fast blink, 5 per second', text: 'Alev sensörü tetiklendi'}, requested: {text: 'Normal gözlem'}}};
   await p.refresh();
   assert.equal(p.$('#flame-status').textContent, 'Alev sensörü tetiklendi');
+  assert.match(p.$('.sensor-scope').textContent, /kısa menzilli.*doğrulamaz/);
   assert.equal(p.$('#mcu-mode').textContent, 'Simülasyon');
   assert.match(p.$('#led-status').textContent, /Kırmızı.*saniyede 5/);
   assert.doesNotMatch(p.$('#led-status').textContent, /Normal gözlem/);

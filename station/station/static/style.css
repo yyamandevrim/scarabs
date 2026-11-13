@@ -43,6 +43,7 @@ main>*{min-width:0}
 #flame-status{font-size:15px;margin-bottom:6px}
 #flame-status.triggered{border-left:3px solid var(--text);padding:10px 12px;background:var(--bg-3);font-weight:500}
 #led-status{font-size:13px;color:var(--text-2);max-width:none}
+.sensor-scope{font-size:12px;color:var(--text-2);margin-top:8px}
 .sensor-details{margin-top:10px;color:var(--text-2);font-size:12px}
 .sensor-details p{margin-top:10px}
 .configuration{margin-top:16px;font-size:13px;color:var(--text-2)}
