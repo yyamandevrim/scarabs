@@ -56,3 +56,10 @@ test('water share is not computed when no area is in view',()=>{
  assert.equal(m.share({viewed_area_ha:120,water_share_pct:0}),0);
  assert.equal(m.share({viewed_area_ha:120,water_share_pct:83.7}),83.7);
 });
+
+test('percent places the sign correctly in Turkish without fabricating missing values',()=>{
+ assert.equal(m.percent(84,'tr'),'%84');
+ assert.equal(m.percent(84,'en'),'84%');
+ assert.equal(m.percent(null,'tr'),'—');
+ assert.equal(m.percent(0,'tr'),'%0');
+});

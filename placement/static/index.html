@@ -1,15 +1,84 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Launch point map</title><link rel="icon" data-brand-icon href="data:,"><link rel="stylesheet" href="/static/vendor/leaflet.css"><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/style.css"><script defer src="/static/vendor/leaflet.js"></script><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/app.js"></script></head>
-<body data-page-title="Launch point map"><header class="site-header"><a class="brand" href="/" aria-label="Back to project"><img data-brand-logo width="36" height="36" alt="Placeholder logo"><span data-brand-name></span></a><span class="tool-name">Launch point map</span><button class="language" aria-label="Switch language">Türkçe</button></header>
-<main><section class="workspace"><div class="map-column"><div class="map-heading"><h1>Compare launch points</h1><span>Helsinki region</span></div><div class="map-shell"><div id="map" aria-label="Candidate location map"></div><div id="map-state" role="status">Loading regional map…</div><div class="map-toolbar"><button id="draw">Draw priority forest</button><button id="finish" hidden>Finish area</button><button id="clear-priority" hidden>Clear area</button></div></div>
-<div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="outside"></i>Outside FOV</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="water"></i>Water in view</span></div><p id="draw-help" class="map-help">Click the map to move the selected candidate.</p>
-<section id="result-summary" class="result-summary" aria-busy="true" aria-label="Candidate results"><div class="summary-heading"><span class="simulation-tag">SIMULATED</span><p id="result-title">Visible forest · smoke + canopy</p></div><p id="result-state" role="status">Loading regional map…</p><button id="retry" hidden>Retry analysis</button><div id="headline-figures" class="headline-figures"></div><h2 id="verdict">The comparison appears when both sites are calculated.</h2><p id="ranking" class="ranking"></p><p id="pair-summary" class="pair-summary"></p></section></div>
-<aside><details id="settings" open><summary>Launch settings</summary><p class="small auto-note">Changes update automatically.</p><div id="candidate-tabs" class="tabs"></div><div class="coordinates"><label>Latitude<input id="lat" type="number" min="59" max="62" step="any" aria-describedby="lat-error"><span id="lat-error" class="input-error"></span></label><label>Longitude<input id="lon" type="number" min="23" max="27" step="any" aria-describedby="lon-error"><span id="lon-error" class="input-error"></span></label></div><div class="control-row"><label>Height above ground<select id="height"><option value="30">30 m</option><option value="100">100 m</option><option value="500">500 m</option><option value="600" selected>600 m</option><option value="700">700 m</option></select></label><label>Analysis detail<select id="resolution"><option value="coarse">Quick · 120 m</option><option value="detailed">Detailed · 40 m</option></select></label></div>
-<div class="heading-title"><label for="heading">Module heading</label><output id="heading-value">—</output></div><input id="heading" type="range" min="0" max="359" value="0" aria-label="Module heading">
-<label class="target-label">Target shown on map<select id="scenario"><option value="canopy_smoke">Smoke · including canopy obstructions</option><option value="canopy_ground">Ground · including canopy obstructions</option><option value="bare_smoke">Smoke · bare-terrain comparison</option><option value="bare_ground">Ground · bare-terrain comparison</option></select></label>
-<details class="secondary-settings"><summary>Camera angles and model settings</summary><div class="control-row"><label>Maximum range (km)<input id="max-range" type="number" min="1" max="15" step="any" value="12"></label><label>Smoke above canopy (m)<input id="smoke-height" type="number" min="1" max="1000" step="any" value="50"></label></div><fieldset><legend>Camera connections</legend><p>At most two cameras connected. Positive tilt points down.</p><div id="camera-controls"></div><p id="camera-status"></p><label class="reference-switch"><input id="reference" type="checkbox"> Three cameras, reference</label></fieldset></details>
-<button id="analyze" class="primary">Recalculate both sites</button><p id="status" role="status" aria-live="polite">Starting…</p></details></aside></section>
-<section id="details-results" class="results" aria-busy="true"><div class="comparison-layout"><div class="table-wrap"><h2>Visibility breakdown</h2><table id="comparison"><caption>Simulated hectares from terrain and canopy geometry, not a detection range. <span id="precision">Rounded to whole hectares.</span> — = not computed.</caption><thead><tr><th scope="col">Metric</th><th scope="col">Unit</th><th scope="col">Haukilahti</th><th scope="col">Nuuksio</th></tr></thead><tbody></tbody></table><p class="small">Blind total = outside FOV + occluded in FOV. Components are rounded before adding; unknown rays are unverified.</p></div>
-<div class="pair-panel"><h2 id="pair-title">Compare camera pairs</h2><p id="pair-context">Selected site · current heading and angles</p><p id="pair-gain"></p><p class="small">Visible forest · ha (simulated)</p><div id="pairs" class="pairs"></div><p class="pair-note">At default 80° FOV, left + right leaves a 60° central gap with no overlap.</p><h3>Heading sensitivity</h3><div id="sensitivity" class="sensitivity"></div><p class="small">Connected cameras · smoke target with canopy · ha (simulated)</p></div></div>
-<p class="field-note">Access, shadow, site use and flight permissions require field checks.</p><details class="data-notes"><summary>Data, assumptions and uncertainty</summary><p id="data-summary" class="small"></p><div id="uncertainty"></div><p>Ground below opaque canopy is hidden. Bare-terrain rows remove canopy occlusion. Water adds no forest target area; sightlines can cross water.</p></details></section></main>
-<footer><span><span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span></span><span data-brand-tagline></span><span id="data-badge">Checking data</span><span>NLS Finland / Syke / Luke · CC BY 4.0</span></footer></body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Launch point map</title><link rel="icon" data-brand-icon href="data:,"><link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/static/vendor/leaflet.css"><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/style.css"><script defer src="/static/vendor/leaflet.js"></script><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/charts.js"></script><script defer src="/static/app.js"></script></head>
+<body class="map-app" data-page-title="Launch point map">
+<header class="shell-bar">
+ <a class="shell-brand" href="/" aria-label="Back to project"><img data-brand-logo width="24" height="24" alt="Placeholder logo"><span data-brand-name></span></a>
+ <nav class="shell-nav" aria-label="Sections"><a href="/">Overview</a><a href="/map" aria-current="page">Launch map</a></nav>
+ <span class="shell-spacer"></span>
+ <span id="data-badge" class="shell-note" hidden></span>
+ <button class="language" aria-label="Switch language">Türkçe</button>
+</header>
+<div id="banner" class="shell-banner fail" role="alert" hidden><strong id="banner-title"></strong><span id="banner-text"></span><button id="retry" class="primary" hidden>Retry analysis</button></div>
+<main class="workspace">
+ <section class="map-shell" aria-label="Candidate location map">
+  <div id="map"></div>
+  <div id="map-state" role="status"><span class="loader" aria-hidden="true"></span><span id="map-state-text">Loading regional map…</span></div>
+  <div class="map-toolbar"><button id="draw">Draw priority forest</button><button id="finish" class="primary" hidden>Finish area</button><button id="clear-priority" hidden>Clear area</button></div>
+  <p id="draw-help" class="map-help" hidden></p>
+  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="water"></i>Water in view</span></div>
+ </section>
+ <aside id="result-summary" class="panel" aria-label="Candidate results" aria-busy="true">
+  <div class="tabs" role="tablist" aria-label="Views"><button role="tab" id="tab-compare" aria-controls="view-compare" aria-selected="true">Compare</button><button role="tab" id="tab-breakdown" aria-controls="view-breakdown" aria-selected="false" tabindex="-1">Breakdown</button><button role="tab" id="tab-data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button></div>
+
+  <div id="view-compare" class="view" role="tabpanel" aria-labelledby="tab-compare">
+   <section class="answer">
+    <label class="metric-picker"><span class="visually-hidden">Target shown on map</span><select id="scenario"><option value="canopy_smoke">Smoke · including canopy obstructions</option><option value="canopy_ground">Ground · including canopy obstructions</option><option value="bare_smoke">Smoke · bare-terrain comparison</option><option value="bare_ground">Ground · bare-terrain comparison</option></select></label>
+    <p id="result-title" class="answer-label">Visible forest · smoke + canopy</p>
+    <div id="headline-figures" class="sites"><div class="site skeleton"></div><div class="site skeleton"></div></div>
+    <p id="verdict" class="verdict">The comparison appears when both sites are calculated.</p>
+    <p id="ranking" class="visually-hidden"></p>
+    <p id="result-state" class="note" role="status">Loading regional map…</p>
+   </section>
+
+   <section class="block">
+    <div class="block-head"><h2 id="pair-title">Connected cameras</h2><span id="pair-context" class="note"></span></div>
+    <div id="pairs" class="pairs"></div>
+    <p id="pair-gain" class="pair-gain"></p>
+    <p id="pair-summary" class="visually-hidden"></p>
+   </section>
+
+   <section class="block">
+    <div class="block-head"><h2><label for="heading">Module heading</label></h2><output id="heading-value" class="figure-sm">—</output></div>
+    <input id="heading" type="range" min="0" max="359" value="0" aria-label="Module heading">
+    <details class="sensitivity-details"><summary>Visible forest if the heading drifts ±20°</summary><div id="sensitivity" class="chart sensitivity"></div></details>
+   </section>
+
+
+   <details id="settings" class="block disclosure"><summary>Position and camera angles <span id="settings-site" class="note"></span></summary>
+        <div class="control-row"><label>Height above ground<select id="height"><option value="30">30 m</option><option value="100">100 m</option><option value="500">500 m</option><option value="600" selected>600 m</option><option value="700">700 m</option></select></label><label>Analysis detail<select id="resolution"><option value="coarse">Quick · 120 m</option><option value="detailed">Detailed · 40 m</option></select></label></div>
+    <div class="coordinates"><label>Latitude<input id="lat" class="mono" type="number" min="59" max="62" step="any" aria-describedby="lat-error"><span id="lat-error" class="input-error"></span></label><label>Longitude<input id="lon" class="mono" type="number" min="23" max="27" step="any" aria-describedby="lon-error"><span id="lon-error" class="input-error"></span></label></div>
+    <p class="note">At most two cameras connected. Positive tilt points down.</p>
+    <div id="camera-controls" class="camera-table"></div>
+    <p id="camera-status" class="note"></p>
+    <label class="check"><input id="reference" type="checkbox"> Three cameras, reference</label>
+    <div class="control-row"><label>Maximum range (km)<input id="max-range" class="mono" type="number" min="1" max="15" step="any" value="12"></label><label>Smoke above canopy (m)<input id="smoke-height" class="mono" type="number" min="1" max="1000" step="any" value="50"></label></div>
+    <button id="analyze">Recalculate both sites</button>
+   </details>
+  </div>
+
+  <div id="view-breakdown" class="view" role="tabpanel" aria-labelledby="tab-breakdown" hidden>
+   <section id="details-results" class="block" aria-busy="true">
+    <div class="block-head"><h2>Forest in range</h2></div>
+    <div id="accounting" class="chart accounting"></div>
+   </section>
+   <section class="block dense">
+    <div class="block-head"><h2>Visibility breakdown</h2></div>
+    <div class="table-wrap"><table id="comparison" class="grid"><caption><span id="precision">Rounded to whole hectares.</span> — = not computed. Blind total = outside FOV + occluded in FOV.</caption><thead><tr><th scope="col">Metric</th><th scope="col" class="unit">Unit</th><th scope="col">Haukilahti</th><th scope="col">Nuuksio</th></tr></thead><tbody></tbody></table></div>
+   </section>
+  </div>
+
+  <div id="view-data" class="view" role="tabpanel" aria-labelledby="tab-data" hidden>
+   <section class="block prose">
+    <p id="data-summary"></p>
+    <div id="uncertainty"></div>
+    <p>Ground below opaque canopy is hidden. Bare-terrain rows remove canopy occlusion. Water adds no forest target area; sightlines can cross water.</p>
+    <p>Access, shadow, site use and flight permissions require field checks.</p>
+    <p class="note"><span data-brand-tagline></span></p>
+    <p class="note">NLS Finland / Syke / Luke · CC BY 4.0 · <span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span> · <span data-brand-challenge></span> challenge</p>
+   </section>
+  </div>
+
+  <footer class="panel-foot"><span>Simulated geometric visibility, not a detection range.</span><span id="status" role="status" aria-live="polite">Starting…</span></footer>
+ </aside>
+</main>
+</body></html>

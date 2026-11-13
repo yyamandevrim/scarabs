@@ -69,3 +69,17 @@ def test_identity_names_product_team_and_event():
             page=client.get(path).text
             assert '<title>ACORN · ' in page
             assert '<span data-brand-team>Scarabs</span>' in page
+
+
+def test_browser_chart_contract():
+    subprocess.run(['node', '--test', str(ROOT / 'tests/ui_charts.cjs')], check=True, cwd=ROOT)
+
+
+def test_rate_limits_are_public_by_default_and_explicitly_overridable():
+    from forest_placement.api import rate_limits_enabled
+    assert not rate_limits_enabled({})
+    assert rate_limits_enabled({'PLACEMENT_PRODUCTION': '1'})
+    for value in ('1', 'true', 'YES', 'on'):
+        assert rate_limits_enabled({'PLACEMENT_RATE_LIMIT': value})
+    for value in ('0', 'false', 'no', 'off'):
+        assert not rate_limits_enabled({'PLACEMENT_PRODUCTION': '1', 'PLACEMENT_RATE_LIMIT': value})

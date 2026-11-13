@@ -1,8 +1,56 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Launch point simulation</title><meta name="description" content="Compare tethered-balloon launch points in the Helsinki capital region by simulated visible forest."><link rel="icon" data-brand-icon href="data:,"><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/site.css"><script defer src="/static/i18n.js"></script></head>
-<body class="landing" data-page-title="Launch point simulation"><header class="site-header"><a class="brand" href="/"><img data-brand-logo alt="Placeholder logo" width="36" height="36"><span data-brand-name></span></a><span class="tool-name"><span data-brand-expansion></span></span><button class="language" aria-label="Switch language">Türkçe</button></header>
-<main><section class="hero"><h1>Which launch point lets two balloon cameras see the most forest?</h1><p class="lead">The launch point map compares candidate sites in the Helsinki capital region. The balloon module carries three cameras, two connected at a time. For each site it simulates how many hectares of forest fall inside the connected cameras’ view, and which pair is worth connecting.</p><div class="hero-action"><a class="action" href="/map">Open the launch point map</a><p>Runs offline on NLS, Syke and Luke data. Every hectare is simulated.</p></div></section>
-<figure class="product-view"><a href="/map" class="product-link" aria-label="Open the launch point map"><picture><source data-product-phone width="390" height="844" media="(max-width:650px)" srcset="/static/placement-preview-phone-en.png"><img data-product-desktop src="/static/placement-preview-en.png" width="1440" height="900" alt="Launch point map comparing Haukilahti and Nuuksio: simulated visible forest for each site, the verdict and the best camera pair."></picture></a><figcaption>Screenshot of the live map · default setup: 600 m, quick 120 m grid, left and centre cameras connected</figcaption></figure>
-<section class="reading"><div><h2>Forest the cameras miss has two causes</h2><p><b>Outside the field of view</b>, shown grey: forest beyond the two connected cameras’ view. <b>Occluded in the field of view</b>, shown rust: forest the cameras face but terrain or canopy hides along the sightline. The blind total is always the sum of the two.</p></div>
-<div><h2>What the numbers do not say</h2><p>The figures are geometric visibility, not a smoke-detection range. The model treats canopy as opaque, uses estimated stand heights and a fixed smoke-target height, and leaves out buildings, weather, tether motion and camera calibration. Access, shadow, site use and flight permissions still need checks on site.</p><p>A separate station runs on the balloon module: it analyses camera footage locally and asks an operator to confirm or reject each smoke suspicion. This website shows placement only and does not expose station feeds.</p></div></section>
-</main><footer><span><span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span> · <span data-brand-challenge></span> challenge</span><span data-brand-tagline></span><span>NLS Finland / Syke / Luke · CC BY 4.0</span></footer></body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Launch point simulation</title><meta name="description" content="Compare tethered-balloon launch points in the Helsinki capital region by simulated visible forest."><link rel="icon" data-brand-icon href="data:,"><link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/site.css"><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/landing.js"></script></head>
+<body class="landing" data-page-title="Launch point simulation">
+<header class="shell-bar">
+ <a class="shell-brand" href="/" aria-label="Back to project"><img data-brand-logo width="24" height="24" alt="Placeholder logo"><span data-brand-name></span></a>
+ <nav class="shell-nav" aria-label="Sections"><a href="/" aria-current="page">Overview</a><a href="/map">Launch map</a></nav>
+ <span class="shell-spacer"></span>
+ <button class="language" aria-label="Switch language">Türkçe</button>
+</header>
+<main>
+ <section class="hero">
+  <div class="hero-copy">
+   <p class="hero-eyebrow"><span data-brand-event></span> · <span data-brand-challenge></span> challenge</p>
+   <h1>A forest watch starts with the right launch point.</h1>
+   <div class="hero-description"><p class="lead"><span data-brand-tagline></span></p><p class="hardware-note">Three mounted cameras. Two active inputs. Terrain and canopy determine what they can see.</p></div>
+   <div class="hero-action"><a class="button primary action" href="/map">Open the launch point map</a><a class="button" href="#method">Method and limits</a></div>
+
+  </div>
+  <figure class="product-view">
+   <a href="/map" class="product-link" aria-label="Open the launch point map"><picture><source data-product-phone width="390" height="844" media="(max-width:650px)" srcset="/static/placement-preview-phone-en.png"><img data-product-desktop src="/static/placement-preview-en.png" width="1440" height="900" alt="Launch point map comparing Haukilahti and Nuuksio: simulated visible forest for each site, the verdict and the best camera pair."></picture></a>
+   <figcaption>Screenshot of the live map · default setup: 600 m, quick 120 m grid, left and centre cameras connected</figcaption>
+  </figure>
+ </section>
+
+ <section class="modules" aria-label="Modules">
+  <article class="module">
+   <div class="module-head"><h2>Launch planning</h2><span class="tag tag-sim">Simulated</span></div>
+   <p>Compares candidate launch points by how much forest the two connected cameras can geometrically see over terrain and canopy, which camera pair to connect, and how sensitive the result is to the module heading.</p>
+   <ul class="facts">
+    <li><span>Inputs</span><b>NLS 10 m DEM · CORINE 2024 · Luke MS-NFI 2023</b></li>
+    <li><span>Grid</span><b class="mono">120 m quick · 40 m detailed</b></li>
+    <li><span>Outputs</span><b>Visible, occluded and outside-FOV forest · pairs · heading ±20°</b></li>
+   </ul>
+   <a href="/map">Open the launch point map</a>
+  </article>
+  <article class="module">
+   <div class="module-head"><h2>Operator station</h2><span class="tag tag-measured">Measured</span></div>
+   <p>Runs on the balloon module: analyses two camera inputs locally, raises a smoke suspicion when three of five analyses agree, and asks an operator to confirm or reject each one. Its panel is local to the device and is not published on this website.</p>
+   <ul class="facts">
+    <li><span>Detector</span><b>Pyronear YOLO11s · ONNX Runtime CPU</b></li>
+    <li><span>Inference</span><b class="mono">57.7 ms mean · 65.6 ms p95</b></li>
+    <li><span>Measured on</span><b>Apple M5 Mac, 640 px input. Not measured on the Arduino UNO Q.</b></li>
+   </ul>
+   <p class="small">Recorded wildfire clip, 54 analyses, 2026-11-13. Source: station README.</p>
+  </article>
+ </section>
+
+ <section id="method" class="reading">
+  <div><h2>Forest the cameras miss has two causes</h2><p><b>Outside the field of view</b>, shown grey: forest beyond the two connected cameras’ view. <b>Occluded in the field of view</b>, shown rust: forest the cameras face but terrain or canopy hides along the sightline. The blind total is always the sum of the two.</p>
+   <div class="legend-row"><span><i class="visible"></i>Visible forest</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="water"></i>Water in view</span></div></div>
+  <div><h2>What the numbers do not say</h2><p>The figures are geometric visibility, not a smoke-detection range. The model treats canopy as opaque, uses estimated stand heights and a fixed smoke-target height, and leaves out buildings, weather, tether motion and camera calibration. Access, shadow, site use and flight permissions still need checks on site.</p><p>Smoke suspicions are not confirmed fires: the station only flags them, and an operator decides.</p></div>
+  <div class="sources"><h2>Data in use</h2><ul id="sources" class="source-list"><li class="muted">Checking data</li></ul></div>
+ </section>
+</main>
+<footer class="site-foot"><span><span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span> · <span data-brand-challenge></span> challenge</span><span data-brand-tagline></span><span>NLS Finland / Syke / Luke · CC BY 4.0</span></footer>
+</body></html>

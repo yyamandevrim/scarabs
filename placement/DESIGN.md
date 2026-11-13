@@ -1,0 +1,25 @@
+# ACORN interface design
+
+The planner answers “which launch point sees more forest?” The station answers “what do the cameras show, and which suspicion needs a decision?” Give each answer a single home.
+
+## Visual system
+
+Dark mineral surfaces: canvas #090e13, panel #0f161d, grouped controls #151e27, selected surface #1c2733. Primary text #e3e9ee, secondary #a7b4bf, quiet text #8697a5. Soft blue #8fc3e3 is the sole interaction accent, used for focus and links. Main actions are neutral. Amber #f2a93b means suspected smoke; red #f0594e means unavailable or failed. The local flame sensor is labelled explicitly; its physical LED colours are reported as data, not adopted as interface decoration.
+
+IBM Plex Sans, locally vendored under the SIL Open Font License (static/fonts/OFL-IBM-Plex-Sans.txt and OFL-IBM-Plex-Mono.txt). Proportional labels in sentence case; 12–14 px supporting text, 15–20 px headings, 32 px result figures, 52 px landing headline. IBM Plex Mono is reserved for coordinates, identifiers and dense numeric tables. Tabular figures throughout. No clock in the planner, tracked capitals, ornamental engine indicators or repeated simulation badges.
+
+## Planner
+
+At 1440 px, map width is 1020 px and the only panel is 420 px. Its Compare tab owns the two site figures, one verdict, camera-pair choice and heading. The active site is underlined and its marker is white; no competing accent. Heading sensitivity expands on demand. Position, angles and reference configuration live in a disclosure. The Breakdown tab owns accounting and expert table; Data owns provenance and assumptions. The three-camera reference is available in the table and settings, not repeated among achievable pairs. A footer states the geometric simulation limit once. During recalculation, old results are explicitly marked as previous settings.
+
+The map is the signature: quiet local terrain beneath coloured visibility cells and readable camera sectors. The map palette is unchanged because backend raster rendering reads its exact token values. Green visible, rust occluded, grey outside field of view, violet overlap, blue water; labels and sector outlines also encode meaning. Legend occupies its own bottom strip. On phones the map precedes the comparison and controls; independent scrolling is desktop only.
+
+The landing page gives the real product preview the full content width. A short explanation and action precede it; method, real data sources and measured station context follow. No invented outcomes or metric widgets.
+
+## Station
+
+Two feed tiles share the primary observation area, with a separately scrolling 400 px review queue. A single event opens initially; other rows show camera and time. Expanding another event is explicit and never restarts or replaces a playing clip during polling. Decisions move into history; correction remains available. Only actual data drives timing, device identity and sensor/LED state. Flame sensing is a separate local-module status, never confirmation of a camera event. Runtime requires only local fonts, CSS, JS, imagery and JSON, without animation or heavy libraries.
+
+## Verification
+
+Desktop and phone screenshots must cover loaded, partial, loading and failure states. Inspect contrast, clipping, queue accumulation and media fallback. Run placement Python tests, station Python tests and station JS panel tests; inspect browser diagnostics for external requests and console errors. Font provenance is recorded in static/fonts/README.md. Brand names and the undecided placeholder remain sourced from brand.json and station/identity.py.
