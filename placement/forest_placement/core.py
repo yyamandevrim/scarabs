@@ -70,12 +70,12 @@ def summarize(camera_masks, forest, water, eligible, cell_area, priority=None):
     factor = cell_area/10000
     if priority is None:
         priority = np.zeros(forest.shape,dtype=bool)
-    values = dict(visible_forest_ha=float(np.sum(forest*seen)*factor),
-                  blind_forest_ha=float(np.sum(forest*(eligible & ~seen))*factor),
-                  overlap_forest_ha=float(np.sum(forest*overlap)*factor),
-                  water_view_ha=float(np.sum(water*seen)*factor),
-                  priority_visible_ha=float(np.sum(forest*seen*priority)*factor),
-                  total_forest_ha=float(np.sum(forest*eligible)*factor),
+    values = dict(visible_forest_ha=float(np.sum(forest*seen,dtype=np.float64)*factor),
+                  blind_forest_ha=float(np.sum(forest*(eligible & ~seen),dtype=np.float64)*factor),
+                  overlap_forest_ha=float(np.sum(forest*overlap,dtype=np.float64)*factor),
+                  water_view_ha=float(np.sum(water*seen,dtype=np.float64)*factor),
+                  priority_visible_ha=float(np.sum(forest*seen*priority,dtype=np.float64)*factor),
+                  total_forest_ha=float(np.sum(forest*eligible,dtype=np.float64)*factor),
                   viewed_area_ha=float(np.count_nonzero(seen)*factor))
     values['water_share_pct'] = 100*values['water_view_ha']/values['viewed_area_ha'] if values['viewed_area_ha'] else 0
     return {k:round(v,3) for k,v in values.items()}, counts
