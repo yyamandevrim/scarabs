@@ -65,6 +65,19 @@ def annotate(frame, detections):
     h, w = image.shape[:2]
     for detection in detections:
         x1, y1, x2, y2 = [round(v * (w if i % 2 == 0 else h)) for i, v in enumerate(detection.box)]
-        cv2.rectangle(image, (x1,y1), (x2,y2), (40,180,255), 2)
-        cv2.putText(image, f"Duman? {detection.confidence:.2f}", (x1, max(18,y1-7)), cv2.FONT_HERSHEY_SIMPLEX, .6, (40,180,255), 2)
+        # Keep suspicion labels legible after the panel scales a 1280px frame.
+        amber = (31, 124, 188)
+        ink = (20, 26, 23)
+        scale = max(.6, w / 1066)
+        thickness = max(1, round(w / 640))
+        padding = max(4, round(w / 160))
+        label = f"Duman suphesi %{round(detection.confidence * 100)}"
+        (tw, th), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, scale, thickness)
+        lx = max(0, min(x1, w - tw - 2 * padding))
+        ly = max(th + padding, y1 - padding)
+        ly = min(ly, h - baseline - padding)
+        cv2.rectangle(image, (x1, y1), (x2, y2), amber, thickness)
+        cv2.rectangle(image, (lx, ly - th - padding), (min(w - 1, lx + tw + 2 * padding), ly + baseline + padding), amber, -1)
+        # OpenCV's built-in font has no Turkish glyphs; the panel uses full Turkish.
+        cv2.putText(image, label, (lx + padding, ly), cv2.FONT_HERSHEY_SIMPLEX, scale, ink, thickness, cv2.LINE_AA)
     return image

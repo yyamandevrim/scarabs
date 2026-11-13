@@ -3,7 +3,8 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 import station.detector as module
-from station.detector import SmokeDetector
+from station.detector import SmokeDetector, annotate
+from station.alarm import Detection
 
 class Session:
     names="{0: 'smoke'}"
@@ -49,3 +50,15 @@ def test_confidence_filter_no_detections(tmp_path,monkeypatch):
     monkeypatch.setattr(module.ort,'InferenceSession',Session)
     detector=SmokeDetector(model,confidence=.99)
     assert detector.predict(np.zeros((360,640,3),np.uint8))[0]==[]
+
+
+@pytest.mark.parametrize('width,height', [(1280,720),(640,360)])
+def test_annotation_label_is_legible_and_inside_frame(width,height):
+    frame=np.zeros((height,width,3),np.uint8)
+    # A box at the top/right edge must still get a filled, visible label.
+    image=annotate(frame,[Detection((.8,0,1,.5),.88)])
+    assert image.shape==frame.shape and not frame.any()
+    # Background extends left of the box to keep the whole suspicion label on screen.
+    assert image[:round(height*.08),:round(width*.8)].any()
+    # Filled background, rather than tiny bare lettering over footage.
+    assert np.count_nonzero(image[:round(height*.08),:,2]) > width*height*.015
