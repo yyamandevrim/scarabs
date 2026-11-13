@@ -1,10 +1,13 @@
 {
-  "name": "[Project name]",
+  "name": "ACORN",
+  "expansion": "Aerial Canopy Observation and Reporting Node",
   "tagline": {
-    "en": "A field station. A wider perspective.",
-    "tr": "Bir saha istasyonu. Daha geniş bir bakış."
+    "en": "Tethered-balloon cameras above the forest canopy, with every smoke suspicion reviewed by an operator.",
+    "tr": "Orman örtüsünün üzerinde bağlı balon kameraları; her duman şüphesini bir operatör değerlendirir."
   },
   "logo": "/static/mark.svg",
   "placeholder": true,
-  "team": "Scarabs"
+  "team": "Scarabs",
+  "event": "Junction 2026, Helsinki",
+  "challenge": "Green European Renaissance"
 }

@@ -22,7 +22,7 @@
    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
    let node;
    while(node=walker.nextNode()){
-     if(node.parentElement.closest('script,style,[data-brand-name],[data-brand-tagline],[data-brand-team],.language,[data-localized]'))continue;
+     if(node.parentElement.closest('script,style,[data-brand-name],[data-brand-tagline],[data-brand-team],[data-brand-expansion],[data-brand-event],[data-brand-challenge],.language,[data-localized]'))continue;
      const old=originals.get(node);const canonical=old&&old.last===node.nodeValue?old.source:translate(node.nodeValue,'en');
      const value=lang==='en'?canonical:translate(canonical,'tr');
      if(node.nodeValue!==value)node.nodeValue=value;
@@ -38,9 +38,11 @@
      document.querySelectorAll('[data-brand-name]').forEach(e=>e.textContent=brand.name);
      document.querySelectorAll('[data-brand-tagline]').forEach(e=>e.textContent=brand.tagline[lang]);
      document.querySelectorAll('[data-brand-team]').forEach(e=>e.textContent=brand.team);
+     for(const key of ['expansion','event','challenge'])document.querySelectorAll('[data-brand-'+key+']').forEach(e=>e.textContent=brand[key]||'');
      document.querySelectorAll('[data-brand-logo]').forEach(e=>{if(e.getAttribute('src')!==brand.logo)e.src=brand.logo});
      document.querySelectorAll('[data-brand-icon]').forEach(e=>{if(e.getAttribute('href')!==brand.logo)e.href=brand.logo});
-     document.title=brand.name+' · '+brand.tagline[lang];
+     const pageTitle=document.body.dataset.pageTitle||'';
+     document.title=brand.name+(pageTitle?' · '+(lang==='en'?pageTitle:translate(pageTitle,'tr')):'');
    }
    observer?.observe(document.body,{subtree:true,childList:true,characterData:true});
  }

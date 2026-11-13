@@ -47,8 +47,9 @@ def branded_page(filename):
     page=re.sub(r'(/static/[^"?]+\.(?:js|css|png))"',lambda match:match.group(1)+'?v='+revision+'"',page)
     page=page.replace('data-brand-icon href="data:,"','data-brand-icon href="'+escape(identity['logo'],quote=True)+'"')
     page=page.replace('data-brand-logo', 'data-brand-logo src="'+escape(identity['logo'],quote=True)+'"')
-    for field,key in [('name','name'),('team','team')]:
-        page=page.replace('<span data-brand-'+field+'></span>', '<span data-brand-'+field+'>'+escape(identity[key])+'</span>')
+    page=re.sub(r'<title>([^<]*)</title>',lambda match:'<title>'+escape(identity['name'])+' · '+match.group(1)+'</title>',page,count=1)
+    for field,key in [('name','name'),('team','team'),('expansion','expansion'),('event','event'),('challenge','challenge')]:
+        page=page.replace('<span data-brand-'+field+'></span>', '<span data-brand-'+field+'>'+escape(identity.get(key,''))+'</span>')
     page=page.replace('<span data-brand-tagline></span>','<span data-brand-tagline>'+escape(identity['tagline']['en'])+'</span>')
     return HTMLResponse(page)
 
