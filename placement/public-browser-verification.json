@@ -1,0 +1,126 @@
+{
+  "date": "2026-11-13",
+  "origin": "http://localhost:8788",
+  "productionMode": true,
+  "rendering": [
+    {
+      "checks": [
+        {
+          "brand": true,
+          "lang": "en",
+          "overflow": false,
+          "rendered": true
+        },
+        {
+          "brand": true,
+          "lang": "tr",
+          "overflow": false,
+          "rendered": true
+        }
+      ],
+      "externalResources": 0,
+      "page": "/map",
+      "width": 1280
+    },
+    {
+      "checks": [
+        {
+          "brand": true,
+          "lang": "en",
+          "overflow": false,
+          "rendered": true
+        },
+        {
+          "brand": true,
+          "lang": "tr",
+          "overflow": false,
+          "rendered": true
+        }
+      ],
+      "externalResources": 0,
+      "page": "/map",
+      "width": 390
+    },
+    {
+      "checks": [
+        {
+          "brand": true,
+          "lang": "en",
+          "overflow": false,
+          "rendered": true
+        },
+        {
+          "brand": true,
+          "lang": "tr",
+          "overflow": false,
+          "rendered": true
+        }
+      ],
+      "externalResources": 0,
+      "page": "/",
+      "width": 390
+    },
+    {
+      "checks": [
+        {
+          "brand": true,
+          "lang": "en",
+          "overflow": false,
+          "rendered": true
+        },
+        {
+          "brand": true,
+          "lang": "tr",
+          "overflow": false,
+          "rendered": true
+        }
+      ],
+      "externalResources": 0,
+      "page": "/",
+      "width": 1280
+    }
+  ],
+  "interactionChecks": [
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "actions": [
+        "landing to map",
+        "select left+right pair",
+        "verify zero overlap",
+        "select inland",
+        "click map land point"
+      ],
+      "newCoordinates": [
+        60.29961,
+        24.56955
+      ]
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "actions": [
+        "landing to map",
+        "select left+right pair",
+        "verify zero overlap",
+        "select inland",
+        "click map land point"
+      ],
+      "newCoordinates": [
+        60.30519,
+        24.56955
+      ]
+    }
+  ],
+  "consoleErrorsObserved": 0,
+  "externalResourcesObserved": 0,
+  "notes": [
+    "Recorded browser measurements; no station-feed proxy or screenshots added.",
+    "No horizontal overflow at either viewport.",
+    "Production local Mac only; Modal was not deployed."
+  ]
+}
