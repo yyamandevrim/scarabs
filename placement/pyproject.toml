@@ -1,0 +1,12 @@
+[project]
+name = "forest-placement"
+version = "0.1.0"
+description = "Offline forest observation station placement simulator"
+requires-python = ">=3.11,<3.14"
+dependencies = ["numpy>=2.1", "rasterio>=1.4", "pyproj>=3.7", "shapely>=2.1", "numba>=0.61", "fastapi>=0.115", "uvicorn>=0.34", "pillow>=11", "httpx>=0.28"]
+[dependency-groups]
+dev = ["pytest>=8.3"]
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = ["integration: requires prepared real raster data"]
