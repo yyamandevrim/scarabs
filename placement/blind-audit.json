@@ -3,7 +3,7 @@
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "coarse",
     "height": 30,
-    "seconds": 0.2915,
+    "seconds": 0.1255,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 382.52,
@@ -220,13 +220,135 @@
           "water_share_pct": 45.016
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 739.32,
+        "blind_forest_ha": 7365.48,
+        "overlap_forest_ha": 81.8,
+        "water_view_ha": 8050.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 9918.72,
+        "outside_fov_forest_ha": 5020.12,
+        "occluded_forest_ha": 2345.36,
+        "water_share_pct": 81.164
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3062.36,
+        "blind_forest_ha": 5042.44,
+        "overlap_forest_ha": 202.52,
+        "water_view_ha": 17967.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27172.8,
+        "outside_fov_forest_ha": 5023.92,
+        "occluded_forest_ha": 18.52,
+        "water_share_pct": 66.122
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 8104.8,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 580.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 584.64,
+        "outside_fov_forest_ha": 5020.12,
+        "occluded_forest_ha": 3084.68,
+        "water_share_pct": 99.295
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 2074.48,
+        "blind_forest_ha": 6030.32,
+        "overlap_forest_ha": 202.48,
+        "water_view_ha": 7184.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 11583.36,
+        "outside_fov_forest_ha": 5023.92,
+        "occluded_forest_ha": 1006.4,
+        "water_share_pct": 62.026
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 179.08,
+        "blind_forest_ha": 7925.72,
+        "overlap_forest_ha": 0.2,
+        "water_view_ha": 4024.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 4370.4,
+        "outside_fov_forest_ha": 7211.64,
+        "occluded_forest_ha": 714.08,
+        "water_share_pct": 92.09
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 248.8,
+        "blind_forest_ha": 7856.0,
+        "overlap_forest_ha": 0.36,
+        "water_view_ha": 5098.04,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 5541.12,
+        "outside_fov_forest_ha": 7357.24,
+        "occluded_forest_ha": 498.76,
+        "water_share_pct": 92.004
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 455.76,
+        "blind_forest_ha": 7649.04,
+        "overlap_forest_ha": 5.68,
+        "water_view_ha": 6026.36,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 6763.68,
+        "outside_fov_forest_ha": 7346.88,
+        "occluded_forest_ha": 302.16,
+        "water_share_pct": 89.099
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 791.88,
+        "blind_forest_ha": 7312.92,
+        "overlap_forest_ha": 3.96,
+        "water_view_ha": 6606.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 7845.12,
+        "outside_fov_forest_ha": 7078.32,
+        "occluded_forest_ha": 234.6,
+        "water_share_pct": 84.211
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1122.64,
+        "blind_forest_ha": 6982.16,
+        "overlap_forest_ha": 22.88,
+        "water_view_ha": 7029.12,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 8870.4,
+        "outside_fov_forest_ha": 6794.0,
+        "occluded_forest_ha": 188.16,
+        "water_share_pct": 79.242
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "coarse",
     "height": 100,
-    "seconds": 0.0563,
+    "seconds": 0.0559,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 577.2,
@@ -443,13 +565,135 @@
           "water_share_pct": 54.894
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 1680.0,
+        "blind_forest_ha": 6424.8,
+        "overlap_forest_ha": 133.36,
+        "water_view_ha": 14417.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 19059.84,
+        "outside_fov_forest_ha": 5017.56,
+        "occluded_forest_ha": 1407.24,
+        "water_share_pct": 75.645
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3084.68,
+        "blind_forest_ha": 5020.12,
+        "overlap_forest_ha": 204.16,
+        "water_view_ha": 18159.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27544.32,
+        "outside_fov_forest_ha": 5020.12,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.926
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.12,
+        "blind_forest_ha": 8104.68,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 8904.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 9116.64,
+        "outside_fov_forest_ha": 5017.56,
+        "occluded_forest_ha": 3087.12,
+        "water_share_pct": 97.672
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3084.4,
+        "blind_forest_ha": 5020.4,
+        "overlap_forest_ha": 204.16,
+        "water_view_ha": 18050.28,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27355.68,
+        "outside_fov_forest_ha": 5020.12,
+        "occluded_forest_ha": 0.28,
+        "water_share_pct": 65.984
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 896.08,
+        "blind_forest_ha": 7208.72,
+        "overlap_forest_ha": 14.76,
+        "water_view_ha": 14084.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18756.0,
+        "outside_fov_forest_ha": 7208.72,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.094
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 750.96,
+        "blind_forest_ha": 7353.84,
+        "overlap_forest_ha": 1.04,
+        "water_view_ha": 15004.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18754.56,
+        "outside_fov_forest_ha": 7353.84,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 80.006
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 760.68,
+        "blind_forest_ha": 7344.12,
+        "overlap_forest_ha": 5.92,
+        "water_view_ha": 15682.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18753.12,
+        "outside_fov_forest_ha": 7344.12,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.624
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1030.48,
+        "blind_forest_ha": 7074.32,
+        "overlap_forest_ha": 8.36,
+        "water_view_ha": 15931.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18750.24,
+        "outside_fov_forest_ha": 7074.32,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 84.965
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1313.2,
+        "blind_forest_ha": 6791.6,
+        "overlap_forest_ha": 23.52,
+        "water_view_ha": 16012.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18738.72,
+        "outside_fov_forest_ha": 6791.6,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.454
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "coarse",
     "height": 500,
-    "seconds": 0.0564,
+    "seconds": 0.0552,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 764.52,
@@ -665,6 +909,128 @@
           "occluded_forest_ha": 0.0,
           "water_share_pct": 55.048
         }
+      }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 2928.12,
+        "blind_forest_ha": 5176.68,
+        "overlap_forest_ha": 225.52,
+        "water_view_ha": 17943.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 26720.64,
+        "outside_fov_forest_ha": 5020.16,
+        "occluded_forest_ha": 156.52,
+        "water_share_pct": 67.153
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3087.44,
+        "blind_forest_ha": 5017.36,
+        "overlap_forest_ha": 222.0,
+        "water_view_ha": 18159.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27555.84,
+        "outside_fov_forest_ha": 5017.36,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.902
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.12,
+        "blind_forest_ha": 8104.68,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 14714.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 15962.4,
+        "outside_fov_forest_ha": 5020.16,
+        "occluded_forest_ha": 3084.52,
+        "water_share_pct": 92.184
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3087.44,
+        "blind_forest_ha": 5017.36,
+        "overlap_forest_ha": 222.0,
+        "water_view_ha": 18159.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27555.84,
+        "outside_fov_forest_ha": 5017.36,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.902
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 899.72,
+        "blind_forest_ha": 7205.08,
+        "overlap_forest_ha": 18.76,
+        "water_view_ha": 14122.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18792.0,
+        "outside_fov_forest_ha": 7205.08,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.153
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 760.6,
+        "blind_forest_ha": 7344.2,
+        "overlap_forest_ha": 0.92,
+        "water_view_ha": 15034.12,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18794.88,
+        "outside_fov_forest_ha": 7344.2,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.991
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 770.92,
+        "blind_forest_ha": 7333.88,
+        "overlap_forest_ha": 5.84,
+        "water_view_ha": 15715.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18792.0,
+        "outside_fov_forest_ha": 7333.88,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.629
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1039.28,
+        "blind_forest_ha": 7065.52,
+        "overlap_forest_ha": 8.52,
+        "water_view_ha": 15974.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18796.32,
+        "outside_fov_forest_ha": 7065.52,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 84.988
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1329.44,
+        "blind_forest_ha": 6775.36,
+        "overlap_forest_ha": 25.16,
+        "water_view_ha": 16042.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18806.4,
+        "outside_fov_forest_ha": 6775.36,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.304
       }
     ]
   },
@@ -889,13 +1255,135 @@
           "water_share_pct": 55.095
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 2979.36,
+        "blind_forest_ha": 5125.44,
+        "overlap_forest_ha": 228.92,
+        "water_view_ha": 18008.96,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27007.2,
+        "outside_fov_forest_ha": 5023.32,
+        "occluded_forest_ha": 102.12,
+        "water_share_pct": 66.682
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3083.08,
+        "blind_forest_ha": 5021.72,
+        "overlap_forest_ha": 228.4,
+        "water_view_ha": 18147.6,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27534.24,
+        "outside_fov_forest_ha": 5021.72,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.909
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.24,
+        "blind_forest_ha": 8104.56,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 15079.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 16440.48,
+        "outside_fov_forest_ha": 5023.32,
+        "occluded_forest_ha": 3081.24,
+        "water_share_pct": 91.721
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3083.08,
+        "blind_forest_ha": 5021.72,
+        "overlap_forest_ha": 228.4,
+        "water_view_ha": 18147.6,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27534.24,
+        "outside_fov_forest_ha": 5021.72,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.909
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 898.24,
+        "blind_forest_ha": 7206.56,
+        "overlap_forest_ha": 19.88,
+        "water_view_ha": 14118.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18787.68,
+        "outside_fov_forest_ha": 7206.56,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.15
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 757.8,
+        "blind_forest_ha": 7347.0,
+        "overlap_forest_ha": 0.92,
+        "water_view_ha": 15025.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18787.68,
+        "outside_fov_forest_ha": 7347.0,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.977
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 769.56,
+        "blind_forest_ha": 7335.24,
+        "overlap_forest_ha": 5.88,
+        "water_view_ha": 15713.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18783.36,
+        "outside_fov_forest_ha": 7335.24,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.656
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1037.88,
+        "blind_forest_ha": 7066.92,
+        "overlap_forest_ha": 8.52,
+        "water_view_ha": 15966.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18783.36,
+        "outside_fov_forest_ha": 7066.92,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.004
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1324.48,
+        "blind_forest_ha": 6780.32,
+        "overlap_forest_ha": 26.6,
+        "water_view_ha": 16041.28,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18803.52,
+        "outside_fov_forest_ha": 6780.32,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.31
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "coarse",
     "height": 700,
-    "seconds": 0.0554,
+    "seconds": 0.0586,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 770.44,
@@ -1112,13 +1600,135 @@
           "water_share_pct": 55.151
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 3013.0,
+        "blind_forest_ha": 5091.8,
+        "overlap_forest_ha": 235.56,
+        "water_view_ha": 18040.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27151.2,
+        "outside_fov_forest_ha": 5028.32,
+        "occluded_forest_ha": 63.48,
+        "water_share_pct": 66.445
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3079.72,
+        "blind_forest_ha": 5025.08,
+        "overlap_forest_ha": 232.92,
+        "water_view_ha": 18131.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27504.0,
+        "outside_fov_forest_ha": 5025.08,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.925
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.28,
+        "blind_forest_ha": 8104.52,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 15289.6,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 16771.68,
+        "outside_fov_forest_ha": 5028.32,
+        "occluded_forest_ha": 3076.2,
+        "water_share_pct": 91.163
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3079.72,
+        "blind_forest_ha": 5025.08,
+        "overlap_forest_ha": 232.92,
+        "water_view_ha": 18131.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 27504.0,
+        "outside_fov_forest_ha": 5025.08,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.925
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 895.6,
+        "blind_forest_ha": 7209.2,
+        "overlap_forest_ha": 20.16,
+        "water_view_ha": 14108.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18773.28,
+        "outside_fov_forest_ha": 7209.2,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.15
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 756.28,
+        "blind_forest_ha": 7348.52,
+        "overlap_forest_ha": 1.04,
+        "water_view_ha": 15012.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18770.4,
+        "outside_fov_forest_ha": 7348.52,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.977
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 770.32,
+        "blind_forest_ha": 7334.48,
+        "overlap_forest_ha": 5.88,
+        "water_view_ha": 15704.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18771.84,
+        "outside_fov_forest_ha": 7334.48,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.658
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1041.8,
+        "blind_forest_ha": 7063.0,
+        "overlap_forest_ha": 8.52,
+        "water_view_ha": 15956.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18774.72,
+        "outside_fov_forest_ha": 7063.0,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 84.991
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1323.84,
+        "blind_forest_ha": 6780.96,
+        "overlap_forest_ha": 26.64,
+        "water_view_ha": 16029.4,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8104.8,
+        "viewed_area_ha": 18781.92,
+        "outside_fov_forest_ha": 6780.96,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.345
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "coarse",
     "height": 30,
-    "seconds": 0.0569,
+    "seconds": 0.0566,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 249.64,
@@ -1335,13 +1945,135 @@
           "water_share_pct": 5.338
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 286.76,
+        "blind_forest_ha": 26647.44,
+        "overlap_forest_ha": 4.76,
+        "water_view_ha": 43.28,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 370.08,
+        "outside_fov_forest_ha": 9652.72,
+        "occluded_forest_ha": 16994.72,
+        "water_share_pct": 11.695
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 9814.56,
+        "blind_forest_ha": 17119.64,
+        "overlap_forest_ha": 458.68,
+        "water_view_ha": 709.36,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 12083.04,
+        "outside_fov_forest_ha": 9660.4,
+        "occluded_forest_ha": 7459.24,
+        "water_share_pct": 5.871
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 26934.2,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 10.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 10.08,
+        "outside_fov_forest_ha": 9652.72,
+        "occluded_forest_ha": 17281.48,
+        "water_share_pct": 100.0
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 1847.88,
+        "blind_forest_ha": 25086.32,
+        "overlap_forest_ha": 24.48,
+        "water_view_ha": 110.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 2155.68,
+        "outside_fov_forest_ha": 9660.4,
+        "occluded_forest_ha": 15425.92,
+        "water_share_pct": 5.144
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 2022.24,
+        "blind_forest_ha": 24911.96,
+        "overlap_forest_ha": 545.0,
+        "water_view_ha": 124.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 2396.16,
+        "outside_fov_forest_ha": 14786.68,
+        "occluded_forest_ha": 10125.28,
+        "water_share_pct": 5.197
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 1876.64,
+        "blind_forest_ha": 25057.56,
+        "overlap_forest_ha": 148.36,
+        "water_view_ha": 113.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 2219.04,
+        "outside_fov_forest_ha": 14759.4,
+        "occluded_forest_ha": 10298.16,
+        "water_share_pct": 5.118
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 1695.16,
+        "blind_forest_ha": 25239.04,
+        "overlap_forest_ha": 3.6,
+        "water_view_ha": 110.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 1987.2,
+        "outside_fov_forest_ha": 14488.68,
+        "occluded_forest_ha": 10750.36,
+        "water_share_pct": 5.539
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 1621.44,
+        "blind_forest_ha": 25312.76,
+        "overlap_forest_ha": 2.6,
+        "water_view_ha": 98.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 1895.04,
+        "outside_fov_forest_ha": 14438.92,
+        "occluded_forest_ha": 10873.84,
+        "water_share_pct": 5.197
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 1542.24,
+        "blind_forest_ha": 25391.96,
+        "overlap_forest_ha": 6.0,
+        "water_view_ha": 90.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 1798.56,
+        "outside_fov_forest_ha": 14492.52,
+        "occluded_forest_ha": 10899.44,
+        "water_share_pct": 5.044
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "coarse",
     "height": 100,
-    "seconds": 0.0562,
+    "seconds": 0.0555,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 4320.16,
@@ -1558,13 +2290,135 @@
           "water_share_pct": 6.496
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 6018.12,
+        "blind_forest_ha": 20916.08,
+        "overlap_forest_ha": 597.88,
+        "water_view_ha": 196.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 7338.24,
+        "outside_fov_forest_ha": 9642.88,
+        "occluded_forest_ha": 11273.2,
+        "water_share_pct": 2.68
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17281.24,
+        "blind_forest_ha": 9652.96,
+        "overlap_forest_ha": 1640.48,
+        "water_view_ha": 2238.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27496.8,
+        "outside_fov_forest_ha": 9652.84,
+        "occluded_forest_ha": 0.12,
+        "water_share_pct": 8.139
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.08,
+        "blind_forest_ha": 26934.12,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 27.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 28.8,
+        "outside_fov_forest_ha": 9642.88,
+        "occluded_forest_ha": 17291.24,
+        "water_share_pct": 94.444
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17236.92,
+        "blind_forest_ha": 9697.28,
+        "overlap_forest_ha": 1632.0,
+        "water_view_ha": 1561.04,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 25778.88,
+        "outside_fov_forest_ha": 9652.84,
+        "occluded_forest_ha": 44.44,
+        "water_share_pct": 6.055
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12134.48,
+        "blind_forest_ha": 14799.72,
+        "overlap_forest_ha": 685.32,
+        "water_view_ha": 1076.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 17529.12,
+        "outside_fov_forest_ha": 14769.84,
+        "occluded_forest_ha": 29.88,
+        "water_share_pct": 6.142
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12151.52,
+        "blind_forest_ha": 14782.68,
+        "overlap_forest_ha": 925.16,
+        "water_view_ha": 1038.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 17422.56,
+        "outside_fov_forest_ha": 14746.52,
+        "occluded_forest_ha": 36.16,
+        "water_share_pct": 5.959
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12408.32,
+        "blind_forest_ha": 14525.88,
+        "overlap_forest_ha": 757.84,
+        "water_view_ha": 874.6,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 17372.16,
+        "outside_fov_forest_ha": 14481.68,
+        "occluded_forest_ha": 44.2,
+        "water_share_pct": 5.034
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12464.12,
+        "blind_forest_ha": 14470.08,
+        "overlap_forest_ha": 723.72,
+        "water_view_ha": 905.4,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 17373.6,
+        "outside_fov_forest_ha": 14425.88,
+        "occluded_forest_ha": 44.2,
+        "water_share_pct": 5.211
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12415.64,
+        "blind_forest_ha": 14518.56,
+        "overlap_forest_ha": 729.16,
+        "water_view_ha": 960.6,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 17366.4,
+        "outside_fov_forest_ha": 14475.36,
+        "occluded_forest_ha": 43.2,
+        "water_share_pct": 5.531
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "coarse",
     "height": 500,
-    "seconds": 0.0555,
+    "seconds": 0.0546,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 10836.68,
@@ -1781,13 +2635,135 @@
           "water_share_pct": 9.405
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 15138.48,
+        "blind_forest_ha": 11795.72,
+        "overlap_forest_ha": 1507.0,
+        "water_view_ha": 1613.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 22678.56,
+        "outside_fov_forest_ha": 9621.88,
+        "occluded_forest_ha": 2173.84,
+        "water_share_pct": 7.115
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17320.6,
+        "blind_forest_ha": 9613.6,
+        "overlap_forest_ha": 1774.04,
+        "water_view_ha": 2240.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27568.8,
+        "outside_fov_forest_ha": 9613.6,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.126
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.04,
+        "blind_forest_ha": 26934.16,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 302.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 540.0,
+        "outside_fov_forest_ha": 9621.88,
+        "occluded_forest_ha": 17312.28,
+        "water_share_pct": 55.956
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17320.6,
+        "blind_forest_ha": 9613.6,
+        "overlap_forest_ha": 1774.04,
+        "water_view_ha": 2232.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27552.96,
+        "outside_fov_forest_ha": 9613.6,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.104
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12206.68,
+        "blind_forest_ha": 14727.52,
+        "overlap_forest_ha": 748.0,
+        "water_view_ha": 1595.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18771.84,
+        "outside_fov_forest_ha": 14727.52,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.498
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12227.84,
+        "blind_forest_ha": 14706.36,
+        "overlap_forest_ha": 1007.32,
+        "water_view_ha": 1546.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18776.16,
+        "outside_fov_forest_ha": 14706.36,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.237
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12519.76,
+        "blind_forest_ha": 14414.44,
+        "overlap_forest_ha": 826.64,
+        "water_view_ha": 1361.36,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18771.84,
+        "outside_fov_forest_ha": 14414.44,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.252
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12558.52,
+        "blind_forest_ha": 14375.68,
+        "overlap_forest_ha": 786.12,
+        "water_view_ha": 1381.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18776.16,
+        "outside_fov_forest_ha": 14375.68,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.355
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12509.56,
+        "blind_forest_ha": 14424.64,
+        "overlap_forest_ha": 825.56,
+        "water_view_ha": 1450.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18776.16,
+        "outside_fov_forest_ha": 14424.64,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.723
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "coarse",
     "height": 600,
-    "seconds": 0.0565,
+    "seconds": 0.0544,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 11308.12,
@@ -2004,13 +2980,135 @@
           "water_share_pct": 9.373
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 15739.68,
+        "blind_forest_ha": 11194.52,
+        "overlap_forest_ha": 1605.4,
+        "water_view_ha": 1790.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 23983.2,
+        "outside_fov_forest_ha": 9638.4,
+        "occluded_forest_ha": 1556.12,
+        "water_share_pct": 7.466
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17309.76,
+        "blind_forest_ha": 9624.44,
+        "overlap_forest_ha": 1810.2,
+        "water_view_ha": 2233.96,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27554.4,
+        "outside_fov_forest_ha": 9624.44,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.107
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.08,
+        "blind_forest_ha": 26934.12,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 413.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 761.76,
+        "outside_fov_forest_ha": 9638.4,
+        "occluded_forest_ha": 17295.72,
+        "water_share_pct": 54.227
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17309.76,
+        "blind_forest_ha": 9624.44,
+        "overlap_forest_ha": 1810.2,
+        "water_view_ha": 2228.04,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27545.76,
+        "outside_fov_forest_ha": 9624.44,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.089
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12208.28,
+        "blind_forest_ha": 14725.92,
+        "overlap_forest_ha": 760.44,
+        "water_view_ha": 1590.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18773.28,
+        "outside_fov_forest_ha": 14725.92,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.473
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12221.68,
+        "blind_forest_ha": 14712.52,
+        "overlap_forest_ha": 1027.92,
+        "water_view_ha": 1543.04,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18771.84,
+        "outside_fov_forest_ha": 14712.52,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.22
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12523.56,
+        "blind_forest_ha": 14410.64,
+        "overlap_forest_ha": 843.76,
+        "water_view_ha": 1357.28,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18781.92,
+        "outside_fov_forest_ha": 14410.64,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.227
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12556.28,
+        "blind_forest_ha": 14377.92,
+        "overlap_forest_ha": 803.44,
+        "water_view_ha": 1378.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18776.16,
+        "outside_fov_forest_ha": 14377.92,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.341
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12504.32,
+        "blind_forest_ha": 14429.88,
+        "overlap_forest_ha": 845.16,
+        "water_view_ha": 1447.4,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18773.28,
+        "outside_fov_forest_ha": 14429.88,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.71
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "coarse",
     "height": 700,
-    "seconds": 0.0556,
+    "seconds": 0.0547,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 11587.32,
@@ -2227,13 +3325,135 @@
           "water_share_pct": 9.41
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 16107.12,
+        "blind_forest_ha": 10827.08,
+        "overlap_forest_ha": 1677.64,
+        "water_view_ha": 1928.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 24854.4,
+        "outside_fov_forest_ha": 9672.68,
+        "occluded_forest_ha": 1154.4,
+        "water_share_pct": 7.76
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17278.56,
+        "blind_forest_ha": 9655.64,
+        "overlap_forest_ha": 1839.92,
+        "water_view_ha": 2238.04,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27528.48,
+        "outside_fov_forest_ha": 9655.64,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.13
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.08,
+        "blind_forest_ha": 26934.12,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 515.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 969.12,
+        "outside_fov_forest_ha": 9672.68,
+        "occluded_forest_ha": 17261.44,
+        "water_share_pct": 53.219
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17278.56,
+        "blind_forest_ha": 9655.64,
+        "overlap_forest_ha": 1839.92,
+        "water_view_ha": 2235.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 27524.16,
+        "outside_fov_forest_ha": 9655.64,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.121
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12194.08,
+        "blind_forest_ha": 14740.12,
+        "overlap_forest_ha": 775.56,
+        "water_view_ha": 1589.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18763.2,
+        "outside_fov_forest_ha": 14740.12,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.472
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12217.56,
+        "blind_forest_ha": 14716.64,
+        "overlap_forest_ha": 1042.8,
+        "water_view_ha": 1543.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18774.72,
+        "outside_fov_forest_ha": 14716.64,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.222
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12518.04,
+        "blind_forest_ha": 14416.16,
+        "overlap_forest_ha": 860.64,
+        "water_view_ha": 1362.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18786.24,
+        "outside_fov_forest_ha": 14416.16,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.252
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12545.32,
+        "blind_forest_ha": 14388.88,
+        "overlap_forest_ha": 819.92,
+        "water_view_ha": 1379.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18771.84,
+        "outside_fov_forest_ha": 14388.88,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.35
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12502.64,
+        "blind_forest_ha": 14431.56,
+        "overlap_forest_ha": 851.48,
+        "water_view_ha": 1445.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26934.2,
+        "viewed_area_ha": 18771.84,
+        "outside_fov_forest_ha": 14431.56,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 7.701
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "detailed",
     "height": 30,
-    "seconds": 0.4574,
+    "seconds": 0.4601,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 263.52,
@@ -2450,13 +3670,135 @@
           "water_share_pct": 41.89
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 514.48,
+        "blind_forest_ha": 7591.12,
+        "overlap_forest_ha": 50.84,
+        "water_view_ha": 9327.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 10707.36,
+        "outside_fov_forest_ha": 5015.84,
+        "occluded_forest_ha": 2575.28,
+        "water_share_pct": 87.116
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3069.84,
+        "blind_forest_ha": 5035.76,
+        "overlap_forest_ha": 202.96,
+        "water_view_ha": 17977.68,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27134.24,
+        "outside_fov_forest_ha": 5019.08,
+        "occluded_forest_ha": 16.68,
+        "water_share_pct": 66.255
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 8105.6,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 1030.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 1052.8,
+        "outside_fov_forest_ha": 5015.84,
+        "occluded_forest_ha": 3089.76,
+        "water_share_pct": 97.876
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 2463.92,
+        "blind_forest_ha": 5641.68,
+        "overlap_forest_ha": 202.56,
+        "water_view_ha": 8580.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 14060.8,
+        "outside_fov_forest_ha": 5019.08,
+        "occluded_forest_ha": 622.6,
+        "water_share_pct": 61.026
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 528.36,
+        "blind_forest_ha": 7577.24,
+        "overlap_forest_ha": 0.24,
+        "water_view_ha": 5569.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 7480.48,
+        "outside_fov_forest_ha": 7212.28,
+        "occluded_forest_ha": 364.96,
+        "water_share_pct": 74.457
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 412.32,
+        "blind_forest_ha": 7693.28,
+        "overlap_forest_ha": 0.44,
+        "water_view_ha": 6547.36,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 7814.88,
+        "outside_fov_forest_ha": 7356.96,
+        "occluded_forest_ha": 336.32,
+        "water_share_pct": 83.781
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 491.36,
+        "blind_forest_ha": 7614.24,
+        "overlap_forest_ha": 5.56,
+        "water_view_ha": 7302.6,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 8263.84,
+        "outside_fov_forest_ha": 7346.68,
+        "occluded_forest_ha": 267.56,
+        "water_share_pct": 88.368
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 802.04,
+        "blind_forest_ha": 7303.56,
+        "overlap_forest_ha": 7.6,
+        "water_view_ha": 7855.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 9127.04,
+        "outside_fov_forest_ha": 7078.84,
+        "occluded_forest_ha": 224.72,
+        "water_share_pct": 86.073
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1147.88,
+        "blind_forest_ha": 6957.72,
+        "overlap_forest_ha": 22.0,
+        "water_view_ha": 8320.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 10220.0,
+        "outside_fov_forest_ha": 6793.92,
+        "occluded_forest_ha": 163.8,
+        "water_share_pct": 81.417
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "detailed",
     "height": 100,
-    "seconds": 0.3887,
+    "seconds": 0.4266,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 436.28,
@@ -2673,13 +4015,135 @@
           "water_share_pct": 55.214
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 1223.0,
+        "blind_forest_ha": 6882.6,
+        "overlap_forest_ha": 94.52,
+        "water_view_ha": 14747.28,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18286.56,
+        "outside_fov_forest_ha": 5012.52,
+        "occluded_forest_ha": 1870.08,
+        "water_share_pct": 80.645
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3089.76,
+        "blind_forest_ha": 5015.84,
+        "overlap_forest_ha": 206.44,
+        "water_view_ha": 18156.96,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27550.4,
+        "outside_fov_forest_ha": 5015.84,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.905
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 8105.6,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 10289.68,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 10625.6,
+        "outside_fov_forest_ha": 5012.52,
+        "occluded_forest_ha": 3093.08,
+        "water_share_pct": 96.839
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3089.32,
+        "blind_forest_ha": 5016.28,
+        "overlap_forest_ha": 206.44,
+        "water_view_ha": 18078.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27287.68,
+        "outside_fov_forest_ha": 5015.84,
+        "occluded_forest_ha": 0.44,
+        "water_share_pct": 66.251
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 896.52,
+        "blind_forest_ha": 7209.08,
+        "overlap_forest_ha": 14.72,
+        "water_view_ha": 14083.4,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18755.68,
+        "outside_fov_forest_ha": 7209.08,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.089
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 751.88,
+        "blind_forest_ha": 7353.72,
+        "overlap_forest_ha": 1.16,
+        "water_view_ha": 15001.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18755.04,
+        "outside_fov_forest_ha": 7353.72,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.986
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 762.4,
+        "blind_forest_ha": 7343.2,
+        "overlap_forest_ha": 6.16,
+        "water_view_ha": 15682.4,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18755.52,
+        "outside_fov_forest_ha": 7343.2,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.615
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1030.36,
+        "blind_forest_ha": 7075.24,
+        "overlap_forest_ha": 8.0,
+        "water_view_ha": 15931.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18751.2,
+        "outside_fov_forest_ha": 7075.24,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 84.964
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1315.4,
+        "blind_forest_ha": 6790.2,
+        "overlap_forest_ha": 22.76,
+        "water_view_ha": 16013.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18749.6,
+        "outside_fov_forest_ha": 6790.2,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.409
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "detailed",
     "height": 500,
-    "seconds": 0.3917,
+    "seconds": 0.3857,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 731.64,
@@ -2896,13 +4360,135 @@
           "water_share_pct": 55.009
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 2615.36,
+        "blind_forest_ha": 5490.24,
+        "overlap_forest_ha": 210.32,
+        "water_view_ha": 17893.84,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 25910.56,
+        "outside_fov_forest_ha": 5015.72,
+        "occluded_forest_ha": 474.52,
+        "water_share_pct": 69.06
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3092.4,
+        "blind_forest_ha": 5013.2,
+        "overlap_forest_ha": 224.16,
+        "water_view_ha": 18159.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27561.76,
+        "outside_fov_forest_ha": 5013.2,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.886
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 8105.6,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 16043.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18050.08,
+        "outside_fov_forest_ha": 5015.72,
+        "occluded_forest_ha": 3089.88,
+        "water_share_pct": 88.884
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3092.4,
+        "blind_forest_ha": 5013.2,
+        "overlap_forest_ha": 224.16,
+        "water_view_ha": 18159.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27561.76,
+        "outside_fov_forest_ha": 5013.2,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.886
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 902.32,
+        "blind_forest_ha": 7203.28,
+        "overlap_forest_ha": 19.04,
+        "water_view_ha": 14120.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18793.92,
+        "outside_fov_forest_ha": 7203.28,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.133
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 760.64,
+        "blind_forest_ha": 7344.96,
+        "overlap_forest_ha": 0.92,
+        "water_view_ha": 15031.68,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18793.44,
+        "outside_fov_forest_ha": 7344.96,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.984
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 771.84,
+        "blind_forest_ha": 7333.76,
+        "overlap_forest_ha": 6.08,
+        "water_view_ha": 15719.24,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18794.56,
+        "outside_fov_forest_ha": 7333.76,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.637
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1040.8,
+        "blind_forest_ha": 7064.8,
+        "overlap_forest_ha": 8.36,
+        "water_view_ha": 15971.84,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18794.4,
+        "outside_fov_forest_ha": 7064.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 84.982
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1327.8,
+        "blind_forest_ha": 6777.8,
+        "overlap_forest_ha": 26.16,
+        "water_view_ha": 16044.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18792.48,
+        "outside_fov_forest_ha": 6777.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.377
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "detailed",
     "height": 600,
-    "seconds": 0.3927,
+    "seconds": 0.389,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 748.44,
@@ -3119,13 +4705,135 @@
           "water_share_pct": 55.066
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 2730.0,
+        "blind_forest_ha": 5375.6,
+        "overlap_forest_ha": 221.2,
+        "water_view_ha": 17967.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 26334.08,
+        "outside_fov_forest_ha": 5017.6,
+        "occluded_forest_ha": 358.0,
+        "water_share_pct": 68.231
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3088.8,
+        "blind_forest_ha": 5016.8,
+        "overlap_forest_ha": 228.36,
+        "water_view_ha": 18143.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27536.96,
+        "outside_fov_forest_ha": 5016.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.888
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 8105.6,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 16377.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18620.0,
+        "outside_fov_forest_ha": 5017.6,
+        "occluded_forest_ha": 3088.0,
+        "water_share_pct": 87.957
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3088.8,
+        "blind_forest_ha": 5016.8,
+        "overlap_forest_ha": 228.36,
+        "water_view_ha": 18143.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27536.96,
+        "outside_fov_forest_ha": 5016.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.888
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 899.16,
+        "blind_forest_ha": 7206.44,
+        "overlap_forest_ha": 20.12,
+        "water_view_ha": 14115.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18784.8,
+        "outside_fov_forest_ha": 7206.44,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.141
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 757.24,
+        "blind_forest_ha": 7348.36,
+        "overlap_forest_ha": 1.0,
+        "water_view_ha": 15023.12,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18785.6,
+        "outside_fov_forest_ha": 7348.36,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.971
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 771.12,
+        "blind_forest_ha": 7334.48,
+        "overlap_forest_ha": 6.24,
+        "water_view_ha": 15711.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18783.36,
+        "outside_fov_forest_ha": 7334.48,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.643
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1039.16,
+        "blind_forest_ha": 7066.44,
+        "overlap_forest_ha": 8.64,
+        "water_view_ha": 15966.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18785.28,
+        "outside_fov_forest_ha": 7066.44,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 84.995
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1326.44,
+        "blind_forest_ha": 6779.16,
+        "overlap_forest_ha": 27.0,
+        "water_view_ha": 16034.96,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18784.96,
+        "outside_fov_forest_ha": 6779.16,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.361
+      }
     ]
   },
   {
     "preset": "Coast \u00b7 Haukilahti",
     "resolution": "detailed",
     "height": 700,
-    "seconds": 0.3949,
+    "seconds": 0.3851,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 757.32,
@@ -3342,13 +5050,135 @@
           "water_share_pct": 55.125
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 2807.92,
+        "blind_forest_ha": 5297.68,
+        "overlap_forest_ha": 229.52,
+        "water_view_ha": 18003.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 26620.96,
+        "outside_fov_forest_ha": 5022.92,
+        "occluded_forest_ha": 274.76,
+        "water_share_pct": 67.628
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 3086.8,
+        "blind_forest_ha": 5018.8,
+        "overlap_forest_ha": 232.28,
+        "water_view_ha": 18127.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27507.52,
+        "outside_fov_forest_ha": 5018.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.902
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 8105.6,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 16604.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 19051.84,
+        "outside_fov_forest_ha": 5022.92,
+        "occluded_forest_ha": 3082.68,
+        "water_share_pct": 87.152
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 3086.8,
+        "blind_forest_ha": 5018.8,
+        "overlap_forest_ha": 232.28,
+        "water_view_ha": 18127.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 27507.52,
+        "outside_fov_forest_ha": 5018.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 65.902
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 160.0,
+        "visible_forest_ha": 897.12,
+        "blind_forest_ha": 7208.48,
+        "overlap_forest_ha": 21.16,
+        "water_view_ha": 14104.96,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18769.44,
+        "outside_fov_forest_ha": 7208.48,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 75.149
+      },
+      {
+        "drift": -10,
+        "heading": 170.0,
+        "visible_forest_ha": 756.8,
+        "blind_forest_ha": 7348.8,
+        "overlap_forest_ha": 1.0,
+        "water_view_ha": 15009.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18768.64,
+        "outside_fov_forest_ha": 7348.8,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 79.971
+      },
+      {
+        "drift": 0,
+        "heading": 180.0,
+        "visible_forest_ha": 771.92,
+        "blind_forest_ha": 7333.68,
+        "overlap_forest_ha": 6.4,
+        "water_view_ha": 15702.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18770.4,
+        "outside_fov_forest_ha": 7333.68,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 83.656
+      },
+      {
+        "drift": 10,
+        "heading": 190.0,
+        "visible_forest_ha": 1040.16,
+        "blind_forest_ha": 7065.44,
+        "overlap_forest_ha": 9.08,
+        "water_view_ha": 15955.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18769.12,
+        "outside_fov_forest_ha": 7065.44,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.008
+      },
+      {
+        "drift": 20,
+        "heading": 200.0,
+        "visible_forest_ha": 1326.72,
+        "blind_forest_ha": 6778.88,
+        "overlap_forest_ha": 27.44,
+        "water_view_ha": 16022.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 8105.6,
+        "viewed_area_ha": 18767.84,
+        "outside_fov_forest_ha": 6778.88,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 85.369
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "detailed",
     "height": 30,
-    "seconds": 0.3998,
+    "seconds": 0.3955,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 173.76,
@@ -3565,13 +5395,135 @@
           "water_share_pct": 3.752
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 194.72,
+        "blind_forest_ha": 26749.12,
+        "overlap_forest_ha": 11.44,
+        "water_view_ha": 48.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 284.32,
+        "outside_fov_forest_ha": 9645.92,
+        "occluded_forest_ha": 17103.2,
+        "water_share_pct": 16.911
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 8223.04,
+        "blind_forest_ha": 18720.8,
+        "overlap_forest_ha": 645.52,
+        "water_view_ha": 417.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 9454.24,
+        "outside_fov_forest_ha": 9658.84,
+        "occluded_forest_ha": 9061.96,
+        "water_share_pct": 4.415
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 26943.84,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 29.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 33.28,
+        "outside_fov_forest_ha": 9645.92,
+        "occluded_forest_ha": 17297.92,
+        "water_share_pct": 89.784
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 1945.24,
+        "blind_forest_ha": 24998.6,
+        "overlap_forest_ha": 19.16,
+        "water_view_ha": 79.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 2196.32,
+        "outside_fov_forest_ha": 9658.84,
+        "occluded_forest_ha": 15339.76,
+        "water_share_pct": 3.606
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 1998.68,
+        "blind_forest_ha": 24945.16,
+        "overlap_forest_ha": 497.88,
+        "water_view_ha": 82.24,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 2278.72,
+        "outside_fov_forest_ha": 14793.68,
+        "occluded_forest_ha": 10151.48,
+        "water_share_pct": 3.609
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 1909.12,
+        "blind_forest_ha": 25034.72,
+        "overlap_forest_ha": 328.92,
+        "water_view_ha": 80.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 2172.16,
+        "outside_fov_forest_ha": 14768.64,
+        "occluded_forest_ha": 10266.08,
+        "water_share_pct": 3.687
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 1762.88,
+        "blind_forest_ha": 25180.96,
+        "overlap_forest_ha": 5.28,
+        "water_view_ha": 78.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 2000.8,
+        "outside_fov_forest_ha": 14491.68,
+        "occluded_forest_ha": 10689.28,
+        "water_share_pct": 3.944
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 1662.0,
+        "blind_forest_ha": 25281.84,
+        "overlap_forest_ha": 4.56,
+        "water_view_ha": 76.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 1889.92,
+        "outside_fov_forest_ha": 14451.6,
+        "occluded_forest_ha": 10830.24,
+        "water_share_pct": 4.038
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 1604.32,
+        "blind_forest_ha": 25339.52,
+        "overlap_forest_ha": 5.76,
+        "water_view_ha": 71.96,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 1817.76,
+        "outside_fov_forest_ha": 14502.96,
+        "occluded_forest_ha": 10836.56,
+        "water_share_pct": 3.959
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "detailed",
     "height": 100,
-    "seconds": 0.3988,
+    "seconds": 0.3906,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 2543.96,
@@ -3788,13 +5740,135 @@
           "water_share_pct": 5.661
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 3501.84,
+        "blind_forest_ha": 23442.0,
+        "overlap_forest_ha": 328.8,
+        "water_view_ha": 117.92,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 4315.52,
+        "outside_fov_forest_ha": 9635.4,
+        "occluded_forest_ha": 13806.6,
+        "water_share_pct": 2.732
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17297.52,
+        "blind_forest_ha": 9646.32,
+        "overlap_forest_ha": 1634.24,
+        "water_view_ha": 2236.48,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27427.68,
+        "outside_fov_forest_ha": 9645.52,
+        "occluded_forest_ha": 0.8,
+        "water_share_pct": 8.154
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 26943.84,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 40.44,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 47.2,
+        "outside_fov_forest_ha": 9635.4,
+        "occluded_forest_ha": 17308.44,
+        "water_share_pct": 85.678
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17173.92,
+        "blind_forest_ha": 9769.92,
+        "overlap_forest_ha": 1612.76,
+        "water_view_ha": 1346.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 24336.64,
+        "outside_fov_forest_ha": 9645.52,
+        "occluded_forest_ha": 124.4,
+        "water_share_pct": 5.532
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12081.92,
+        "blind_forest_ha": 14861.92,
+        "overlap_forest_ha": 687.04,
+        "water_view_ha": 930.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 16595.36,
+        "outside_fov_forest_ha": 14779.28,
+        "occluded_forest_ha": 82.64,
+        "water_share_pct": 5.605
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12084.28,
+        "blind_forest_ha": 14859.56,
+        "overlap_forest_ha": 927.32,
+        "water_view_ha": 890.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 16339.2,
+        "outside_fov_forest_ha": 14755.12,
+        "occluded_forest_ha": 104.44,
+        "water_share_pct": 5.451
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12347.16,
+        "blind_forest_ha": 14596.68,
+        "overlap_forest_ha": 748.64,
+        "water_view_ha": 732.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 16240.48,
+        "outside_fov_forest_ha": 14476.24,
+        "occluded_forest_ha": 120.44,
+        "water_share_pct": 4.507
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12386.08,
+        "blind_forest_ha": 14557.76,
+        "overlap_forest_ha": 727.48,
+        "water_view_ha": 773.84,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 16193.12,
+        "outside_fov_forest_ha": 14437.04,
+        "occluded_forest_ha": 120.72,
+        "water_share_pct": 4.779
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12340.52,
+        "blind_forest_ha": 14603.32,
+        "overlap_forest_ha": 742.96,
+        "water_view_ha": 820.12,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 16189.6,
+        "outside_fov_forest_ha": 14488.0,
+        "occluded_forest_ha": 115.32,
+        "water_share_pct": 5.066
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "detailed",
     "height": 500,
-    "seconds": 0.3989,
+    "seconds": 0.3901,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 8733.36,
@@ -4011,13 +6085,135 @@
           "water_share_pct": 9.387
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 12123.48,
+        "blind_forest_ha": 14820.36,
+        "overlap_forest_ha": 1155.92,
+        "water_view_ha": 1521.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18743.36,
+        "outside_fov_forest_ha": 9637.92,
+        "occluded_forest_ha": 5182.44,
+        "water_share_pct": 8.12
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17316.28,
+        "blind_forest_ha": 9627.56,
+        "overlap_forest_ha": 1777.8,
+        "water_view_ha": 2246.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27568.16,
+        "outside_fov_forest_ha": 9627.56,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.148
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.0,
+        "blind_forest_ha": 26943.84,
+        "overlap_forest_ha": 0.0,
+        "water_view_ha": 525.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 1121.76,
+        "outside_fov_forest_ha": 9637.92,
+        "occluded_forest_ha": 17305.92,
+        "water_share_pct": 46.801
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17315.64,
+        "blind_forest_ha": 9628.2,
+        "overlap_forest_ha": 1777.8,
+        "water_view_ha": 2229.76,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27520.8,
+        "outside_fov_forest_ha": 9627.56,
+        "occluded_forest_ha": 0.64,
+        "water_share_pct": 8.102
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12206.6,
+        "blind_forest_ha": 14737.24,
+        "overlap_forest_ha": 747.52,
+        "water_view_ha": 1586.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18741.6,
+        "outside_fov_forest_ha": 14736.6,
+        "occluded_forest_ha": 0.64,
+        "water_share_pct": 8.466
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12225.08,
+        "blind_forest_ha": 14718.76,
+        "overlap_forest_ha": 1011.96,
+        "water_view_ha": 1539.36,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18741.92,
+        "outside_fov_forest_ha": 14718.12,
+        "occluded_forest_ha": 0.64,
+        "water_share_pct": 8.213
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12514.04,
+        "blind_forest_ha": 14429.8,
+        "overlap_forest_ha": 827.24,
+        "water_view_ha": 1358.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18742.88,
+        "outside_fov_forest_ha": 14429.16,
+        "occluded_forest_ha": 0.64,
+        "water_share_pct": 7.245
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12553.08,
+        "blind_forest_ha": 14390.76,
+        "overlap_forest_ha": 795.48,
+        "water_view_ha": 1373.68,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18741.76,
+        "outside_fov_forest_ha": 14390.12,
+        "occluded_forest_ha": 0.64,
+        "water_share_pct": 7.33
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12505.72,
+        "blind_forest_ha": 14438.12,
+        "overlap_forest_ha": 814.4,
+        "water_view_ha": 1441.04,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18742.56,
+        "outside_fov_forest_ha": 14437.48,
+        "occluded_forest_ha": 0.64,
+        "water_share_pct": 7.689
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "detailed",
     "height": 600,
-    "seconds": 0.4001,
+    "seconds": 0.3963,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 9422.16,
@@ -4234,13 +6430,135 @@
           "water_share_pct": 9.401
         }
       }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 13074.8,
+        "blind_forest_ha": 13869.04,
+        "overlap_forest_ha": 1279.12,
+        "water_view_ha": 1694.72,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 20497.76,
+        "outside_fov_forest_ha": 9661.04,
+        "occluded_forest_ha": 4208.0,
+        "water_share_pct": 8.268
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17299.2,
+        "blind_forest_ha": 9644.64,
+        "overlap_forest_ha": 1810.6,
+        "water_view_ha": 2241.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27545.12,
+        "outside_fov_forest_ha": 9644.64,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.139
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.04,
+        "blind_forest_ha": 26943.8,
+        "overlap_forest_ha": 0.04,
+        "water_view_ha": 688.0,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 1527.2,
+        "outside_fov_forest_ha": 9661.04,
+        "occluded_forest_ha": 17282.76,
+        "water_share_pct": 45.05
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17298.84,
+        "blind_forest_ha": 9645.0,
+        "overlap_forest_ha": 1810.6,
+        "water_view_ha": 2233.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27523.2,
+        "outside_fov_forest_ha": 9644.64,
+        "occluded_forest_ha": 0.36,
+        "water_share_pct": 8.114
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12208.24,
+        "blind_forest_ha": 14735.6,
+        "overlap_forest_ha": 761.52,
+        "water_view_ha": 1588.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18760.8,
+        "outside_fov_forest_ha": 14735.24,
+        "occluded_forest_ha": 0.36,
+        "water_share_pct": 8.468
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12223.36,
+        "blind_forest_ha": 14720.48,
+        "overlap_forest_ha": 1031.28,
+        "water_view_ha": 1541.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18760.48,
+        "outside_fov_forest_ha": 14720.12,
+        "occluded_forest_ha": 0.36,
+        "water_share_pct": 8.217
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12511.8,
+        "blind_forest_ha": 14432.04,
+        "overlap_forest_ha": 845.32,
+        "water_view_ha": 1360.28,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18760.64,
+        "outside_fov_forest_ha": 14431.68,
+        "occluded_forest_ha": 0.36,
+        "water_share_pct": 7.251
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12551.56,
+        "blind_forest_ha": 14392.28,
+        "overlap_forest_ha": 806.0,
+        "water_view_ha": 1377.52,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18760.8,
+        "outside_fov_forest_ha": 14391.92,
+        "occluded_forest_ha": 0.36,
+        "water_share_pct": 7.343
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12504.6,
+        "blind_forest_ha": 14439.24,
+        "overlap_forest_ha": 826.64,
+        "water_view_ha": 1445.36,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18760.8,
+        "outside_fov_forest_ha": 14438.88,
+        "occluded_forest_ha": 0.36,
+        "water_share_pct": 7.704
+      }
     ]
   },
   {
     "preset": "Inland \u00b7 Nuuksio",
     "resolution": "detailed",
     "height": 700,
-    "seconds": 0.3997,
+    "seconds": 0.3934,
     "metrics": {
       "bare_ground": {
         "visible_forest_ha": 9964.64,
@@ -4456,6 +6774,128 @@
           "occluded_forest_ha": 0.0,
           "water_share_pct": 9.425
         }
+      }
+    ],
+    "reference": {
+      "bare_ground": {
+        "visible_forest_ha": 13825.96,
+        "blind_forest_ha": 13117.88,
+        "overlap_forest_ha": 1388.32,
+        "water_view_ha": 1829.68,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 21851.36,
+        "outside_fov_forest_ha": 9692.68,
+        "occluded_forest_ha": 3425.2,
+        "water_share_pct": 8.373
+      },
+      "bare_smoke": {
+        "visible_forest_ha": 17273.6,
+        "blind_forest_ha": 9670.24,
+        "overlap_forest_ha": 1836.76,
+        "water_view_ha": 2241.16,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27518.88,
+        "outside_fov_forest_ha": 9670.24,
+        "occluded_forest_ha": 0.0,
+        "water_share_pct": 8.144
+      },
+      "canopy_ground": {
+        "visible_forest_ha": 0.04,
+        "blind_forest_ha": 26943.8,
+        "overlap_forest_ha": 0.04,
+        "water_view_ha": 839.56,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 1925.28,
+        "outside_fov_forest_ha": 9692.68,
+        "occluded_forest_ha": 17251.12,
+        "water_share_pct": 43.607
+      },
+      "canopy_smoke": {
+        "visible_forest_ha": 17273.28,
+        "blind_forest_ha": 9670.56,
+        "overlap_forest_ha": 1836.76,
+        "water_view_ha": 2237.64,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 27508.32,
+        "outside_fov_forest_ha": 9670.24,
+        "occluded_forest_ha": 0.32,
+        "water_share_pct": 8.134
+      }
+    },
+    "heading_sensitivity": [
+      {
+        "drift": -20,
+        "heading": 0.0,
+        "visible_forest_ha": 12198.0,
+        "blind_forest_ha": 14745.84,
+        "overlap_forest_ha": 775.88,
+        "water_view_ha": 1588.08,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18759.84,
+        "outside_fov_forest_ha": 14745.52,
+        "occluded_forest_ha": 0.32,
+        "water_share_pct": 8.465
+      },
+      {
+        "drift": -10,
+        "heading": 10.0,
+        "visible_forest_ha": 12214.52,
+        "blind_forest_ha": 14729.32,
+        "overlap_forest_ha": 1046.12,
+        "water_view_ha": 1542.32,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18762.08,
+        "outside_fov_forest_ha": 14729.0,
+        "occluded_forest_ha": 0.32,
+        "water_share_pct": 8.22
+      },
+      {
+        "drift": 0,
+        "heading": 20.0,
+        "visible_forest_ha": 12502.88,
+        "blind_forest_ha": 14440.96,
+        "overlap_forest_ha": 859.12,
+        "water_view_ha": 1362.88,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18761.6,
+        "outside_fov_forest_ha": 14440.64,
+        "occluded_forest_ha": 0.32,
+        "water_share_pct": 7.264
+      },
+      {
+        "drift": 10,
+        "heading": 30.0,
+        "visible_forest_ha": 12543.48,
+        "blind_forest_ha": 14400.36,
+        "overlap_forest_ha": 814.04,
+        "water_view_ha": 1379.2,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18761.28,
+        "outside_fov_forest_ha": 14400.04,
+        "occluded_forest_ha": 0.32,
+        "water_share_pct": 7.351
+      },
+      {
+        "drift": 20,
+        "heading": 40.0,
+        "visible_forest_ha": 12498.32,
+        "blind_forest_ha": 14445.52,
+        "overlap_forest_ha": 839.56,
+        "water_view_ha": 1446.8,
+        "priority_visible_ha": 0.0,
+        "total_forest_ha": 26943.84,
+        "viewed_area_ha": 18761.28,
+        "outside_fov_forest_ha": 14445.2,
+        "occluded_forest_ha": 0.32,
+        "water_share_pct": 7.712
       }
     ]
   }
