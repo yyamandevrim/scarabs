@@ -1,0 +1,50 @@
+[
+  {
+    "filename": "smoke.ogv",
+    "title": "Wildfire Near Monserrate.ogv",
+    "category": "real wildfire smoke",
+    "author": "Peter Angritt (Mrtony77)",
+    "source": "https://commons.wikimedia.org/wiki/File:Wildfire_Near_Monserrate.ogv",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Wildfire_Near_Monserrate.ogv",
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sha256": "73c6d39e6a648343c215a5d3c5c4789c0d439bf868a8320e3c8e00b50ba1ddf2",
+    "changes": "None; original video, audio ignored by capture"
+  },
+  {
+    "filename": "fog.webm",
+    "title": "Fog covering mountain time lapse.webm",
+    "category": "real fog negative",
+    "author": "Athulvis",
+    "source": "https://commons.wikimedia.org/wiki/File:Fog_covering_mountain_time_lapse.webm",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/06/Fog_covering_mountain_time_lapse.webm",
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sha256": "d2c6899393911b791eba6a6eb47f60278fae06883ae97195af08e9e29d7e5c40",
+    "changes": "None; Commons labels this self-published work and also has a pending external licence-review notice"
+  },
+  {
+    "filename": "cloud.webm",
+    "title": "Angeles National Forest from Mount Wilson.webm",
+    "category": "real cloud negative",
+    "author": "Tom Hawkins",
+    "source": "https://commons.wikimedia.org/wiki/File:Angeles_National_Forest_from_Mount_Wilson.webm",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/2/20/Angeles_National_Forest_from_Mount_Wilson.webm",
+    "license": "CC-BY-SA-3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "sha256": "aea6754bba9275903b6f1739fedfbe5ba1171c1e0a8c762401a9ef8d3645f82c",
+    "changes": "None; original cloud time lapse"
+  },
+  {
+    "filename": "glare.webm",
+    "title": "072014 CostaRica Cow close up shot great lens flare.webm",
+    "category": "real sunlight lens flare negative",
+    "author": "Michael Weinman",
+    "source": "https://commons.wikimedia.org/wiki/File:072014_CostaRica_Cow_close_up_shot_great_lens_flare.webm",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/4/49/072014_CostaRica_Cow_close_up_shot_great_lens_flare.webm",
+    "license": "CC-BY-SA-2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sha256": "3e01dbd31ccccfa5ec85deeb80c6ac124b1133387dcc20bf785cdf39ea9c833e",
+    "changes": "None; original video, audio ignored by capture"
+  }
+]
