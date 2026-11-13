@@ -36,12 +36,14 @@ Generated JSON/overlay results live in ephemeral `/tmp`, capped at **256 analyse
 
 ## Public compute protections
 
-- **12 analysis/compare requests per client per 60 seconds**, plus **60 requests globally per 60 seconds**. Invalid requests and cache hits consume the same budget. A comparison contains at most six candidates. HTTP 429 includes `Retry-After: 60`.
+- **90 analysis/compare requests per client per 60 seconds**, plus **360 requests globally per 60 seconds**. Invalid requests and cache hits consume the same budget. A comparison contains at most six candidates. HTTP 429 includes `Retry-After: 60`.
 - Client identity uses the ASGI peer provided by Modal (`request.client.host`); untrusted `X-Forwarded-For` is ignored. Modal documents this client-IP interface. `PLACEMENT_PROXY_HOPS` is an opt-in for a separately managed trusted reverse proxy and is **unset on Modal**. Do not enable it on a directly accessible local server.
 - One nonblocking compute slot; contention returns HTTP 503 with `Retry-After: 2`, without an unbounded application queue.
 - 32 KiB request-body limit, including streamed bodies; 1–15 km range; only **120 m or 40 m** grids; **100 polygon vertices / 2,000 km²** maximum positive polygon area; at most six comparison candidates; exactly three camera definitions, with at most two active unless explicitly in reference mode.
 - Finite numeric values and angle/height/coordinate limits; invalid/self-intersecting polygons, unknown fields, out-of-region/water launch points are rejected. Heights 10–1,000 m permit low-height diagnostic checks; the intended balloon scenario is 500–700 m.
 - Bounded in-memory client tracking; same-origin CSP and no CORS access. Maps and result routes use explicit filename allowlists. No public preparation, upload, configuration-write, arbitrary-file or station-feed endpoint exists.
+
+Rate limiting is enabled by `PLACEMENT_PRODUCTION=1` on Modal; local demos leave it off. `PLACEMENT_RATE_LIMIT=1` or `0` is an explicit override.
 
 Budgets are in-process and reset when the container restarts. They bound this hackathon service, not a distributed DDoS defence. Cold starts and static requests still incur platform costs. The single-container cap is intentional; account billing/spend controls remain the owner's Modal settings.
 

@@ -16,7 +16,7 @@ The blind-forest diagnosis and full 30/100/500/600/700 m results are in [`VERIFI
 
 ## Cold start
 
-Run these commands from this repository. Python 3.12 was used on this Mac; the project supports Python 3.11–3.13. `uv.lock` pins the environment.
+Prerequisites: Python 3.11–3.13, `uv`, and internet access for the initial dependency and raster downloads. Run these commands from this repository. Python 3.12 was used on this Mac; the project supports Python 3.11–3.13. `uv.lock` pins the environment.
 
 ```sh
 cd placement
@@ -25,7 +25,7 @@ uv run python scripts/prepare_data.py
 uv run uvicorn forest_placement.api:app --host 127.0.0.1 --port 8787
 ```
 
-Open **http://127.0.0.1:8787/**. Port 8765 was occupied on the development Mac, so this app uses 8787. No credentials or API key are needed for the selected public data mirrors.
+Open **http://127.0.0.1:8787/**. No credentials or API key are needed for the selected public data mirrors.
 
 After environment setup and data preparation, internet access is unnecessary:
 
@@ -33,7 +33,11 @@ After environment setup and data preparation, internet access is unnecessary:
 uv run --offline --frozen uvicorn forest_placement.api:app --host 127.0.0.1 --port 8787
 ```
 
+The preparation script uses a verified certifi CA bundle for urllib and GDAL, including the Syke certificate chain; TLS verification remains enabled. A byte-identical rebuild retains the pinned release timestamps in metadata.json while preparation-run.json records the actual run times.
+
 Preparation downloads approximately 240 MB of regional raw rasters and produces approximately 32 MB in `data/prepared/`. The entire current data/cache directory is approximately 276 MB. To move the demo, copy the source code and `data/prepared/`; install Python dependencies before disconnecting. `data/raw/` is only needed for rebuilding. `data/results/` is recreated automatically. All large data, virtual environments and generated result images are ignored by `placement/.gitignore`.
+
+Local mode leaves rate limiting off. `PLACEMENT_PRODUCTION=1` enables the public 90/client/minute and 360/global/minute limits; `PLACEMENT_RATE_LIMIT=1` or `0` explicitly overrides that choice. The single compute slot applies in both modes.
 
 In ordinary laptop mode, the first visibility request may compile Numba code. Production/Modal mode warms the exact strided-array signature before accepting requests. Later requests use bounded disk cache results keyed by inputs, dataset checksums and algorithm version. Restart the server after preparing a different dataset: raster arrays are held in memory. Use one uvicorn worker for the laptop demo; API calculations are serialized to avoid competing CPU-heavy work.
 
@@ -114,12 +118,12 @@ For explicit camera settings, supply three `cameras` objects with `yaw`, `tilt`,
 
 ## Demo sequence
 
-1. Disconnect internet after preparation. Start on port 8787 and open the local page. Choose **Explore the map** on the landing page (or open `/map` directly). Switch to Turkish to follow the labels below. The initial map compares **Haukilahti** `(60.159, 24.773)`, heading **180°**, and **Nuuksio** `(60.293, 24.557)`, heading **20°**, both at 600 m. Left+centre are connected; right is grey **bağlı değil**.
+1. Disconnect internet after preparation. Start on port 8787 and open the local page. Choose **Open the launch point map** on the landing page (or open `/map` directly). Switch to Turkish to follow the labels below. The initial map compares **Haukilahti** `(60.159, 24.773)`, heading **180°**, and **Nuuksio** `(60.293, 24.557)`, heading **20°**, both at 600 m. Left+centre are connected; right is grey **bağlı değil**.
 2. Read the **duman · taç engelleri dahil** table. The south-facing coast spends about **84%** of its target-plane view over water; the inland preset about **7%**. Water is not forest target area. Click the inland tab to see its own cells/sectors.
 3. Change height to 500/700 m, then choose **Ayrıntılı · 40 m** for a selected point. Select ground and bare-terrain scenarios to explain the canopy assumption.
 4. At the coastal site, compare the three pair cards. Click **Sol + sağ**: the centre sector becomes grey, the central gap is visible and overlap becomes zero. Use **Merkez + sağ** if useful. Return to **Sol + merkez** for the baseline.
 5. Turn on **Üç kamera, referans** to show the physically unachievable all-connected comparison. Turn it off before presenting the two-input production result.
-6. Move the coastal heading from **180° to 0°**. The visible smoke-target forest changes from about **770 to 5,541 simulated ha** in the coarse pass. The API is rerun automatically. Inspect the ±10°/±20° chart.
+6. Move the coastal heading from **180° to 0°**. The visible smoke-target forest changes from about **770 to 5,541 simulated ha** in the coarse pass. The API is rerun automatically. Expand the heading-sensitivity disclosure to inspect the ±10°/±20° chart.
 7. Click **Öncelikli orman çiz**, click at least three corners near Nuuksio or Sipoonkorpi, then **Alanı tamamla** (or Enter). Candidates are reranked by visible priority forest. **Alanı temizle** resets it. Escape cancels an unfinished drawing. You can also click the map to move the selected candidate or enter coordinates directly.
 8. Road access, shadow, site constraints and permission suitability are shown as **sahada doğrulanacak**. They are not computed or validated launch-site recommendations.
 
