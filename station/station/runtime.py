@@ -15,6 +15,7 @@ from .led import LedHook
 from .machine import machine_identity
 from .mcu_bridge import McuBridge
 from .storage import EventStore
+from .lora.bridge import LoraBridge
 
 class Station:
     def __init__(self, config, detector=None, capture_factory=None):
@@ -34,6 +35,7 @@ class Station:
         self.encoder = ThreadPoolExecutor(max_workers=1, thread_name_prefix="evidence", initializer=clip.lower_thread_priority)
         self.clip_timings = deque(maxlen=50)
         self.thread = None
+        self.lora = LoraBridge(self)
 
     def start(self):
         self.data_lock = datalock.acquire(self.config.data_dir)
@@ -44,8 +46,10 @@ class Station:
         self.thread = Thread(target=self._run, name="shared-detector", daemon=True)
         self.thread.start()
         self.mcu.start()
+        self.lora.start()
 
     def stop(self):
+        self.lora.stop()
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=30)

@@ -109,6 +109,17 @@ class EventStore:
             result.append(item)
         return result
 
+    def event(self, event_id):
+        # Exact UUID lookup, independent of queue/list limits, for in-range collection.
+        with self.lock:
+            row = self.db.execute("SELECT * FROM events WHERE id=?", (event_id,)).fetchone()
+        if row is None:
+            return None
+        item = dict(row)
+        item["box"] = json.loads(item["box"])
+        item["details"] = json.loads(item["details"]) if item["details"] else None
+        return item
+
     def prune(self, now, retention_days):
         with self.lock, self.db:
             rows = self.db.execute("SELECT id FROM events WHERE last_seen < ?", (now-retention_days*86400,)).fetchall()

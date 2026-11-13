@@ -1,6 +1,6 @@
 # ACORN — Aerial Canopy Observation and Reporting Node
 
-Offline smoke-suspicion prototype for the Green European Renaissance challenge at Junction 2026 in Helsinki. Python 3.11+, `uv`, OpenCV headless, ONNX Runtime CPU, FastAPI, plain local HTML/CSS/JS, and SQLite. No PyTorch, GPU, Jetson, cloud inference, CDN, external fonts, LoRa, or solar implementation.
+Offline smoke-suspicion prototype for the Green European Renaissance challenge at Junction 2026 in Helsinki. Python 3.11+, `uv`, OpenCV headless, ONNX Runtime CPU, FastAPI, plain local HTML/CSS/JS, and SQLite. No PyTorch, GPU, Jetson, cloud inference, CDN, external fonts, or solar implementation. Communication now includes a compact LoRa packet layer with a simulated transport; no real radio has been tested.
 
 The panel's English product name is defined once in `station/identity.py`. It supplies the plain text ACORN wordmark and page title, including alarm and connection-loss states. No logo has been selected.
 
@@ -21,7 +21,7 @@ uv run --offline --frozen pytest -q
 uv run --offline --frozen forest-station --config config.toml serve --port 8080
 ```
 
-Open **http://127.0.0.1:8080**. The two default sources are actual recorded wildfire and fog videos, played at their original frame rates and analysed at a target of once per second per active camera. The right slot stays mounted/inactive. Stop with Ctrl+C. Saved decisions survive restart. All config paths resolve relative to the TOML file, independent of the shell's working directory.
+Set the ranger panel secret before serving (see [Communication](#communication)): `read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo` (macOS zsh). Without a secret all panel data/API access fails closed. Open **http://127.0.0.1:8080** and sign in. The two default sources are actual recorded wildfire and fog videos, played at their original frame rates and analysed at a target of once per second per active camera. The right slot stays mounted/inactive. Stop with Ctrl+C. Saved decisions survive restart. All config paths resolve relative to the TOML file, independent of the shell's working directory.
 
 The project has its own `.python-version`, `pyproject.toml`, `uv.lock`, and `.gitignore`. `models/`, `media/`, `data/`, virtual environments, and local config overrides are excluded from git. Nothing needs to be fetched while serving. A cold clone must run the fetch scripts before the real-video tests; those tests explicitly skip if assets are absent, rather than substituting generated footage.
 
@@ -42,7 +42,7 @@ uv run --offline --frozen pytest -q
 uv run --offline --frozen forest-station --config config.toml serve --host 0.0.0.0 --port 8080
 ```
 
-Copy the downloaded `models/` and `media/` directories to the board instead of fetching again if desired. Install Linux dependencies on Linux: do not copy the Mac `.venv`. `--host 0.0.0.0` permits a browser on the station's local network to connect to `http://BOARD_LOCAL_IP:8080`; a local display can use `127.0.0.1`. The default host is loopback. The prototype has no authentication, so expose it only on the intended local demo network.
+Copy the downloaded `models/` and `media/` directories to the board instead of fetching again if desired. Install Linux dependencies on Linux: do not copy the Mac `.venv`. `--host 0.0.0.0` permits a browser on the station's local network to connect to `http://BOARD_LOCAL_IP:8080`; a local display can use `127.0.0.1`. The default host is loopback. The panel and all data APIs require the shared-secret login described under [Communication](#communication); configure it before exposing the service.
 
 Before judging board speed, stop the server and run the smoke `benchmark` command in [Tests and measured Mac results](#tests-and-measured-mac-results) **on the UNO Q**. Published timings below are Apple M5 Mac measurements only. For the KY-026, RGB LED, sketch upload and real bridge config, follow the [complete hardware installation checklist](../firmware/README.md#install-on-the-arduino-uno-q--first-time-checklist). The checked-in `[mcu] mode = "simulated"` is a hardware-free demo; switch your board config to `router` before presenting it as hardware telemetry.
 
@@ -100,7 +100,7 @@ Clips play inline in the panel: an HTML `<video>` with native controls, the anno
 
 The MCU status LED and local KY-026 now use the implemented RouterBridge client (`station/mcu_bridge.py`, `mcu_link.py`), with a tested in-process simulation. See the [panel API contract](#microcontroller-and-local-flame-sensor-api-for-the-panel-designer) and [hardware guide/LED table](../firmware/README.md#led-state-table). The sketch compiles for UNO Q; actual bridge, sensor and LED operation on the board remain unverified.
 
-The separate legacy `station/led.py` interface, `LedHook.set_alarm(enabled)`, is still available: no `led_path` means no-op; a configured Linux LED brightness file receives `1`/`0`, with missing/unwritable paths disabling this hook without stopping detection. It is a binary smoke-alarm hook, not the MCU's multi-state RGB driver. Leave it unset when using the MCU scheme, avoiding another writer to the same LED. LoRa and solar are omitted.
+The separate legacy `station/led.py` interface, `LedHook.set_alarm(enabled)`, is still available: no `led_path` means no-op; a configured Linux LED brightness file receives `1`/`0`, with missing/unwritable paths disabling this hook without stopping detection. It is a binary smoke-alarm hook, not the MCU's multi-state RGB driver. Leave it unset when using the MCU scheme, avoiding another writer to the same LED. Solar is omitted. LoRa communication uses the simulated transport described below; real radio hardware remains unverified.
 
 ## Model provenance and licence
 
@@ -253,3 +253,60 @@ Simulation applies no signal to the board. Keep titles distinct: cameras **“Du
 - SQLite and media are local; abrupt power loss can leave incomplete evidence. Startup closes previously open events and retention eventually removes orphan files. There is no disk quota beyond age-based retention.
 - The model/threshold and mounting FOV are demo settings. Detection is suspicion support requiring operator review, not a validated autonomous emergency system.
 - The installed Starlette TestClient emits one upstream `httpx` deprecation warning; tests still pass. No failing test is hidden or filtered.
+
+## Communication
+
+ACORN has two distinct access paths. The **original remote dashboard** in [`ground/`](../ground/README.md) receives only compact binary alert/status/decision packets over **LoRa link (simulated transport)**. The **ranger Wi-Fi panel** here is the full-detail interface for someone close to the station: feeds, snapshots, clips and authenticated operator decisions. Wi-Fi is a permanent close-range feature. The remote dashboard's optional Wi-Fi imagery is an explicitly labelled demo aid and is off by default. No image/video is carried by LoRa.
+
+### Configure the link
+
+Copy `config.toml` to an ignored `communication.local.toml`. Enable `[lora] enabled = true`; set a unique `station_id`, actual configured `heading` and the ground laptop's `peer_host`/`peer_port`. The default UDP destination is loopback port 9901, SF10/BW125/CR4/5, sub-band 868.0–868.6 MHz at 868.3 MHz, calculated 1% duty limit, one replaceable heartbeat every 300 s, and two alert/decision repeats 30 s apart. Start ground first, then:
+
+```sh
+# From station/, macOS zsh: input is hidden and not written into shell history.
+read -s 'ACORN_PANEL_SECRET?Choose a strong station secret: '; export ACORN_PANEL_SECRET; echo
+uv run --offline --frozen forest-station --config communication.local.toml serve --port 8091
+```
+
+For bash on the UNO Q use `read -rs -p 'Choose a strong station secret: ' ACORN_PANEL_SECRET; export ACORN_PANEL_SECRET; echo`. For a persistent local setting, put `panel_secret` under `[station]` in an ignored, owner-readable `*.local.toml` (`chmod 600`). Never use the checked-in config for secrets. `ACORN_PANEL_SECRET` overrides the local TOML value. There is no default password, development bypass or unauthenticated data API. Missing configuration returns HTTP 503 instead of exposing the panel. Choose a long random secret and share it with authorised rangers separately from public demo materials.
+
+The shared-secret login compares using `hmac.compare_digest`, limits failed logins to five per five-minute window per source and globally, and limits login body size. The global limit intentionally trades availability for resistance to source rotation: a ranger may need to wait five minutes after repeated failures. Successful logins set an opaque random HttpOnly, SameSite=Strict cookie for eight hours. Sessions survive reload but expire on server restart or logout (`POST /api/auth/logout`). Only local static assets and the login page/endpoint are public; status, frames, all events, evidence and MCU routes require a session. Mutating requests must be same-origin. HTTP runs without transport encryption on the local AP; use a strong WPA2/WPA3 AP password, a trusted local network and HTTPS if that network is not trusted. Do not forward the panel from a public router.
+
+The [`packet specification`](station/lora/PACKETS.md) contains byte layouts, projection assumptions, airtime tables, CEPT primary sources, exact queue policy and unimplemented modem integration points. The bridge works independently of capture/inference and never waits for radio airtime. New alerts take priority; repeats are bounded; heartbeats yield; `data/lora-duty.json` persists the rolling sub-band budget. Lost simulated packets still consume airtime. Never erase that ledger to increase a real transmitter's allowance. `loss`, `seed`, `airtime_delay`, `payload_limit`, stricter `duty_fraction` and heartbeat/repeat intervals can exercise constraints without changing packets or UIs. There is no battery sensor: the status packet explicitly says **not measured**.
+
+The serial adapter is a documented **unimplemented/untested skeleton** and refuses startup when selected. No modem command set, wiring, serial device, e.r.p., range, RSSI or SNR is invented. The station ID is configured identity, not an authenticated radio identity. CRC protects against accidental corruption, not an attacker. New events opened during the current process session are scanned into a bounded in-memory outbox; unsent work is not durable across shutdown. See the specification for these prototype limits.
+
+### UNO Q as a ranger Wi-Fi access point — all board steps unverified
+
+Arduino's [UNO Q Debian Linux Basics](https://docs.arduino.cc/tutorials/uno-q/debian-guide/) documents the board's NetworkManager **`nmcli`** Wi-Fi management and USB ADB recovery. The [UNO Q user manual](https://docs.arduino.cc/tutorials/uno-q/user-manual/) also uses `nmcli`. The following AP procedure uses [NetworkManager's own hotspot command](https://networkmanager.pages.freedesktop.org/NetworkManager/NetworkManager/nmcli.html), rather than assuming Raspberry Pi tools or preinstalled `hostapd`. **None of these steps has been run on the UNO Q; AP mode, driver capabilities, DHCP sharing and phone interoperability are unverified.**
+
+Use a local SBC console or USB ADB shell first; switching the only Wi-Fi interface to AP mode can disconnect its existing network/App Lab connection. Keep that recovery shell open. Replace the interface placeholder with the actual name reported on the board:
+
+```sh
+# UNVERIFIED ON BOARD: inspect shipped network tools, interface and AP capability.
+command -v nmcli
+nmcli device status
+nmcli -f GENERAL.DEVICE,WIFI-PROPERTIES.AP device show WIFI_INTERFACE
+# If AP is unavailable, stop here: a verified supported Wi-Fi adapter/AP is needed.
+
+# UNVERIFIED ON BOARD: prompt separately for a strong AP password (bash).
+read -rs -p 'Ranger AP password: ' ACORN_AP_PASSWORD; echo
+sudo nmcli device wifi hotspot ifname WIFI_INTERFACE con-name acorn-ranger \
+  ssid ACORN-Ranger password "$ACORN_AP_PASSWORD"
+unset ACORN_AP_PASSWORD
+# UNVERIFIED ON BOARD: explicit shared IPv4 network and WPA2-capable configuration.
+sudo nmcli connection modify acorn-ranger ipv4.method shared \
+  ipv4.addresses 10.42.0.1/24 wifi-sec.key-mgmt wpa-psk wifi-sec.proto rsn
+sudo nmcli connection up acorn-ranger
+nmcli -g IP4.ADDRESS device show WIFI_INTERFACE
+```
+
+These password arguments are passed to the local `nmcli` process; do this only on the trusted board console. The password is not a literal in shell history or this repository. Verify that the resulting AP is protected and a ranger receives an address on 10.42.0.0/24. Do not assume internet connectivity, concurrent client/AP mode or a captive portal. If the interface cannot provide AP mode, the procedure is incomplete until a supported AP/adapter is tested; do not call the UNO Q hotspot tested.
+
+**UNVERIFIED ON BOARD:** configure `ACORN_PANEL_SECRET` as above, then start station with `serve --host 0.0.0.0 --port 8091` on the board's Linux side. Join **ACORN-Ranger** from the ranger phone/laptop using its AP password, open **http://10.42.0.1:8091**, and sign in with the separate station panel secret. Confirm the address with `nmcli` rather than assuming the requested address succeeded. The full local panel is then the Wi-Fi evidence/decision view. Keep unrelated services off this field AP and restrict access to the intended network; no firewall configuration is claimed as applied here.
+
+**UNVERIFIED ON BOARD recovery:** from the retained local/ADB shell, run `sudo nmcli connection down acorn-ranger`, then `sudo nmcli connection up YOUR_PREVIOUS_CONNECTION`. Use `nmcli connection show` to identify that saved connection. Remove the AP profile with `sudo nmcli connection delete acorn-ranger` if no longer wanted. Refer to Arduino's ADB recovery instructions if normal network access is lost.
+
+### Collect evidence when in range
+
+The ranger can inspect the full panel directly. On a ground laptop that already received LoRa alerts, join the station AP, start ground with `--station-url http://10.42.0.1:8091` and `ACORN_STATION_SECRET` set to the station's panel secret, then use **Collect evidence over Wi-Fi** on the received alert. Ground checks the station ID and requests that alert's full original UUID via the protected API. It saves snapshot/clip locally under `ground/data/evidence/STATION_ID/EVENT_UUID/`. A later station outage or retention cleanup does not remove those copies. Enable the clearly marked Wi-Fi demo area to view them in ground; with the switch off, no imagery is shown. Collection works independently of that viewing switch and does not create radio alerts or station decisions.

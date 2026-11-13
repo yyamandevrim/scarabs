@@ -141,3 +141,5 @@ main{display:flex;flex-direction:column;min-height:0}
 footer{padding:20px;line-height:1.6}
 .event-meta{font-size:11px}
 }
+
+@media(min-width:721px){.event-panel{position:sticky;top:0;align-self:start}}

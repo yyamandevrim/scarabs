@@ -30,6 +30,9 @@ def create_app(station, manage_lifecycle=True):
     app = FastAPI(title=identity.NAME, lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
     static = Path(__file__).parent/"static"
 
+    from .auth import install_auth
+    install_auth(app, station, static)
+
     @app.middleware("http")
     async def local_only_headers(request, call_next):
         response = await call_next(request)
@@ -80,6 +83,23 @@ def create_app(station, manage_lifecycle=True):
         # WebM plays inline (FileResponse answers Range requests); legacy AVI downloads.
         media_type = {".jpg":"image/jpeg", ".webm":"video/webm", ".avi":"video/x-msvideo"}[path.suffix]
         return FileResponse(path, media_type=media_type, filename=filename if path.suffix == ".avi" else None)
+
+    @app.get("/api/communication")
+    def communication():
+        link = station.lora
+        sender = link.sender
+        return {"station_id": station.config.lora.station_id, "role": "Ranger Wi-Fi full-detail panel",
+                "link": {"enabled": sender is not None, "transport": link.link.label if sender else "disabled",
+                         "sent": sender.sent if sender else 0, "duty_refusals": sender.refused if sender else 0,
+                         "queued": len(sender.queue) if sender else 0, "queue_drops": sender.dropped if sender else 0,
+                         "error": link.error}}
+
+    @app.get("/api/events/{event_id}")
+    def event(event_id: str):
+        item = station.store.event(event_id)
+        if item is None:
+            raise HTTPException(404, "Event not found")
+        return item
 
     register_mcu_routes(app, station)
     app.mount("/static", StaticFiles(directory=static), name="static")

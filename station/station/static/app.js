@@ -28,6 +28,7 @@ async function json(url, options = {}) {
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
     const response = await fetch(url, {...options, signal: controller.signal});
+    if (response.status === 401) { window.location.assign('/login'); throw new Error('Login required'); }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
   } finally { clearTimeout(timeout); }

@@ -59,3 +59,24 @@ vfov = 50.0
 width = 1280
 height = 720
 loop = true
+
+[lora]
+# Opt-in; UDP carries the unchanged binary packets until a modem is selected.
+# LoRa link (simulated transport). No imagery is sent on this link.
+enabled = false
+transport = "simulated"
+station_id = 1
+heading = 0.0  # configured, not measured; set module's actual heading before use
+peer_host = "127.0.0.1"
+peer_port = 9901
+sf = 10
+bandwidth = 125000
+coding_rate = 1  # 4/5
+sub_band = "868.0-868.6"
+frequency = 868.3
+duty_fraction = 0.01
+heartbeat_seconds = 300
+repeats = 2  # two repeats after the original, all charged to the budget
+repeat_seconds = 30
+loss = 0.0
+airtime_delay = true

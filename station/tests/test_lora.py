@@ -1,0 +1,137 @@
+import binascii
+from dataclasses import replace
+import math
+import struct
+import uuid
+import pytest
+from station.lora.protocol import Packet, Kind, encode, decode, bearing, MAX_PAYLOAD, HEADER
+from station.lora.radio import Radio, DutyBudget
+from station.lora.sender import Sender
+from station.lora.transport import SimulatedLink, SerialModem
+from station.lora.bridge import LoraBridge, LoraConfig
+
+EVENT = '1234567890abcdef1234567890abcdef'
+DATA = {Kind.SMOKE:dict(event_id=EVENT,camera=0,recorded=False,bearing_cd=29000,width=40,height=50,confidence=83),Kind.FLAME:dict(event_id=EVENT,source='unknown'),Kind.DECISION:dict(event_id=EVENT,decision=1),Kind.STATUS:dict(active=3,lost=2,pending=4,uptime=100,battery=None,heading_cd=0,yaw=[-7000,0,7000],hfov=[80,80,80])}
+def packet(kind=Kind.SMOKE, **kw):
+    return Packet(kind, 1, 42, 0, 1700000000, 3600, DATA[kind] | kw)
+
+@pytest.mark.parametrize('kind,size', [(Kind.SMOKE,40),(Kind.FLAME,35),(Kind.DECISION,35),(Kind.STATUS,38)])
+def test_packet_roundtrip_size(kind,size):
+    p=packet(kind);raw=encode(p)
+    assert len(raw)==size<=MAX_PAYLOAD
+    assert decode(raw)==p
+
+@pytest.mark.parametrize('kind',list(Kind))
+def test_corruption_every_byte_and_truncation(kind):
+    raw=encode(packet(kind))
+    for i in range(len(raw)):
+        corrupt=bytearray(raw);corrupt[i]^=1
+        with pytest.raises(ValueError):decode(bytes(corrupt))
+    for length in range(len(raw)):
+        with pytest.raises(ValueError):decode(raw[:length])
+
+def test_unknown_version_and_semantics_even_with_valid_crc():
+    raw=bytearray(encode(packet()));raw[1]=0x21
+    raw[-2:]=struct.pack('>H',binascii.crc_hqx(raw[:-2],0xffff))
+    with pytest.raises(ValueError):decode(bytes(raw))
+    for values in (dict(camera=3),dict(confidence=101),dict(bearing_cd=36000)):
+        with pytest.raises(ValueError):encode(packet(**values))
+
+@pytest.mark.parametrize('heading,yaw,box,fov,expected',[(0,0,(.4,.1,.6,.9),80,0),(10,-70,(.4,0,.6,1),80,300),(350,20,(0,0,1,1),80,10),(0,0,(1,0,1,1),80,40),(0,0,(0,0,0,1),80,320),(0,0,(.75,0,.75,1),90,math.degrees(math.atan(.5)))])
+def test_bearing_projection(heading,yaw,box,fov,expected):
+    assert bearing(heading,yaw,box,fov)==pytest.approx(expected)
+
+@pytest.mark.parametrize('fov', [0,180,float('nan')])
+def test_invalid_bearing(fov):
+    with pytest.raises(ValueError):bearing(0,0,(0,0,1,1),fov)
+
+# Semtech SX1276/77/78/79 datasheet packet example: 10 bytes, SF7,
+# BW125, CR4/5, explicit header, CRC, preamble 8 => 41.216 ms.
+# Semtech AN1200.86 Fig 6 rounds 11-byte SF7/9/10 to .04/.14/.29 s; SF12 CRC-enabled vector is separate.
+@pytest.mark.parametrize('sf,size,expected',[(7,10,.041216),(7,11,.041216),(9,11,.144384),(10,11,.288768),(12,11,1.155072),(12,40,1.974272),(10,40,.534528)])
+def test_airtime_reference(sf,size,expected):
+    assert Radio(sf).airtime(size)==pytest.approx(expected)
+
+def test_airtime_bandwidth_coding_rate_and_occupied_band():
+    assert Radio(10,250000).airtime(40)<Radio().airtime(40)
+    assert Radio(coding_rate=4).airtime(40)>Radio().airtime(40)
+    assert Radio().band_limit('868.0-868.6',868.3)==.01
+    with pytest.raises(ValueError):Radio().band_limit('868.0-868.6',868.01)
+    with pytest.raises(ValueError):LoraConfig(duty_fraction=.1)
+
+def test_rolling_duty_persistence_and_clock_reversal(tmp_path):
+    path=tmp_path/'duty.json';b=DutyBudget(.01,path=path)
+    assert b.reserve(20,1000) and not b.reserve(17,1001)
+    assert b.remaining(1002)==16
+    b=DutyBudget(.01,path=path)
+    assert b.remaining(1002)==16 and not b.reserve(1,999)
+    assert b.remaining(4619)==16  # full TX duration accounted until end + hour
+    assert b.remaining(4620)==36
+    path.write_text('bad json')
+    assert DutyBudget(.01,path=path).remaining(1)==0
+
+class FakeLink:
+    def __init__(self):self.raw=[]
+    def send(self,payload,airtime):self.raw.append(payload)
+
+def test_priority_repeats_bounded_heartbeat_yields():
+    link=FakeLink();s=Sender(link,Radio(),DutyBudget(.01),repeats=2,repeat_interval=5)
+    s.enqueue(packet(Kind.STATUS),0)
+    s.enqueue(packet(),0)
+    assert decode(s.tick(0)).kind==Kind.SMOKE
+    s.enqueue(packet(event_id=uuid.uuid4().hex),5)
+    assert decode(s.tick(5)).data['event_id']!=EVENT  # new first, before due repeat
+    for now in range(7,40,2):s.tick(now)
+    alerts=[decode(x) for x in link.raw if decode(x).kind==Kind.SMOKE]
+    assert sum(p.data['event_id']==EVENT for p in alerts)==3
+    assert decode(link.raw[-1]).kind==Kind.STATUS
+    assert len({p.sequence for p in alerts})==6
+    assert s.tick(100) is None
+
+def test_duty_refusal_keeps_alert_and_reserves_heartbeat_headroom():
+    link=FakeLink();budget=DutyBudget(.001);s=Sender(link,Radio(),budget)
+    budget.reserve(3,0)
+    s.enqueue(packet(Kind.STATUS),0)
+    assert s.tick(0) is None
+    s.enqueue(packet(),0)
+    assert s.tick(0)  # alert fits remaining .6s; heartbeat yields
+    assert s.tick(31) is None
+    assert s.refused>=2
+
+def test_queue_bounded_and_repeat_evictable():
+    s=Sender(FakeLink(),Radio(),DutyBudget(),max_queue=2)
+    assert s.enqueue(packet(),0,priority=2)
+    assert s.enqueue(packet(),0)
+    assert s.enqueue(packet(Kind.FLAME),0)
+    assert len(s.queue)==2 and not s.enqueue(packet(),0)
+
+def test_udp_exact_bytes_loss_and_serial_skeleton():
+    receiver=SimulatedLink(bind=('127.0.0.1',0))
+    sender=SimulatedLink(peer=receiver.socket.getsockname(),loss=0,delay=False)
+    try:
+        raw=encode(packet());sender.send(raw,.1);assert receiver.receive()==raw
+        sender.loss=1;sender.send(raw,.1);assert receiver.receive() is None
+        with pytest.raises(ValueError):sender.send(bytes(49),.1)
+        with pytest.raises(NotImplementedError):SerialModem('/dev/unselected')
+    finally:sender.close();receiver.close()
+
+def test_bridge_uses_event_uuid_and_separate_flame(config):
+    from station.runtime import Station
+    from station.alarm import Detection
+    from test_capture import EmptyDetector
+    cfg=replace(config,lora=LoraConfig(enabled=True,airtime_delay=False))
+    station=Station(cfg,detector=EmptyDetector());bridge=station.lora
+    try:
+        now=bridge.started+1
+        event=station.store.create('left',Detection((.4,.2,.6,.8),.8),now)
+        flame=station.store.create_flame(now,{})
+        bridge.poll(now)
+        packets=[entry[3] for entry in bridge.sender.queue]
+        assert {p.data['event_id'] for p in packets}=={event,flame}
+        smoke=next(p for p in packets if p.kind==Kind.SMOKE)
+        assert smoke.data['bearing_cd']==29000
+        station.store.decide(event,'confirmed',now+1);bridge.poll(now+1)
+        assert any(p[3].kind==Kind.DECISION for p in bridge.sender.queue)
+        bridge.heartbeat(now)
+        assert decode(encode(bridge.sender.heartbeat)).data['battery'] is None
+    finally:station.stop();station.store.shutdown()

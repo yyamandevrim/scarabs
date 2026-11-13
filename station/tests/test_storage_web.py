@@ -1,7 +1,7 @@
 from dataclasses import replace
 import re
 import time
-from fastapi.testclient import TestClient
+from auth_client import TestClient
 import pytest
 from station.alarm import Detection
 from station.led import LedHook

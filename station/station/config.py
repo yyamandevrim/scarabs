@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import tomllib
 from .mcu_protocol import McuConfig
+from .lora.bridge import LoraConfig
 
 SLOTS = ("left", "centre", "right")
 
@@ -41,6 +42,8 @@ class Config:
     ort_threads: int = 2
     led_path: str | None = None
     mcu: McuConfig = field(default_factory=McuConfig)
+    lora: LoraConfig = field(default_factory=LoraConfig)
+    panel_secret: str | None = None
 
     def __post_init__(self):
         if sorted(c.name for c in self.cameras) != sorted(SLOTS):
@@ -81,4 +84,5 @@ def load_config(path: str | Path) -> Config:
             camera.source = str((base / camera.source).resolve())
         cameras.append(camera)
     options["mcu"] = McuConfig(**raw.get("mcu", {}))
+    options["lora"] = LoraConfig(**raw.get("lora", {}))
     return Config(cameras=cameras, **options)

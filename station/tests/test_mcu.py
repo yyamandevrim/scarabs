@@ -5,7 +5,7 @@ import sqlite3
 import subprocess
 import threading
 import time
-from fastapi.testclient import TestClient
+from auth_client import TestClient
 import pytest
 from station import msgpack_lite
 from station.alarm import Detection

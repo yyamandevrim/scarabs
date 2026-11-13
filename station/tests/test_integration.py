@@ -4,7 +4,7 @@ import hashlib
 import socket
 import time
 import cv2
-from fastapi.testclient import TestClient
+from auth_client import TestClient
 import pytest
 from station.config import load_config
 from station.runtime import Station

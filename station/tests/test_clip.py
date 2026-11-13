@@ -2,7 +2,7 @@
 import time
 import cv2
 import numpy as np
-from fastapi.testclient import TestClient
+from auth_client import TestClient
 import pytest
 from station import clip
 from station.alarm import Detection
