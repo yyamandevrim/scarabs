@@ -1,0 +1,17 @@
+WOULD UPLOAD	placement/data/prepared/background.png	5060724 bytes	sha256:84868aa52156da18d43106944c821884081070757754524b3ed3126a08c25fba
+WOULD UPLOAD	placement/data/prepared/coarse.npz	3176327 bytes	sha256:42643b6899ef4313227fd79bcce71f61ecdb39a96c13619cf64765a17116f9ed
+WOULD UPLOAD	placement/data/prepared/detailed.npz	22497333 bytes	sha256:98d64016333bcc86e7ab98b50c712648d1dfdf37839b0fb472b2649a30b8bac8
+WOULD UPLOAD	placement/data/prepared/forest.png	969984 bytes	sha256:d817ce2961e24591949ec4c2fe37cf8d11e842707a062a3f88f659ce20b3f9c2
+WOULD UPLOAD	placement/data/prepared/map.json	95 bytes	sha256:97d7a257dcdf37e359aef3f8275cc48e893a5ff12f16146698ebf7bad264ef76
+WOULD UPLOAD	placement/data/prepared/metadata.json	4389 bytes	sha256:cb955e7bc804db4cfbf17fad8a92f97725a870fe7ade325b02ed9ae8c2562aca
+WOULD UPLOAD	placement/data/prepared/water.png	202382 bytes	sha256:66d9078cd181f38f6c0bebdf7237416fe8b4da150e5c6d43e12cb8ebd5f31b3e
+WOULD UPLOAD	station/media/cloud.webm	3668183 bytes	sha256:aea6754bba9275903b6f1739fedfbe5ba1171c1e0a8c762401a9ef8d3645f82c
+WOULD UPLOAD	station/media/glare.webm	32114677 bytes	sha256:3e01dbd31ccccfa5ec85deeb80c6ac124b1133387dcc20bf785cdf39ea9c833e
+WOULD UPLOAD	station/media/smoke.ogv	6378494 bytes	sha256:73c6d39e6a648343c215a5d3c5c4789c0d439bf868a8320e3c8e00b50ba1ddf2
+WOULD UPLOAD	station/models/smoke.onnx	38155661 bytes	sha256:5c17b5f917b3cd61bafd15b808cbe3c3b03e054e2e9f09ca72f6309d53d8e76b
+WOULD UPLOAD	tools/licenses/ARTIFACT-NOTICES.md	4346 bytes	sha256:610087bd6733481b1af81488efd0e30ebe68328789297683d300f4e146fbba65
+WOULD UPLOAD	tools/licenses/PYRONEAR-AGPL-3.0.txt	34523 bytes	sha256:0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0
+EXCLUDED	station/media/fog.webm	Uploader asserts CC BY-SA 4.0, but Commons external licence review remains pending; excluded until provenance verified.
+EXCLUDED	placement/data/raw/	Rebuild cache; prepared data is sufficient.
+EXCLUDED	station/data/	Runtime events and operator decisions are not public test artifacts.
+13 artifacts, 112267118 bytes; manifest included in upload.

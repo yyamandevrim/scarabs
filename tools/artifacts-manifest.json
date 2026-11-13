@@ -1,0 +1,577 @@
+{
+  "schema": 1,
+  "reviewed_on": "2026-11-13",
+  "artifacts": [
+    {
+      "path": "placement/data/prepared/background.png",
+      "size": 5060724,
+      "sha256": "84868aa52156da18d43106944c821884081070757754524b3ed3126a08c25fba",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "placement/data/prepared/coarse.npz",
+      "size": 3176327,
+      "sha256": "42643b6899ef4313227fd79bcce71f61ecdb39a96c13619cf64765a17116f9ed",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "placement/data/prepared/detailed.npz",
+      "size": 22497333,
+      "sha256": "98d64016333bcc86e7ab98b50c712648d1dfdf37839b0fb472b2649a30b8bac8",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "placement/data/prepared/forest.png",
+      "size": 969984,
+      "sha256": "d817ce2961e24591949ec4c2fe37cf8d11e842707a062a3f88f659ce20b3f9c2",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "placement/data/prepared/map.json",
+      "size": 95,
+      "sha256": "97d7a257dcdf37e359aef3f8275cc48e893a5ff12f16146698ebf7bad264ef76",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "placement/data/prepared/metadata.json",
+      "size": 4389,
+      "sha256": "cb955e7bc804db4cfbf17fad8a92f97725a870fe7ade325b02ed9ae8c2562aca",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "placement/data/prepared/water.png",
+      "size": 202382,
+      "sha256": "66d9078cd181f38f6c0bebdf7237416fe8b4da150e5c6d43e12cb8ebd5f31b3e",
+      "source": [
+        {
+          "name": "Syke CORINE Land Cover 2024, national 20m raster",
+          "url": "https://paikkatiedot.ymparisto.fi/geoserver/inspire_lc/wcs?service=WCS&version=1.0.0&request=GetCoverage&coverage=inspire_lc%3ALC.LandCoverRaster.2024&crs=EPSG%3A3067&bbox=345000%2C6650000%2C420120%2C6725120&resx=20&resy=20&format=GeoTIFF",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 20,
+          "publication": "2026-09-29"
+        },
+        {
+          "name": "NLS Finland 10m ground DEM, Paituli 2019 snapshot",
+          "url": "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019/",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "tiles": [
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4311.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4312.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4322.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L43/L4321.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4142.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4144.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4132.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4114.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4113.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4131.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4133.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4143.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4141.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4134.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4123.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L41/L4124.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4213.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4233.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L42/L4231.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//L4/L44/L4411.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4422.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K44/K4421.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4223.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4244.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4224.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4243.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4241.tif",
+            "https://www.nic.funet.fi/index/geodata/mml/dem10m/2019//K4/K42/K4242.tif"
+          ],
+          "native_resolution_m": 10
+        },
+        {
+          "name": "Luke MS-NFI 2023 keskipituus",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/keskipituus_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "dm"
+        },
+        {
+          "name": "Luke MS-NFI 2023 latvuspeitto",
+          "url": "https://www.nic.funet.fi/index/geodata/luke/vmi/2023/latvuspeitto_vmi1x_1923.tif",
+          "licence": "CC BY 4.0",
+          "accessed": "2026-11-13",
+          "native_resolution_m": 16,
+          "unit": "percent"
+        }
+      ],
+      "licence": "CC-BY-4.0",
+      "attribution": "National Land Survey of Finland Elevation model 10 m (2019); Syke CORINE Land Cover 2024; Natural Resources Institute Finland (Luke) MS-NFI 2023.",
+      "changes": "Clipped/reprojected/aggregated EPSG:3067 rasters; PNGs are derived Web Mercator map images. See metadata.json and placement/README.md."
+    },
+    {
+      "path": "station/media/cloud.webm",
+      "size": 3668183,
+      "sha256": "aea6754bba9275903b6f1739fedfbe5ba1171c1e0a8c762401a9ef8d3645f82c",
+      "source": "https://commons.wikimedia.org/wiki/File:Angeles_National_Forest_from_Mount_Wilson.webm",
+      "licence": "CC-BY-SA-3.0",
+      "attribution": "Tom Hawkins",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "changes": "None; original cloud time lapse"
+    },
+    {
+      "path": "station/media/glare.webm",
+      "size": 32114677,
+      "sha256": "3e01dbd31ccccfa5ec85deeb80c6ac124b1133387dcc20bf785cdf39ea9c833e",
+      "source": "https://commons.wikimedia.org/wiki/File:072014_CostaRica_Cow_close_up_shot_great_lens_flare.webm",
+      "licence": "CC-BY-SA-2.0",
+      "attribution": "Michael Weinman",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+      "changes": "None; original video, audio ignored by capture"
+    },
+    {
+      "path": "station/media/smoke.ogv",
+      "size": 6378494,
+      "sha256": "73c6d39e6a648343c215a5d3c5c4789c0d439bf868a8320e3c8e00b50ba1ddf2",
+      "source": "https://commons.wikimedia.org/wiki/File:Wildfire_Near_Monserrate.ogv",
+      "licence": "CC-BY-SA-4.0",
+      "attribution": "Peter Angritt (Mrtony77)",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "changes": "None; original video, audio ignored by capture"
+    },
+    {
+      "path": "station/models/smoke.onnx",
+      "size": 38155661,
+      "sha256": "5c17b5f917b3cd61bafd15b808cbe3c3b03e054e2e9f09ca72f6309d53d8e76b",
+      "source": "https://huggingface.co/pyronear/yolov11s/tree/de398b5192b2c1d5f8963aef56bf8df1f13c159e",
+      "licence": "AGPL-3.0-only",
+      "attribution": "Pyronear YOLO11s, Tenacious Tiger v8.3.0; Ultralytics ancestry.",
+      "changes": "Unmodified upstream ONNX export.",
+      "source_access": {
+        "weights": "https://huggingface.co/pyronear/yolov11s/resolve/de398b5192b2c1d5f8963aef56bf8df1f13c159e/best.pt",
+        "manifest": "https://huggingface.co/pyronear/yolov11s/raw/de398b5192b2c1d5f8963aef56bf8df1f13c159e/manifest.yaml",
+        "training": "https://github.com/pyronear/pyro-train",
+        "framework": "https://github.com/ultralytics/ultralytics"
+      }
+    },
+    {
+      "path": "tools/licenses/ARTIFACT-NOTICES.md",
+      "size": 4346,
+      "sha256": "610087bd6733481b1af81488efd0e30ebe68328789297683d300f4e146fbba65",
+      "source": "Project attribution notice",
+      "licence": "CC0-1.0"
+    },
+    {
+      "path": "tools/licenses/PYRONEAR-AGPL-3.0.txt",
+      "size": 34523,
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+      "source": "https://huggingface.co/pyronear/yolov11s/tree/de398b5192b2c1d5f8963aef56bf8df1f13c159e",
+      "licence": "AGPL-3.0-only"
+    }
+  ],
+  "excluded": [
+    {
+      "path": "station/media/fog.webm",
+      "reason": "Uploader asserts CC BY-SA 4.0, but Commons external licence review remains pending; excluded until provenance verified.",
+      "source": "https://commons.wikimedia.org/wiki/File:Fog_covering_mountain_time_lapse.webm"
+    },
+    {
+      "path": "placement/data/raw/",
+      "reason": "Rebuild cache; prepared data is sufficient."
+    },
+    {
+      "path": "station/data/",
+      "reason": "Runtime events and operator decisions are not public test artifacts."
+    }
+  ]
+}
