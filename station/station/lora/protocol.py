@@ -70,7 +70,7 @@ def decode(raw):
         raise ValueError('CRC mismatch')
     magic, vt, station, boot, sequence, timestamp, remaining = HEADER.unpack(raw[:HEADER.size])
     kind = vt & 15
-    if magic != 0xAC or vt >> 4 != 1 or kind not in FORMATS:
+    if station == 0 or magic != 0xAC or vt >> 4 != 1 or kind not in FORMATS:
         raise ValueError('Unknown magic, version or kind')
     fmt = FORMATS[kind]
     if len(raw) != HEADER.size+fmt.size+2:
@@ -91,6 +91,6 @@ def decode(raw):
     else:
         d = dict(active=v[0], lost=v[1], pending=v[2], uptime=v[3], battery=None,
                  heading_cd=v[5], yaw=list(v[6:9]), hfov=list(v[9:12]))
-        if v[4] != 255 or d['active'] > 7 or d['lost'] & ~d['active'] or d['heading_cd'] >= 36000 or any(not 0 < f < 180 for f in d['hfov']):
+        if v[4] != 255 or d['active'] > 7 or d['active'].bit_count() > 2 or any(not -18000 <= y < 18000 for y in d['yaw']) or d['lost'] & ~d['active'] or d['heading_cd'] >= 36000 or any(not 0 < f < 180 for f in d['hfov']):
             raise ValueError('Invalid status fields')
     return Packet(Kind(kind), station, boot, sequence, timestamp, remaining, d)

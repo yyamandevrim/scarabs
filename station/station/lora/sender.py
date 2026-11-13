@@ -18,6 +18,10 @@ class Sender:
         if packet.kind == Kind.STATUS:
             self.heartbeat = packet
             return True
+        if packet.kind == Kind.DECISION and priority != 2:
+            # Correcting a review supersedes unsent/repeating older decisions.
+            self.queue = [x for x in self.queue if not (x[3].kind == Kind.DECISION and x[3].data['event_id'] == packet.data['event_id'])]
+            heapq.heapify(self.queue)
         if len(self.queue) >= self.max_queue:
             # Evict a repeat before rejecting a new alert.
             candidates = [i for i, x in enumerate(self.queue) if x[0] == 2]

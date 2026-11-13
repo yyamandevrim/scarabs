@@ -49,8 +49,8 @@ class LoraBridge:
     def __init__(self, station):
         self.station = station
         self.config = c = station.config.lora
-        if c.enabled and any(camera.hfov >= 180 for camera in station.config.cameras):
-            raise ValueError('LoRa bearing projection requires hfov < 180 degrees')
+        if c.enabled and any(not 1 <= round(camera.hfov) < 180 for camera in station.config.cameras):
+            raise ValueError('LoRa bearing projection requires horizontal FOV rounding to 1..179 degrees')
         self.boot = secrets.randbits(32)
         self.started = time.time()
         self.stop_event = Event()
@@ -61,7 +61,7 @@ class LoraBridge:
         if not c.enabled:
             self.sender = None
             return
-        self.link = SimulatedLink(peer=(c.peer_host, c.peer_port), loss=c.loss, delay=c.airtime_delay, payload_limit=c.payload_limit, seed=c.seed) if c.transport == 'simulated' else SerialModem(c.serial_port)
+        self.link = SimulatedLink(peer=(c.peer_host, c.peer_port), loss=c.loss, delay=c.airtime_delay, payload_limit=c.payload_limit, seed=c.seed) if c.transport == 'simulated' else SerialModem(c.serial_port, sf=c.sf, bandwidth=c.bandwidth, coding_rate=c.coding_rate, frequency=c.frequency)
         self.sender = Sender(self.link, Radio(c.sf, c.bandwidth, c.coding_rate),
                              DutyBudget(c.duty_fraction, path=station.config.data_dir/'lora-duty.json'),
                              c.repeats, c.repeat_seconds)

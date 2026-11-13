@@ -18,10 +18,12 @@ uv sync --locked --python 3.11
 uv run python scripts/fetch_model.py
 uv run python scripts/fetch_footage.py
 uv run --offline --frozen pytest -q
+# macOS zsh; choose a local secret before starting the server.
+read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo
 uv run --offline --frozen forest-station --config config.toml serve --port 8080
 ```
 
-Set the ranger panel secret before serving (see [Communication](#communication)): `read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo` (macOS zsh). Without a secret all panel data/API access fails closed. Open **http://127.0.0.1:8080** and sign in. The two default sources are actual recorded wildfire and fog videos, played at their original frame rates and analysed at a target of once per second per active camera. The right slot stays mounted/inactive. Stop with Ctrl+C. Saved decisions survive restart. All config paths resolve relative to the TOML file, independent of the shell's working directory.
+Without a configured secret all panel data/API access fails closed; see [Communication](#communication). Open **http://127.0.0.1:8080** and sign in. The two default sources are actual recorded wildfire and fog videos, played at their original frame rates and analysed at a target of once per second per active camera. The right slot stays mounted/inactive. Stop with Ctrl+C. Saved decisions survive restart. All config paths resolve relative to the TOML file, independent of the shell's working directory.
 
 The project has its own `.python-version`, `pyproject.toml`, `uv.lock`, and `.gitignore`. `models/`, `media/`, `data/`, virtual environments, and local config overrides are excluded from git. Nothing needs to be fetched while serving. A cold clone must run the fetch scripts before the real-video tests; those tests explicitly skip if assets are absent, rather than substituting generated footage.
 
@@ -39,6 +41,8 @@ uv sync --locked --python 3.11
 uv run python scripts/fetch_model.py
 uv run python scripts/fetch_footage.py
 uv run --offline --frozen pytest -q
+# bash on the board; local secret, never committed.
+read -rs -p 'Station secret: ' ACORN_PANEL_SECRET; export ACORN_PANEL_SECRET; echo
 uv run --offline --frozen forest-station --config config.toml serve --host 0.0.0.0 --port 8080
 ```
 

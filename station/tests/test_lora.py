@@ -45,8 +45,8 @@ def test_bearing_projection(heading,yaw,box,fov,expected):
 def test_invalid_bearing(fov):
     with pytest.raises(ValueError):bearing(0,0,(0,0,1,1),fov)
 
-# Semtech SX1276/77/78/79 datasheet packet example: 10 bytes, SF7,
-# BW125, CR4/5, explicit header, CRC, preamble 8 => 41.216 ms.
+# Exact formula vector: 10 bytes, SF7, BW125, CR4/5, explicit header,
+# CRC enabled, preamble 8 => 41.216 ms.
 # Semtech AN1200.86 Fig 6 rounds 11-byte SF7/9/10 to .04/.14/.29 s; SF12 CRC-enabled vector is separate.
 @pytest.mark.parametrize('sf,size,expected',[(7,10,.041216),(7,11,.041216),(9,11,.144384),(10,11,.288768),(12,11,1.155072),(12,40,1.974272),(10,40,.534528)])
 def test_airtime_reference(sf,size,expected):
@@ -135,3 +135,26 @@ def test_bridge_uses_event_uuid_and_separate_flame(config):
         bridge.heartbeat(now)
         assert decode(encode(bridge.sender.heartbeat)).data['battery'] is None
     finally:station.stop();station.store.shutdown()
+
+@pytest.mark.parametrize('sf,published_seconds',[(7,.04),(9,.14),(10,.29)])
+def test_published_semtech_11byte_rounded_reference(sf,published_seconds):
+    assert round(Radio(sf).airtime(11),2)==published_seconds
+
+def test_corrected_decision_cancels_old_repeats():
+    s=Sender(FakeLink(),Radio(),DutyBudget(),repeat_interval=5)
+    s.enqueue(packet(Kind.DECISION,decision=1),0)
+    s.tick(0)
+    assert len(s.queue)==1
+    corrected=replace(packet(Kind.DECISION,decision=2),timestamp=1700000001)
+    s.enqueue(corrected,2)
+    assert len(s.queue)==1
+    assert decode(s.tick(2)).data['decision']==2
+    assert all(x[3].data['decision']==2 for x in s.queue)
+
+def test_transport_error_keeps_limited_retry_and_spends_airtime():
+    class Broken(FakeLink):
+        def send(self,payload,airtime):raise OSError('modem unavailable')
+    b=DutyBudget();s=Sender(Broken(),Radio(),b)
+    s.enqueue(packet(),0)
+    with pytest.raises(OSError):s.tick(0)
+    assert len(s.queue)==1 and b.remaining(1)<36

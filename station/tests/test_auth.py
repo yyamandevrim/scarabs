@@ -61,3 +61,10 @@ def test_environment_overrides_local_config(monkeypatch):
     auth=PanelAuth('local-test-secret')
     assert auth.login('local-test-secret','host')[0]==401
     assert auth.login('env-test-secret','host')[0]==200
+
+def test_login_body_limit_and_malformed_json(secured):
+    assert secured.post('/api/auth/login',content=b'{'*2049).status_code==413
+    assert secured.post('/api/auth/login',content=b'not json').status_code==401
+    response=secured.get('/api/status')
+    assert response.headers['cache-control']=='no-store'
+    assert "frame-ancestors 'none'" in response.headers['content-security-policy']
