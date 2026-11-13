@@ -223,3 +223,89 @@ test('pipeline errors are a failure warning, not a measured zero or a healthy an
   assert.match(p.$('#system-warning').textContent, /Analiz kesintisi/);
   assert.match(p.$('.camera-info').textContent, /Analiz kullanılamıyor/);
 });
+
+const webm = '0123456789abcdef0123456789abcdef.webm';
+async function clipPanel(clip, canPlay = 'maybe', events) {
+  const p = await panel(events || [event({clip})]);
+  p.window.HTMLMediaElement.prototype.canPlayType = () => canPlay;
+  p.window.HTMLMediaElement.prototype.pause = function () { this.pausedByPanel = true; };
+  await p.refresh();
+  return p;
+}
+
+test('WebM clip plays inline with the annotated snapshot as poster, recorded-demo label and download', async () => {
+  const p = await clipPanel(webm);
+  const video = p.$('.event video');
+  assert.equal(p.$('.clip-player').hidden, false);
+  assert.equal(video.getAttribute('src'), `/events/${webm}`);
+  assert.equal(video.getAttribute('poster'), '/events/0123456789abcdef0123456789abcdef.jpg');
+  assert.equal(video.controls, true);
+  assert.equal(p.$('.event .evidence').hidden, true);
+  assert.equal(p.$('.clip-label').textContent, 'Kayıtlı demo · olay klibi');
+  assert.equal(p.$('.event .evidence-link').getAttribute('href'), `/events/${webm}`);
+  assert.equal(p.$('.event .evidence-link').getAttribute('download'), webm);
+  assert.equal(p.$('.event .evidence-link').textContent, 'İndir (.webm)');
+  assert.equal(p.$('.clip-status').hidden, true);
+  assert.doesNotMatch(p.$('.event').textContent, /yangın/i);
+});
+
+test('polling keeps the same video element and never reloads the clip being watched', async () => {
+  const p = await clipPanel(webm);
+  const video = p.$('.event video');
+  let reloads = 0;
+  const setAttribute = video.setAttribute.bind(video);
+  video.setAttribute = (name, value) => { if (name === 'src') reloads++; setAttribute(name, value); };
+  p.state.events[0].last_seen += 3;
+  await p.refresh();
+  await p.refresh();
+  assert.equal(p.$('.event video'), video);
+  assert.equal(reloads, 0);
+});
+
+test('legacy AVI events show the snapshot, an honest message and the download, without a player', async () => {
+  const p = await clipPanel('0123456789abcdef0123456789abcdef.avi');
+  assert.equal(p.$('.clip-player').hidden, true);
+  assert.equal(p.$('.event video').getAttribute('src'), null);
+  assert.equal(p.$('.event .evidence').hidden, false);
+  assert.match(p.$('.clip-status').textContent, /tarayıcıda oynatılamaz \(\.avi\).*indirilip/);
+  assert.equal(p.$('.event .evidence-link').textContent, 'İndir (.avi)');
+  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+});
+
+test('a browser without VP8 support, or a decode error, falls back to snapshot plus download', async () => {
+  const unsupported = await clipPanel(webm, '');
+  assert.equal(unsupported.$('.clip-player').hidden, true);
+  assert.equal(unsupported.$('.event .evidence').hidden, false);
+  assert.match(unsupported.$('.clip-status').textContent, /Bu tarayıcı klibi oynatamıyor/);
+  const p = await clipPanel(webm);
+  p.$('.event video').dispatchEvent(new p.window.Event('error'));
+  assert.equal(p.$('.clip-player').hidden, true);
+  assert.equal(p.$('.event .evidence').hidden, false);
+  assert.match(p.$('.clip-status').textContent, /oynatamıyor/);
+  await p.refresh();
+  assert.equal(p.$('.clip-player').hidden, true, 'a failed clip is not retried on every poll');
+});
+
+test('clip states: pending encode, failed encode and live camera label', async () => {
+  const p = await clipPanel(null);
+  assert.match(p.$('.clip-status').textContent, /hazırlanıyor/);
+  assert.equal(p.$('.clip-bar').hidden, true);
+  p.state.events[0].media_error = 'encoder failed';
+  await p.refresh();
+  assert.match(p.$('.clip-status').textContent, /Klip kaydedilemedi/);
+  assert.equal(p.$('.clip-status').classList.contains('error'), true);
+  p.state.events[0].clip = webm;
+  p.state.events[0].media_error = null;
+  p.state.status.cameras[0].kind = 'usb';
+  await p.refresh();
+  assert.equal(p.$('.clip-label').textContent, 'Kamera kaydı · olay klibi');
+});
+
+test('deciding pauses a playing clip', async () => {
+  const p = await clipPanel(webm);
+  const video = p.$('.event video');
+  Object.defineProperty(video, 'paused', {configurable: true, get: () => false});
+  p.$('.confirm').click();
+  await flush();
+  assert.equal(video.pausedByPanel, true);
+});

@@ -67,7 +67,7 @@ class EventStore:
         with self.lock, self.db:
             rows = self.db.execute("SELECT id FROM events WHERE last_seen < ?", (now-retention_days*86400,)).fetchall()
             for row in rows:
-                for suffix in (".jpg", ".avi", ".tmp.avi"):
+                for suffix in (".jpg", ".webm", ".tmp.webm", ".avi", ".tmp.avi"):
                     (self.media / (row["id"]+suffix)).unlink(missing_ok=True)
                 self.db.execute("DELETE FROM events WHERE id=?", (row["id"],))
             # Remove orphaned media left by a process crash, after the same retention period.

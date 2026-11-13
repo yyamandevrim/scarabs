@@ -70,12 +70,14 @@ def create_app(station, manage_lifecycle=True):
     def media(filename: str):
         # Event-generated filenames only; do not expose arbitrary data files.
         import re
-        if not re.fullmatch(r"[0-9a-f]{32}\.(jpg|avi)", filename):
+        if not re.fullmatch(r"[0-9a-f]{32}\.(jpg|webm|avi)", filename):
             raise HTTPException(404)
         path = station.store.media/filename
         if not path.is_file():
             raise HTTPException(404)
-        return FileResponse(path, filename=filename if path.suffix == ".avi" else None)
+        # WebM plays inline (FileResponse answers Range requests); legacy AVI downloads.
+        media_type = {".jpg":"image/jpeg", ".webm":"video/webm", ".avi":"video/x-msvideo"}[path.suffix]
+        return FileResponse(path, media_type=media_type, filename=filename if path.suffix == ".avi" else None)
 
     app.mount("/static", StaticFiles(directory=static), name="static")
     return app

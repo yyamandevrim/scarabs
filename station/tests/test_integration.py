@@ -36,9 +36,12 @@ def test_real_smoke_negative_pipeline_offline(tmp_path,monkeypatch,negative):
         event=next(e for e in station.store.events() if e['id']==event['id'])
         snapshot=client.get('/events/'+event['snapshot']);assert snapshot.status_code==200
         clip=client.get('/events/'+event['clip']);assert clip.status_code==200
+        assert event['clip'].endswith('.webm') and clip.headers['content-type']=='video/webm'
         cap=cv2.VideoCapture(str(station.store.media/event['clip']))
-        assert cap.isOpened() and cap.get(cv2.CAP_PROP_FRAME_COUNT)>=10
-        assert cap.read()[0];cap.release()
+        decoded=0
+        while cap.read()[0]:decoded+=1
+        cap.release()
+        assert decoded>=10
         assert client.get('/api/cameras/left/frame.jpg').status_code==200
         assert client.get('/api/cameras/centre/frame.jpg').status_code==200
         assert client.get('/api/cameras/right/frame.jpg').status_code==404

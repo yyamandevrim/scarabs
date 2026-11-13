@@ -90,8 +90,13 @@ summary { cursor: pointer; min-height: 44px; align-content: center; }
 .event-meta { color: var(--muted); margin-bottom: var(--space-3); }
 .evidence { display: block; margin-bottom: var(--space-3); }
 .evidence img { width: 100%; aspect-ratio: 16 / 9; object-fit: contain; display: block; border-radius: var(--radius-inner); background: var(--frame); }
+.clip-player { margin-bottom: var(--space-2); }
+.clip-player video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; border-radius: var(--radius-inner); background: var(--frame); }
 .event-detail { color: var(--muted); }
-.evidence-link { display: inline-block; margin-top: var(--space-2); min-height: 32px; }
+.clip-bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--space-3); margin-bottom: var(--space-2); font-size: var(--text-small); color: var(--muted); }
+.evidence-link { display: inline-flex; align-items: center; min-height: 32px; color: var(--ink); }
+.clip-status { font-size: var(--text-small); margin-bottom: var(--space-2); }
+.clip-status.error { color: var(--failure); }
 .actions { margin-top: var(--space-3); display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .decision { grid-column: 1 / -1; font-weight: 600; }
 .pending .decision { color: var(--amber); }
@@ -109,7 +114,7 @@ button.cancel { grid-column: 1 / -1; }
 .history .event { padding: var(--space-4) 0; border-bottom: 1px solid var(--line); }
 .event.decided { color: var(--muted); }
 .event.decided h3 { font-size: var(--text-body); font-weight: 500; }
-.event.decided .event-detail, .event.decided .evidence, .event.decided .evidence-link { display: none; }
+.event.decided .event-detail, .event.decided .evidence, .event.decided .clip-player, .event.decided .clip-bar { display: none; }
 .event.decided .event-meta { font-size: var(--text-small); margin-bottom: 0; }
 .event.decided .actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); margin-top: 0; }
 .event.decided .decision { font-weight: 500; }
@@ -136,11 +141,10 @@ footer { max-width: 1600px; margin: auto; padding: 0 var(--space-8) var(--space-
   #event-count { margin-top: 0; }
   .event.pending { padding: var(--space-3); margin-bottom: 0; }
   .event + .event { margin-top: var(--space-4); }
-  .evidence img { max-height: 168px; }
+  .evidence img, .clip-player video { max-height: 168px; }
   .event-detail { font-size: var(--text-small); }
   .event-note { margin-bottom: var(--space-3); }
   .event-meta { margin-bottom: var(--space-2); }
-  .evidence-link { margin-top: var(--space-1); }
   .observation .section-heading { display: block; }
   .observation .section-heading p { margin-top: var(--space-1); }
   .empty { padding: var(--space-3) 0; }

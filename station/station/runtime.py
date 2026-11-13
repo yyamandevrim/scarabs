@@ -1,4 +1,5 @@
 """One shared detector, round-robin analysis, independent capture and local evidence."""
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
@@ -6,7 +7,7 @@ from threading import Event, Lock, Thread
 import logging
 import time
 import cv2
-import numpy as np
+from . import clip
 from .alarm import EventTracker
 from .capture import CaptureWorker
 from .detector import SmokeDetector, annotate
@@ -26,7 +27,8 @@ class Station:
         self.metrics = {name: {"analyses":0, "preprocess_ms":None, "inference_ms":None, "analysis_ms":None, "analysis_hz":0.0, "pipeline_error":None} for name in self.workers}
         self.pending = []
         self.media_jobs = []
-        self.encoder = ThreadPoolExecutor(max_workers=1, thread_name_prefix="evidence")
+        self.encoder = ThreadPoolExecutor(max_workers=1, thread_name_prefix="evidence", initializer=clip.lower_thread_priority)
+        self.clip_timings = deque(maxlen=50)
         self.thread = None
 
     def start(self):
@@ -92,7 +94,7 @@ class Station:
             self.store.set_media(event_id, snapshot=filename)
         else:
             self.store.set_media(event_id, error="Snapshot write failed")
-        self.pending.append({"id":event_id, "camera":name, "start":now-self.config.pre_seconds, "end":now+self.config.post_seconds, "frames":self.workers[name].evidence(now-self.config.pre_seconds, now), "last":now})
+        self.pending.append({"id":event_id, "camera":name, "start":now-self.config.pre_seconds, "end":now+self.config.post_seconds, "frames":self.workers[name].evidence(now-self.config.pre_seconds, now), "last":now, "detection":detection})
         return event_id
 
     def _submit_clip(self, pending):
@@ -104,38 +106,15 @@ class Station:
         self.media_jobs.append(self.encoder.submit(self._write_clip, pending))
 
     def _write_clip(self, pending):
-        filename = pending["id"]+".avi"
-        temporary = self.store.media / (pending["id"]+".tmp.avi")
-        writer = None
         try:
-            frames = pending["frames"]
-            if not frames:
-                raise OSError("No captured evidence frames")
-            first = cv2.imdecode(np.frombuffer(frames[0][1], np.uint8), cv2.IMREAD_COLOR)
-            height, width = first.shape[:2]
-            writer = cv2.VideoWriter(str(temporary), cv2.VideoWriter_fourcc(*"MJPG"), self.config.clip_fps, (width,height))
-            if not writer.isOpened():
-                raise OSError("MJPEG evidence codec unavailable")
-            # Resample by capture timestamps; do not speed up irregular samples.
-            times = np.arange(frames[0][0], frames[-1][0]+.5/self.config.clip_fps, 1/self.config.clip_fps)
-            index = 0
-            for timestamp in times:
-                while index+1 < len(frames) and frames[index+1][0] <= timestamp:
-                    index += 1
-                image = cv2.imdecode(np.frombuffer(frames[index][1],np.uint8), cv2.IMREAD_COLOR)
-                writer.write(image)
-            writer.release()
-            writer = None
-            temporary.replace(self.store.media/filename)
-            if not self.store.set_media(pending["id"], clip=filename):
-                (self.store.media/filename).unlink(missing_ok=True)
+            result = clip.encode(pending["frames"], self.config.clip_fps, self.store.media, pending["id"], pending.get("detection"))
+            logging.info("Event clip %s: %s, %d frames, encoded in %.0f ms", pending["id"], result.format, result.frames, result.encode_ms)
+            self.clip_timings.append(result.encode_ms)
+            if not self.store.set_media(pending["id"], clip=result.filename):
+                (self.store.media/result.filename).unlink(missing_ok=True)
         except Exception as exc:
             logging.exception("Event evidence failed")
             self.store.set_media(pending["id"], error=str(exc))
-            temporary.unlink(missing_ok=True)
-        finally:
-            if writer is not None:
-                writer.release()
 
     def _collect_evidence(self, now):
         for pending in list(self.pending):

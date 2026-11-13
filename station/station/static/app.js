@@ -149,15 +149,77 @@ function eventRow(event) {
   const image = document.createElement('img');
   image.alt = 'Duman şüphesi işaretlenmiş olay görüntüsü';
   evidence.append(image);
+  const player = text('div', '', 'clip-player');
+  const video = document.createElement('video');
+  video.controls = true;
+  video.muted = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  video.setAttribute('aria-label', 'Duman şüphesi olay klibi');
+  video.addEventListener('error', () => {
+    // A decoder that refuses the clip falls back to the snapshot and download.
+    item.playbackFailed = video.getAttribute('src');
+    renderClip(item, item.event);
+  });
+  player.append(video);
+  player.hidden = true;
   const noImage = text('p', 'Görüntü kaydı bekleniyor…', 'event-detail');
   const detail = text('p', '', 'event-detail');
-  const clip = text('a', 'Olay klibini indir (.avi)', 'evidence-link');
-  const clipStatus = text('p', '', 'event-detail');
+  const clipBar = text('div', '', 'clip-bar');
+  const clipLabel = text('span', '', 'clip-label');
+  const clip = text('a', '', 'evidence-link');
+  clipBar.append(clipLabel, clip);
+  const clipStatus = text('p', '', 'event-detail clip-status');
   const actions = text('div', '', 'actions');
-  row.append(title, meta, evidence, noImage, detail, clip, clipStatus, actions);
-  const item = {row, title, meta, evidence, image, noImage, detail, clip, clipStatus, actions, mode: '', saving: false, savedUntil: 0};
+  row.append(title, meta, player, evidence, noImage, clipBar, clipStatus, detail, actions);
+  const item = {row, title, meta, player, video, evidence, image, noImage, detail, clipBar, clipLabel, clip, clipStatus, actions, event, playbackFailed: null, mode: '', saving: false, savedUntil: 0};
   eventElements.set(event.id, item);
   return item;
+}
+function sourceLabel(event) {
+  const camera = currentStatus?.cameras.find(candidate => candidate.name === event.camera);
+  return camera?.kind === 'usb' ? 'Kamera kaydı' : camera?.kind === 'file' ? 'Kayıtlı demo' : 'Olay kaydı';
+}
+function renderClip(item, event) {
+  const clipUrl = event.clip ? `/events/${event.clip}` : null;
+  const extension = event.clip?.split('.').pop();
+  // WebM/VP8 plays inline; legacy or fallback AVI stays a download beside the snapshot.
+  const playable = extension === 'webm' && item.playbackFailed !== clipUrl && item.video.canPlayType('video/webm; codecs="vp8"') !== '';
+  const snapshotUrl = event.snapshot ? `/events/${event.snapshot}` : null;
+  item.player.hidden = !playable;
+  item.evidence.hidden = playable || !snapshotUrl;
+  item.noImage.hidden = playable || !!snapshotUrl;
+  if (snapshotUrl) {
+    item.evidence.setAttribute('href', snapshotUrl);
+    if (item.image.getAttribute('src') !== snapshotUrl) item.image.src = snapshotUrl;
+    if (item.video.getAttribute('poster') !== snapshotUrl) item.video.setAttribute('poster', snapshotUrl);
+  }
+  if (playable) {
+    // Polling must never restart a clip the operator is watching.
+    if (item.video.getAttribute('src') !== clipUrl) item.video.setAttribute('src', clipUrl);
+  } else if (item.video.getAttribute('src')) {
+    item.video.pause?.();
+    item.video.removeAttribute('src');
+  }
+  item.clipBar.hidden = !clipUrl;
+  if (clipUrl) {
+    item.clipLabel.textContent = `${sourceLabel(event)} · olay klibi`;
+    item.clip.textContent = `İndir (.${extension})`;
+    item.clip.setAttribute('href', clipUrl);
+    item.clip.setAttribute('download', event.clip);
+  }
+  item.clipStatus.classList.remove('error');
+  if (!clipUrl) {
+    item.clipStatus.textContent = event.media_error ? 'Klip kaydedilemedi · işaretli görüntü yukarıda' : 'Olay klibi hazırlanıyor…';
+    item.clipStatus.classList.toggle('error', !!event.media_error);
+  } else if (playable) {
+    item.clipStatus.textContent = '';
+  } else if (extension === 'webm') {
+    item.clipStatus.textContent = 'Bu tarayıcı klibi oynatamıyor · işaretli görüntü gösteriliyor, klip indirilebilir';
+  } else {
+    item.clipStatus.textContent = 'Bu klip tarayıcıda oynatılamaz (.avi) · işaretli görüntü gösteriliyor, klip indirilip yerel oynatıcıda açılabilir';
+  }
+  item.clipStatus.hidden = !item.clipStatus.textContent;
 }
 function renderActions(item, event) {
   const mode = event.decision === 'pending' || editing.has(event.id) ? 'editing' : 'decided';
@@ -210,20 +272,12 @@ function renderEvents(events) {
     const isPending = event.decision === 'pending';
     item.row.className = `event ${isPending ? 'pending' : editing.has(event.id) ? 'editing' : 'decided'}`;
     if (isNew && isPending) item.row.classList.add('new-event');
+    if (item.row.classList.contains('decided') && !item.video.paused) item.video.pause?.();
     item.title.textContent = `${labels[event.camera]} kamera · Duman şüphesi`;
     item.meta.textContent = `${dateTime(event.opened_at)} · model güveni %${Math.round(event.confidence * 100)}`;
-    item.evidence.hidden = !event.snapshot;
-    item.noImage.hidden = !!event.snapshot;
-    if (event.snapshot) {
-      const url = `/events/${event.snapshot}`;
-      item.evidence.setAttribute('href', url);
-      if (item.image.getAttribute('src') !== url) item.image.src = url;
-    }
+    item.event = event;
+    renderClip(item, event);
     item.detail.textContent = `${event.closed_at ? 'Gözlem sona erdi' : 'İzleme sürüyor'} · son gözlem ${time(event.last_seen)}`;
-    item.clip.hidden = !event.clip;
-    item.clipStatus.hidden = !!event.clip;
-    if (event.clip) item.clip.href = `/events/${event.clip}`;
-    else item.clipStatus.textContent = event.media_error ? 'Klip kaydedilemedi' : 'Olay klibi hazırlanıyor…';
     renderActions(item, event);
     const target = isPending ? $('#events') : $('#history-events');
     // Keep existing rows and controls in place while measurements poll.

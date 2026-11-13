@@ -1,6 +1,7 @@
 """Run the local panel or benchmark the identical detector on recorded video."""
 import argparse
 import json
+import logging
 import platform
 from pathlib import Path
 import time
@@ -62,6 +63,8 @@ def main():
     try:
         config=load_config(args.config)
         if args.command=="serve":
+            # Evidence logs (clip format and encode time) go to the terminal.
+            logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
             import uvicorn
             from .runtime import Station
             from .web import create_app
