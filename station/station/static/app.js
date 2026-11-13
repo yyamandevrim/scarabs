@@ -1,4 +1,5 @@
 'use strict';
+const stationTitle = document.title;
 const labels = {left: 'Sol', centre: 'Orta', right: 'Sağ'};
 const decisions = {confirmed: 'Operatör doğruladı', rejected: 'Operatör reddetti'};
 const cameraElements = new Map();
@@ -198,7 +199,7 @@ function renderEvents(events) {
   $('#event-count').classList.toggle('has-pending', pending.length > 0);
   $('#pending-summary').textContent = `${pending.length} karar bekliyor`;
   $('#pending-summary').classList.toggle('has-pending', pending.length > 0);
-  document.title = pending.length ? `(${pending.length}) Duman şüphesi — ${[...new Set(pending.map(event => labels[event.camera]))].join(', ')}` : 'Orman Gözlem İstasyonu';
+  document.title = pending.length ? `(${pending.length}) Duman şüphesi — ${[...new Set(pending.map(event => labels[event.camera]))].join(', ')} — ${stationTitle}` : stationTitle;
   $('#events').querySelectorAll('.empty').forEach(element => element.remove());
   for (const [id, item] of eventElements) {
     if (!events.some(event => event.id === id)) { item.row.remove(); eventElements.delete(id); editing.delete(id); }
@@ -272,7 +273,7 @@ async function decide(id, decision) {
 }
 function serverLost() {
   online = false;
-  document.title = 'Bağlantı yok — Orman Gözlem İstasyonu';
+  document.title = `Bağlantı yok — ${stationTitle}`;
   $('#connection').textContent = 'İstasyon bağlantısı yok';
   $('#connection').className = 'lost';
   $('#pending-summary').textContent = 'Karar sayısı —';

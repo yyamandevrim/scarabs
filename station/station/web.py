@@ -1,12 +1,14 @@
 """Entirely local panel and JSON API; no cloud services or frontend dependencies."""
 from contextlib import asynccontextmanager
+from html import escape
 from pathlib import Path
 import time
 from typing import Literal
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from . import identity
 
 class Decision(BaseModel):
     decision: Literal["confirmed", "rejected"]
@@ -24,7 +26,7 @@ def create_app(station, manage_lifecycle=True):
                 station.stop()
                 station.store.shutdown()
 
-    app = FastAPI(title="Orman Gözlem İstasyonu", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title=identity.NAME, lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
     static = Path(__file__).parent/"static"
 
     @app.middleware("http")
@@ -37,7 +39,9 @@ def create_app(station, manage_lifecycle=True):
 
     @app.get("/")
     def panel():
-        return FileResponse(static/"index.html")
+        markup = (static/"index.html").read_text(encoding="utf-8")
+        return HTMLResponse(markup.replace("{{station_title}}", escape(identity.NAME))
+                            .replace("{{station_wordmark}}", escape(identity.NAME.partition(" — ")[0])))
 
     @app.get("/api/status")
     def status():

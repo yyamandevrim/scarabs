@@ -1,6 +1,8 @@
-# Portable forest observation station
+# ACORN — Aerial Canopy Observation and Reporting Node
 
-Offline smoke-suspicion prototype for the Green European Renaissance hackathon. Python 3.11+, `uv`, OpenCV headless, ONNX Runtime CPU, FastAPI, plain local HTML/CSS/JS, and SQLite. No PyTorch, GPU, Jetson, cloud inference, CDN, external fonts, LoRa, or solar implementation.
+Offline smoke-suspicion prototype for the Green European Renaissance challenge at Junction 2026 in Helsinki. Python 3.11+, `uv`, OpenCV headless, ONNX Runtime CPU, FastAPI, plain local HTML/CSS/JS, and SQLite. No PyTorch, GPU, Jetson, cloud inference, CDN, external fonts, LoRa, or solar implementation.
+
+The panel's English product name is defined once in `station/identity.py`. It supplies the plain text ACORN wordmark and page title, including alarm and connection-loss states. No logo has been selected.
 
 **The two-input requirement is applied.** Three cameras remain physically mounted: `left` −70°, `centre` 0°, `right` +70°. Each slot has an `active` flag. Any pair can be selected; the default is **left + centre**. Three active slots are rejected with `At most two camera slots may be active; the board has two usable inputs`. Only active slots create capture workers or receive inference. The inactive slot reads **“takılı, bağlı değil”**; a failed active source reads **“bağlantı koptu”**.
 
@@ -32,7 +34,7 @@ sudo apt-get update
 sudo apt-get install -y curl ca-certificates v4l-utils libglib2.0-0
 curl -LsSf https://astral.sh/uv/install.sh | sh
 # Open a new shell, then enter the copy of this repository on the board:
-cd /path/to/junction/station
+cd station
 uv sync --locked --python 3.11
 uv run python scripts/fetch_model.py
 uv run python scripts/fetch_footage.py

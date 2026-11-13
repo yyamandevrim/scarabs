@@ -2,14 +2,13 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Orman Gözlem İstasyonu</title>
-<link rel="icon" href="/static/icon.svg">
+<title>{{station_title}}</title>
 <link rel="stylesheet" href="/static/style.css">
 <script src="/static/app.js" defer></script>
 </head>
 <body>
 <header class="station-bar">
-  <h1>Orman Gözlem İstasyonu</h1>
+  <h1 title="{{station_title}}" aria-label="{{station_title}}">{{station_wordmark}}</h1>
   <p id="connection" role="status">İstasyona bağlanılıyor…</p>
   <a id="pending-summary" href="#event-panel">Kararlar yükleniyor…</a>
 </header>

@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {Window} from 'happy-dom';
 
-const html = readFileSync(new URL('../station/static/index.html', import.meta.url), 'utf8');
+const stationTitle = 'Test product — Observation node';
+const html = readFileSync(new URL('../station/static/index.html', import.meta.url), 'utf8')
+  .replaceAll('{{station_title}}', stationTitle).replaceAll('{{station_wordmark}}', 'Test product');
 const script = readFileSync(new URL('../station/static/app.js', import.meta.url), 'utf8');
 const camera = (name, active = true) => ({
   name, active, connected: active, kind: 'file', yaw: name === 'left' ? -70 : name === 'right' ? 70 : 0,
@@ -48,6 +50,7 @@ test('loading never claims no events or a connected station', async () => {
   assert.equal(p.$('#cameras').children.length, 2);
   assert.doesNotMatch(p.$('#events').textContent, /Henüz/);
   assert.ok(p.$('#event-panel').compareDocumentPosition(p.$('.observation')) & 4);
+  assert.equal(p.window.document.title, stationTitle);
 });
 
 test('normal has two feeds, one inactive status row, local demo labels and measured figures', async () => {
@@ -59,6 +62,7 @@ test('normal has two feeds, one inactive status row, local demo labels and measu
   assert.match(p.$('.camera-info').textContent, /Ölçülen.*54,8 ms/);
   assert.match(p.$('#events').textContent, /Henüz duman şüphesi kaydı yok/);
   assert.equal(p.$('#system-warning').hidden, true);
+  assert.equal(p.window.document.title, stationTitle);
 });
 
 test('pending count excludes decisions, includes closed records still awaiting a decision', async () => {
@@ -66,6 +70,7 @@ test('pending count excludes decisions, includes closed records still awaiting a
   assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
   assert.equal(p.$('#history-count').textContent, '(1)');
   assert.match(p.window.document.title, /\(1\) Duman şüphesi/);
+  assert.ok(p.window.document.title.endsWith(stationTitle));
   assert.equal(p.$('.camera').classList.contains('suspected'), true); // other record remains open
 });
 
@@ -187,6 +192,7 @@ test('server loss removes connected states, stale figures, empty all-clear and d
   assert.match(p.$('#system-warning').textContent, /İstasyon yanıt vermiyor.*Son veri/);
   assert.equal(p.$('#connection').textContent, 'İstasyon bağlantısı yok');
   assert.equal(p.$('#pending-summary').textContent, 'Karar sayısı —');
+  assert.equal(p.window.document.title, `Bağlantı yok — ${stationTitle}`);
   assert.equal(p.$('.camera-state').textContent, 'Durum bilinmiyor');
   assert.equal(p.$('.camera-info').textContent, 'Ölçülen · —');
   assert.equal(p.$('.camera img').getAttribute('src'), null);
