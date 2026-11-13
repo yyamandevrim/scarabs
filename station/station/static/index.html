@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orman Gözlem İstasyonu</title>
+<link rel="icon" href="/static/icon.svg">
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<header><div><p class="eyebrow">GREEN EUROPEAN RENAISSANCE · YEREL İSTASYON</p><h1>Ormanı gözlüyoruz.</h1><p>Erken işaretler, yerinde değerlendirme.</p></div><div class="offline"><span></span>Çevrimdışı çalışır<small>Görüntüler bu cihazda işlenir</small></div></header>
+<main>
+<div class="section-heading"><h2>Kamera görünümleri</h2><p>3 takılı kamera · en fazla 2 etkin giriş</p></div>
+<p id="connection" role="status">İstasyona bağlanılıyor…</p>
+<section id="cameras" class="cameras" aria-label="Kameralar"></section>
+<div class="section-heading events-heading"><div><p class="eyebrow">OPERATÖR DEĞERLENDİRMESİ</p><h2>Gözlem kayıtları <span id="event-count">0</span></h2></div><p>Şüphe bir uyarıdır. Her kayıt değerlendirme bekler.</p></div>
+<p id="action-status" role="status"></p>
+<section id="events" aria-label="Duman şüphesi kayıtları"><p class="empty">Henüz duman şüphesi kaydı yok.</p></section>
+</main>
+<footer>Yerel kayıt · CPU üzerinde analiz · Deneysel prototip <span id="settings"></span></footer>
+</body></html>
