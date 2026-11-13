@@ -51,6 +51,17 @@ RELEASE=dict(prepared_at='2026-11-13T19:54:06.478715+00:00',accessed='2026-11-13
              files={'detailed.npz':'98d64016333bcc86e7ab98b50c712648d1dfdf37839b0fb472b2649a30b8bac8',
                     'coarse.npz':'42643b6899ef4313227fd79bcce71f61ecdb39a96c13619cf64765a17116f9ed'})
 
+def write_metadata(metadata):
+    """Publish release metadata separately from this preparation run’s clock."""
+    run=dict(prepared_at=metadata['prepared_at'],accessed=sorted({s['accessed'] for s in metadata['sources']}),files=dict(metadata['files']))
+    run['reproduced_release']=metadata['files']==RELEASE['files']
+    if run['reproduced_release']:
+        metadata['prepared_at']=RELEASE['prepared_at']
+        for item in metadata['sources']:item['accessed']=RELEASE['accessed']
+    (PREP/'metadata.json').write_text(json.dumps(metadata,indent=2))
+    (PREP/'preparation-run.json').write_text(json.dumps(run,indent=2))
+    print('Reproduced pinned release:' if run['reproduced_release'] else 'New data release (differs from pinned manifest):',sorted(metadata['files']),flush=True)
+
 def fetch(url,path):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     if not path.exists():
@@ -172,14 +183,7 @@ def main():
             cell=20*factor,bounds=BOUNDS)
         metadata['files'][path.name]=hashlib.sha256(path.read_bytes()).hexdigest()
         print('Prepared',name,ground.shape,flush=True)
-    run=dict(prepared_at=metadata['prepared_at'],accessed=sorted({s['accessed'] for s in SOURCES}),files=dict(metadata['files']))
-    run['reproduced_release']=metadata['files']==RELEASE['files']
-    if run['reproduced_release']:
-        metadata['prepared_at']=RELEASE['prepared_at']
-        for item in metadata['sources']:item['accessed']=RELEASE['accessed']
-    (PREP/'metadata.json').write_text(json.dumps(metadata,indent=2))
-    (PREP/'preparation-run.json').write_text(json.dumps(run,indent=2))
-    print('Reproduced pinned release:' if run['reproduced_release'] else 'New data release (differs from pinned manifest):',sorted(metadata['files']),flush=True)
+    write_metadata(metadata)
     make_background(PREP)
     print('Offline data ready:',PREP,flush=True)
 
