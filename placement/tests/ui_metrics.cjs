@@ -37,3 +37,22 @@ test('absent priority area is uncomputed even if a legacy response contains zero
  const calculated={input:{priority:[[24,60],[25,60],[24,61]]},metrics:{canopy_smoke:{priority_visible_ha:0}}};
  assert.equal(m.priorityValue(calculated,'canopy_smoke'),0);
 });
+
+test('quick-mode figures round to 10 ha and the blind split still sums exactly',()=>{
+ assert.equal(m.round(769.56,120),770);
+ assert.equal(m.round(769.56,40),770);
+ assert.equal(m.round(12523.56,40),12524);
+ assert.equal(m.round(undefined,120),null);
+ for(const [outside,occluded] of [[7335.24,0],[14410.64,4.9],[10750.36,14488.68],[5,5]]){
+  const split=m.blind({blind_forest_ha:outside+occluded,outside_fov_forest_ha:outside,occluded_forest_ha:occluded},120);
+  assert.equal(split.total,split.outside+split.occluded);
+  assert.equal(split.outside%10,0);
+ }
+});
+
+test('water share is not computed when no area is in view',()=>{
+ assert.equal(m.share({viewed_area_ha:0,water_share_pct:0}),null);
+ assert.equal(m.share({water_share_pct:0}),null);
+ assert.equal(m.share({viewed_area_ha:120,water_share_pct:0}),0);
+ assert.equal(m.share({viewed_area_ha:120,water_share_pct:83.7}),83.7);
+});
