@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Launch point map</title><link rel="icon" data-brand-icon href="data:,"><link rel="stylesheet" href="/static/vendor/leaflet.css"><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/style.css"><script defer src="/static/vendor/leaflet.js"></script><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/charts.js"></script><script defer src="/static/app.js"></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Launch point map</title><link rel="icon" data-brand-icon href="data:,"><link rel="stylesheet" href="/static/vendor/leaflet.css"><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/style.css"><script defer src="/static/vendor/leaflet.js"></script><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/charts.js"></script><script defer src="/static/map-display.js"></script><script defer src="/static/app.js"></script></head>
 <body class="map-app" data-page-title="Launch point map">
 <header class="shell-bar">
  <a class="shell-brand" href="/" aria-label="Back to project"><img data-brand-logo width="24" height="24" alt="Placeholder logo"><span data-brand-name></span></a>
@@ -15,7 +15,7 @@
   <div id="map-state" role="status"><span class="loader" aria-hidden="true"></span><span id="map-state-text">Loading regional map…</span></div>
   <div class="map-toolbar"><button id="draw">Draw priority forest</button><button id="finish" class="primary" hidden>Finish area</button><button id="clear-priority" hidden>Clear area</button></div>
   <p id="draw-help" class="map-help" hidden></p>
-  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="water"></i>Water in view</span></div>
+  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="water"></i>Water in view</span><span><i class="other-site"></i>Other site’s field of view</span></div>
  </section>
  <aside id="result-summary" class="panel" aria-label="Candidate results" aria-busy="true">
   <div class="tabs" role="tablist" aria-label="Views"><button role="tab" id="tab-compare" aria-controls="view-compare" aria-selected="true">Compare</button><button role="tab" id="tab-breakdown" aria-controls="view-breakdown" aria-selected="false" tabindex="-1">Breakdown</button><button role="tab" id="tab-data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button></div>

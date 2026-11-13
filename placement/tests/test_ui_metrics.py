@@ -83,3 +83,7 @@ def test_rate_limits_are_public_by_default_and_explicitly_overridable():
         assert rate_limits_enabled({'PLACEMENT_RATE_LIMIT': value})
     for value in ('0', 'false', 'no', 'off'):
         assert not rate_limits_enabled({'PLACEMENT_PRODUCTION': '1', 'PLACEMENT_RATE_LIMIT': value})
+
+
+def test_browser_map_display_contract():
+    subprocess.run(['node', '--test', str(ROOT / 'tests/ui_map_display.cjs')], check=True, cwd=ROOT)

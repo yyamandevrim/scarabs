@@ -11,6 +11,7 @@ const cameraNames=['Left','Centre','Right'],cameraNamesTr=['Sol','Merkez','Sağ'
 const camName=i=>tr(cameraNames[i],cameraNamesTr[i]);
 const pairName=p=>p.pair.map((i,k)=>k?camName(i).toLocaleLowerCase(lang()==='tr'?'tr':'en'):camName(i)).join(' + ');
 const siteName=c=>c?.name?.split(' · ').pop()||'—';
+let mapRenderRevision=0;
 const token=name=>getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const scenarioNames={canopy_smoke:['smoke + canopy','duman + taç'],canopy_ground:['ground + canopy','zemin + taç'],bare_smoke:['smoke / bare terrain','duman / çıplak arazi'],bare_ground:['ground / bare terrain','zemin / çıplak arazi']};
 function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
@@ -114,15 +115,23 @@ function renderTable(){
 function offset(lat,lon,bearing,metres){const b=bearing*Math.PI/180;return [lat+metres*Math.cos(b)/111320,lon+metres*Math.sin(b)/(111320*Math.cos(lat*Math.PI/180))];}
 function renderMap(){
  if(!map||!layers)return;layers.markers.clearLayers();layers.sectors.clearLayers();if(overlay){map.removeLayer(overlay);overlay=null;}
- const result=results[selected];
- if(result){const image=result.images?.[scenario];if(image){overlay=L.imageOverlay(image.url,image.bounds,{opacity:.9,interactive:false}).addTo(map);overlay.on('error',()=>{lastError='Map overlay expired. Recalculate both sites.';state(lastError,true);banner('Map overlay expired. Recalculate both sites.','',true)});}
+ const revision=++mapRenderRevision,result=results[selected];
+ // The other site's field of view is deliberately dashed and unfilled: two coloured
+ // coverage rasters would conceal each other where they overlap.
+ results.forEach((r,index)=>{if(!r||index===selected)return;r.sectors?.filter(s=>s.active).forEach(s=>L.polygon(s.points,{color:token('--map-sector'),weight:1.5,opacity:.6,fillOpacity:.025,dashArray:'5 6',interactive:false,className:'other-footprint'}).addTo(layers.sectors));});
+ if(result){const image=result.images?.[scenario];if(image){
+   const rgb=value=>value.match(/[a-f0-9]{2}/gi).map(v=>parseInt(v,16));
+   const source=Object.fromEntries(['visible','water'].map(k=>[k,rgb(token('--map-'+k))]));
+   const display={visible:rgb(token('--display-visible')),water:rgb(token('--display-water'))};
+   MapDisplay.image(image.url,source,display).then(url=>{if(revision!==mapRenderRevision)return;overlay=L.imageOverlay(url,image.bounds,{opacity:1,interactive:false}).addTo(map);}).catch(()=>{if(revision!==mapRenderRevision)return;lastError='Map overlay expired. Recalculate both sites.';state(lastError,true);banner(lastError,'',true);});
+  }
   const input=result.input;
-  result.sectors?.forEach((s,i)=>{L.polygon(s.points,{color:token(s.active?'--map-sector':'--map-outside'),weight:s.active?1.5:1,opacity:s.active?.9:.8,fillOpacity:0,dashArray:s.active?null:'4 6',interactive:false}).addTo(layers.sectors);
+  result.sectors?.forEach((s,i)=>{L.polygon(s.points,{color:token(s.active?'--map-sector':'--map-outside'),weight:s.active?1.5:1,opacity:s.active?.9:.55,fillOpacity:0,dashArray:s.active?null:'4 6',interactive:false}).addTo(layers.sectors);
    const cam=input.cameras[i],at=offset(input.lat,input.lon,input.heading+cam.yaw,input.max_range*.62);const label=el('span','sector-label'+(s.active?'':' inactive'),camName(i)+(s.active?'':' · '+tr('disconnected','bağlı değil')));
    L.marker(at,{interactive:false,keyboard:false,icon:L.divIcon({className:'sector-icon',html:label.outerHTML,iconSize:null})}).addTo(layers.sectors)});
  }
  candidates.forEach((c,i)=>{if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon))return;const marker=L.circleMarker([c.lat,c.lon],{radius:i===selected?7:5,color:token('--bg-0'),weight:2,fillColor:i===selected?token('--text'):token('--text-2'),fillOpacity:1}).addTo(layers.markers);
-  marker.bindTooltip(letters[i]+' · '+siteName(c),{permanent:true,direction:'left',offset:[-8,0],className:'candidate-label'+(i===selected?' selected':'')}).on('click',()=>selectSite(i,false))});
+  marker.bindTooltip(letters[i]+' · '+siteName(c),{permanent:true,direction:matchMedia('(max-width:760px)').matches&&i===1?'right':'left',offset:[matchMedia('(max-width:760px)').matches&&i===1?8:-8,0],className:'candidate-label'+(i===selected?' selected':'')}).on('click',()=>selectSite(i,false))});
 }
 function revealSite(i){if(!map)return;const c=candidates[i];if(!Number.isFinite(c.lat))return;const bounds=L.latLng(c.lat,c.lon).toBounds(2*c.max_range);if(!map.getBounds().contains(bounds))map.fitBounds(bounds,{padding:[24,24],maxZoom:11});}
 function render(){renderMap();renderSummary();renderAccounting();renderPairs();renderSensitivity();renderTable();}
@@ -161,24 +170,30 @@ function toggleDraw(){if(!map)return;if(drawing){stopDrawing();return;}drawing=t
 // --- Start -------------------------------------------------------------------
 function dataSummary(){const pct=dataInfo.assumed_canopy_forest_pct;localized($('data-summary'),`NLS 2019 · CORINE 2024 · Luke MS-NFI 2023 height and cover. ${M.percent(pct,'en',2)} of forest cells use assumed canopy.`,`NLS 2019 · CORINE 2024 · Luke MS-NFI 2023 boy ve taç örtüsü. Orman hücrelerinin ${M.percent(pct,'tr',2)} kadarında varsayılan taç kullanılır.`);}
 function mapState(text){$('map-state').hidden=!text;if(text)$('map-state-text').textContent=text;}
-async function init(){if(ready)return;ready=true;mapState('Loading regional map…');setBusy(true);
+async function init(){let initializingMap=null;if(ready)return;ready=true;mapState('Loading regional map…');setBusy(true);
  try{const response=await fetch('/api/config');if(!response.ok)throw Error();const config=await response.json();candidates=config.presets;dataInfo=config.data;showControls();renderSummary();if(!config.ready)throw Error();
   dataSummary();
-  const m=L.map('map',{attributionControl:true,zoomControl:false,zoomSnap:.5});
+  const m=initializingMap=L.map('map',{attributionControl:true,zoomControl:false,zoomSnap:.5,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false});
   layers={markers:L.layerGroup(),sectors:L.layerGroup(),draw:L.layerGroup()};
-  L.control.zoom({zoomInTitle:'Zoom in',zoomOutTitle:'Zoom out',position:'topright'}).addTo(m);m.attributionControl.setPrefix(false);m.attributionControl.addAttribution('NLS 2019 · Syke 2024 · Luke 2023 | CC BY 4.0');
+  const DrawControl=L.Control.extend({onAdd(){const controls=document.querySelector('.map-toolbar');L.DomEvent.disableClickPropagation(controls);L.DomEvent.disableScrollPropagation(controls);return controls;}});
+  new DrawControl({position:'topleft'}).addTo(m);L.control.zoom({zoomInTitle:'Zoom in',zoomOutTitle:'Zoom out',position:'topleft'}).addTo(m);m.attributionControl.setPrefix(false);m.attributionControl.addAttribution('NLS 2019 · Syke 2024 · Luke 2023 | CC BY 4.0');
   const mapResponse=await fetch('/maps/map.json');if(!mapResponse.ok)throw Error();const mapConfig=await mapResponse.json();
-  m.fitBounds(candidates.map(c=>[c.lat,c.lon]),{padding:[60,60],maxZoom:matchMedia('(max-width:760px)').matches?9:10,animate:false});
+  const interior=await MapDisplay.extent('/maps/background.png'),nw=m.project(L.latLng(mapConfig.bounds[1][0],mapConfig.bounds[0][1]),0),se=m.project(L.latLng(mapConfig.bounds[0][0],mapConfig.bounds[1][1]),0);
+  const corner=(x,y)=>m.unproject(L.point(nw.x+(se.x-nw.x)*x,nw.y+(se.y-nw.y)*y),0);
+  const safeBounds=L.latLngBounds(corner(interior.left,interior.bottom),corner(interior.right,interior.top));
+  function constrainView(){const minimum=Math.ceil(m.getBoundsZoom(safeBounds,true)*2)/2;m.stop();m.setMinZoom(minimum);if(Number.isFinite(m.getZoom())){if(m.getZoom()<minimum)m.setZoom(minimum,{animate:false});m.panInsideBounds(safeBounds,{animate:false});}}
+  m.options.maxBoundsViscosity=1;m.setMaxBounds(safeBounds);constrainView();
+  m.fitBounds(candidates.map(c=>[c.lat,c.lon]),{padding:[60,60],maxZoom:Math.max(m.getMinZoom(),matchMedia('(max-width:760px)').matches?9:10),animate:false});
   const background=L.imageOverlay('/maps/background.png',mapConfig.bounds,{className:'base-map'}).addTo(m);const forests=L.imageOverlay('/maps/forest.png',mapConfig.bounds,{opacity:.45}),waters=L.imageOverlay('/maps/water.png',mapConfig.bounds,{opacity:.45});
-  L.control.layers({'Local terrain map':background},{'Forest highlight':forests,'Water highlight':waters},{collapsed:true,position:'topright'}).addTo(m);L.control.scale({imperial:false,position:'bottomright'}).addTo(m);
+  L.control.layers({'Local terrain map':background},{'Forest highlight':forests,'Water highlight':waters},{collapsed:true,position:'topleft'}).addTo(m);L.control.scale({imperial:false,position:'bottomright'}).addTo(m);
   for(const layer of Object.values(layers))layer.addTo(m);
   const labels=[['Helsinki',60.17,24.94],['Espoo',60.205,24.66],['Vantaa',60.294,25.04],['Nuuksio',60.32,24.51,true],['Sipoonkorpi',60.32,25.19,true]];
   labels.filter(([name])=>!candidates.some(c=>siteName(c)===name)).forEach(([name,lat,lon,forest])=>L.marker([lat,lon],{interactive:false,keyboard:false,icon:L.divIcon({className:'map-label'+(forest?' forest-label':''),html:name,iconSize:[100,20]})}).addTo(m));
   m.on('click',e=>{if(drawing){drawPoints.push(e.latlng);layers.draw.clearLayers();L.polyline(drawPoints,{color:token('--accent'),weight:2}).addTo(layers.draw);drawPoints.forEach(p=>L.circleMarker(p,{radius:4,color:token('--accent'),fillColor:token('--bg-0'),fillOpacity:1}).addTo(layers.draw));return;}readControls();candidates[selected].lat=e.latlng.lat;candidates[selected].lon=e.latlng.lng;showControls();run(false)});
   m.on('dblclick',()=>{if(drawing)finishDraw()});
-  new ResizeObserver(()=>m.invalidateSize({pan:false})).observe($('map'));
+  new ResizeObserver(()=>{m.invalidateSize({pan:false});constrainView();}).observe($('map'));
   map=m;mapState('');render();await run(true);
- }catch{ready=false;if(map){map.remove();map=null;layers=null;}mapState('Could not load regional map data. Use Recalculate both sites to retry.');lastError='Could not load regional map data. Use Recalculate both sites to retry.';status(lastError,true);banner(lastError,'',true);renderSummary();setBusy(false);}}
+ }catch{ready=false;const failedMap=map||initializingMap;if(failedMap){const controls=document.querySelector('.map-toolbar');failedMap.remove();if(controls)document.querySelector('.map-shell').append(controls);}map=null;layers=null;mapState('Could not load regional map data. Use Recalculate both sites to retry.');lastError='Could not load regional map data. Use Recalculate both sites to retry.';status(lastError,true);banner(lastError,'',true);renderSummary();setBusy(false);}}
 
 ['lat','lon','height','resolution','max-range','smoke-height'].forEach(id=>$(id).addEventListener('change',()=>{readControls();later(300)}));
 // Dragging the heading only redraws the sector guide; one analysis runs after release.

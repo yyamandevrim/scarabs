@@ -31,6 +31,8 @@
   --fail: #f0594e;
   --fail-wash: rgba(240,89,78,.14);
   --ok: #4cc38a;
+  --display-visible: #5aefb0;
+  --display-water: #46778e;
   --map-visible: #009e73;
   --map-outside: #8f969c;
   --map-occluded: #b87850;

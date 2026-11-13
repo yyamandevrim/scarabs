@@ -229,5 +229,6 @@
  "Visible forest if the heading drifts ±20°": "Yön ±20° saparsa görünen orman",
  "Simulated geometric visibility, not a detection range.": "Simüle edilmiş geometrik görünürlük; tespit menzili değildir.",
  "A forest watch starts with the right launch point.": "Orman gözlemi, doğru kalkış noktasıyla başlar.",
- "Three mounted cameras. Two active inputs. Terrain and canopy determine what they can see.": "Üç takılı kamera. İki etkin giriş. Görebildikleri alanı arazi ve ağaç taçları belirler."
+ "Three mounted cameras. Two active inputs. Terrain and canopy determine what they can see.": "Üç takılı kamera. İki etkin giriş. Görebildikleri alanı arazi ve ağaç taçları belirler.",
+ "Other site’s field of view": "Diğer konumun görüş alanı"
 }
