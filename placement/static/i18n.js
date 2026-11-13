@@ -5,6 +5,7 @@
  if(!['en','tr'].includes(lang))lang='en';
  document.documentElement.lang=lang;
  let dictionary={}, brand=null, observer;
+ window.placementText=(en,tr)=>lang==='tr'?tr:en;
  const originals=new WeakMap();
  const translate=(value,to)=>{
    const entries=Object.entries(dictionary).map(([en,tr])=>to==='tr'?[en,tr]:[tr,en]).sort((a,b)=>b[0].length-a[0].length);
@@ -20,16 +21,17 @@
    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
    let node;
    while(node=walker.nextNode()){
-     if(node.parentElement.closest('script,style,[data-brand-name],[data-brand-tagline],[data-brand-team],.language'))continue;
+     if(node.parentElement.closest('script,style,[data-brand-name],[data-brand-tagline],[data-brand-team],.language,[data-localized]'))continue;
      const old=originals.get(node);const canonical=old&&old.last===node.nodeValue?old.source:translate(node.nodeValue,'en');
      const value=lang==='en'?canonical:translate(canonical,'tr');
      if(node.nodeValue!==value)node.nodeValue=value;
      originals.set(node,{source:canonical,last:value});
    }
-   document.querySelectorAll('[aria-label]').forEach(el=>{
-     const current=el.getAttribute('aria-label');const canonical=translate(current,'en');
-     el.setAttribute('aria-label',lang==='en'?canonical:translate(canonical,'tr'));
+   document.querySelectorAll('[aria-label], [title], [alt]').forEach(el=>{
+     for(const attr of ['aria-label','title','alt']){const current=el.getAttribute(attr);if(current===null)continue;const canonical=translate(current,'en');el.setAttribute(attr,lang==='en'?canonical:translate(canonical,'tr'));}
    });
+   document.querySelectorAll('[data-product-desktop]').forEach(e=>{const path='/static/placement-preview-'+lang+'.png';if(e.getAttribute('src')!==path)e.src=path});
+   document.querySelectorAll('[data-product-phone]').forEach(e=>{const path='/static/placement-preview-phone-'+lang+'.png';if(e.getAttribute('srcset')!==path)e.srcset=path});
    document.querySelectorAll('.language').forEach(b=>{b.textContent=lang==='en'?'Türkçe':'English';b.setAttribute('aria-label',lang==='en'?'Switch to Turkish':'İngilizceye geç')});
    if(brand){
      document.querySelectorAll('[data-brand-name]').forEach(e=>e.textContent=brand.name);
@@ -46,7 +48,7 @@
    try{localStorage.setItem('language',lang)}catch{}
    render();window.dispatchEvent(new Event('languagechange'));render();
  }));
- Promise.all([fetch('/static/translations.json').then(r=>r.json()),fetch('/api/brand').then(r=>r.json())]).then(([d,b])=>{
-   dictionary=d;brand=b;observer=new MutationObserver(render);render();
+ Promise.allSettled([fetch('/static/translations.json').then(r=>r.json()),fetch('/api/brand').then(r=>r.json())]).then(([d,b])=>{
+   dictionary=d.status==='fulfilled'?d.value:{};brand=b.status==='fulfilled'?b.value:null;observer=new MutationObserver(render);render();window.dispatchEvent(new Event('languagechange'));
  });
 })();

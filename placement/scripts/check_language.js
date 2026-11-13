@@ -8,7 +8,7 @@
     if(document.documentElement.lang!==lang)document.querySelector('.language').click();
     await new Promise(resolve=>setTimeout(resolve,40));
     const text=document.body.innerText;
-    const expected=mapPage?(lang==='en'?'Occluded inside FOV · simulated ha':'Görüş alanı içinde perdelenmiş · simülasyon ha'):(lang==='en'?'A better view.':'Daha iyi bir görüş.');
+    const expected=mapPage?(lang==='en'?'Occluded in FOV':'Görüş içinde perdelenmiş'):(lang==='en'?'Compare launch points by forest in view.':'Kalkış noktalarını görünen ormana göre karşılaştırın.');
     if(!text.includes(expected))throw Error('Missing rendered '+lang+' text: '+expected);
     if(document.querySelector('[data-brand-name]').textContent!==identity.name)throw Error('Brand config not rendered');
     if(!document.title.includes(identity.tagline[lang]))throw Error('Localized config tagline not rendered');
