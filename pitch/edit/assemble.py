@@ -209,8 +209,8 @@ def render_edit(data, types, shot, edit, dest, log):
             cx, cy, cw, ch = crop
             x, y, w, h = rect
             chain = f"[{i}:v]setpts=PTS-STARTPTS,fps={fps},crop={cw}:{ch}:{cx}:{cy},scale={w}:{h}:flags=lanczos,setsar=1"
-            if still and shot["source_type"] == "REAL":
-                # 100 -> 103% crop move on the actual photo only; no invented geometry.
+            if still and shot["source_type"] in ("REAL", "GENERATED"):
+                # Restrained 100 -> 103% push on stills; generated context is captioned.
                 chain += f",zoompan=z='1+0.03*on/{max(count-1,1)}':x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2':d=1:s={w}x{h}:fps={fps}"
             chain += f",tpad=stop_mode=clone:stop_duration={duration},trim=end_frame={count},setpts=PTS-STARTPTS[v{i}]"
             filters.append(chain)

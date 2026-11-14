@@ -1,5 +1,6 @@
 # ACORN — promo script
 
+**Current production:** English takes and the built deck supersede the earlier text-only capture plan below. See [capture index](captures/README.md), [film assembly](edit/README.md) and [deck](deck/README.md). Remaining picture gaps: 04, 13, 20.
 ## The idea
 
 **Minutes spent waiting for someone to notice smoke are minutes we want to give back. Making a watch station affordable and independent of an internet uplink could let more people keep watch.** That is the design ambition, not a measured time saving or proven price advantage. No countdown, fire-growth statistic, cost or market claim appears in this film.
@@ -12,7 +13,7 @@ Shot numbers match `SHOTLIST.md`; capture IDs and exact recipes are in `MOCKUPS.
 
 Dark mineral background `#090e13`, panels `#0f161d`, text `#e3e9ee`, secondary `#a7b4bf`, blue `#8fc3e3`. Amber `#f2a93b` means smoke suspicion, red `#f0594e` faults; mint `#5aefb0` visible forest. IBM Plex Sans titles, IBM Plex Mono numeric labels. Generic Mac-style displays/laptop and iPhone-style portrait phone share matte edges, diffuse silver light and subtle shadows. Keep product pixels sharp, with no landscape grain or generative enhancement. No network waves, radar or decorative telemetry.
 
-Use **ACORN as plain text**. `[LOGO SLOT — undecided; leave empty]` is not exported. Cover only existing header logo artwork in the composition, following its scroll position, with plain ACORN; never cover status/source labels. No app changes. Station is Turkish: retain it and add English translations outside the device. All editorial copy is English.
+Use **ACORN as plain text**. `[LOGO SLOT — undecided; leave empty]` is not exported. Use plain ACORN in editorial titles; retain genuine interface pixels and source/status labels. No app changes. Station is English; retain the captured controls without translation overlays. All editorial copy is English.
 
 Every GENERATED frame carries **Illustration** on a dark backing; 04 adds **Station concept · not deployed**. Generated scenes are mood/context, never camera input, inference, map output or ACORN detecting a real fire. Hard-cut into product evidence. The physical photo is labelled **Actual prototype · still photograph**.
 
@@ -38,7 +39,7 @@ All Station and related Ground demo shots carry **Laptop demo · recorded footag
 | 14 · 01:21–01:28 · 7 s | “Our map estimates visible forest using real Finnish terrain and forest data.” | `Simulated geometric visibility · not detection range` | MOCKUP: desktop Placement Compare, complete map and simulation-labelled results, C6. |
 | 15 · 01:28–01:36 · 8 s | “Change the heading. Compare camera pairs. See what the terrain hides.” | `Planning estimate · edited sequence` / `Simulated geometric visibility` | MOCKUP: desktop Placement heading change/restoration and achievable pair selection, completed states only, C7. |
 | 16 · 01:36–01:40 · 4 s | “Earlier notice is the aim.” | `Illustration` | GENERATED: unchanged opening forest. No implied prevented fire. |
-| 17 · 01:40–01:44 · 4 s | “Board detection quality and real radio still need testing.” | `Unverified: board detection quality · real radio · AP · external RGB LED` / `LoRa transport simulated` / `Laptop demo · recorded footage · recap` | MOCKUP: paired phone/desk stable genuine C1 selects; limitations caption, no new event. |
+| 17 · 01:40–01:44 · 4 s | “Field smoke sensitivity and real radio still need testing.” | `Measured board screen-smoke response · field sensitivity still open` / `LoRa transport simulated` / `Laptop demo · recorded footage · recap` | MOCKUP: paired phone/desk stable genuine C1 selects; limitations caption, no new event. |
 | 18 · 01:44–01:48 · 4 s | “The short-range infrared sensor is separate from camera smoke.” | `Simulated sensor + logical LED` / `Does not confirm camera smoke` / `Laptop demo` | MOCKUP: phone Station local MCU section, simulated trigger/release C8. Not a physical LED response. |
 | 19 · 01:48–01:51 · 3 s | “Next comes field testing.” | `Proposed work: supervised trial · radio · power · cost` / `Simulated geometric visibility` | MOCKUP: desktop Placement held real C6 map, no new result. |
 | 20 · 01:51–01:54 · 3 s | “This is the prototype we built.” | `ACORN · Scarabs` / `Junction 2026 · Helsinki` / `Actual prototype · still photograph` | REAL: genuine assembly photo, slow 100→103% move, no invented LED response. Last image; no slogan outro. |
@@ -69,3 +70,12 @@ Reuse master assets, 16:9, English subtitles, all source/illustration/simulation
 - Carry `SHOTLIST.md` source credits with both exports and deck. Recorded wildfire/fog is third-party footage inside the app, never ACORN field camera footage.
 
 Production fields: `[LOGO SLOT]`, `[CAPTURE DATE / ACTUAL TAKE CONDITIONS]`, `[LOCAL IR STIMULUS / OBSERVED DISTANCE]` (physical stimulus no longer required; mark not applicable for this simulated take). Record scratch reads before voice generation; fit pauses within these windows rather than accelerate UI events.
+
+
+## English production refresh — 2026-11-14
+
+All current product takes are English, recorded from a fresh clone of pushed `origin/main`; dated Turkish clips are kept under `captures/archive-2026-11-14-tr/`. See `captures/README.md` for accepted takes, matching arrival UUID/times, device-frame provenance and Screeny accounting. Translation overlays are retired. Events remain smoke suspicions. LoRa transport remains simulated; smoke alerts are 42 bytes (status 40, decision/local-sensor 37). A physical radio module exists but is unidentified and unused for an ACORN link.
+
+Detection claims follow `DEMO.md`: dense daytime smoke filling the camera view worked live on UNO Q with centre crop, three loops and peak scores 0.62–0.76; arbitrary news footage is not a reliable trigger. The new film's file-source inference is a laptop demonstration, separate from that board run. No accuracy/range/endurance claim is added.
+
+Current production overrides earlier text-only handoff language. Hardware-free crops from the existing concept illustration supply forest context in shots 01/02/03/16, with Illustration captions and slow push-ins. Shots 04 and 13 retain labelled cards because the flying/solar concepts do not fit an inert ridge station or a clearly occluding ridge. Shot 20 still needs a genuine assembly photograph. Never substitute the generated hardware. Film renders remain silent with English script subtitles pending recorded narration/music.

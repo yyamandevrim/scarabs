@@ -2,7 +2,7 @@
 
 **Nine slides / three minutes, followed by the live demo.** Allow 20 seconds per slide, including its transition. Speaker notes are an exact suggested read; rehearse to the time windows. Do not play the 114-second film inside these three minutes. Use it separately if the judging format permits.
 
-Use the visual system in `VIDEO_SCRIPT.md`: dark mineral canvas, IBM Plex, restrained blue interaction accent, amber only for suspicion, map first. One main visual and one statement per slide; retain every app capture's provenance label. Slides 4–6 use the exact generic device frames from `MOCKUPS.md`, exported from the film compositions, with the same matte stage, silver diffuse light, screen aspect ratios and IBM Plex captions. No raw screenshots pasted on slides. All editorial copy is English; translate Station controls in an adjacent caption without altering the captured interface. Name treatment is plain **ACORN**; `[LOGO SLOT — undecided; leave empty]` on the layout master. No invented logo, sponsor logo or mock interface.
+Use the visual system in `VIDEO_SCRIPT.md`: dark mineral canvas, IBM Plex, restrained blue interaction accent, amber only for suspicion, map first. One main visual and one statement per slide; retain every app capture's provenance label. Slides 4–6 use the exact generic device frames from `MOCKUPS.md`, exported from the film compositions, with the same matte stage, silver diffuse light, screen aspect ratios and IBM Plex captions. No raw screenshots pasted on slides. All three interfaces and all editorial copy are English (fe1f57f). Use new English recordings; the dated Turkish recordings are archival only. Name treatment is plain **ACORN**; `[LOGO SLOT — undecided; leave empty]` on the layout master. No invented logo, sponsor logo or mock interface.
 
 Evidence references below are production notes, not extra on-slide prose. Shot IDs refer to `SHOTLIST.md`. Place generated-image **Illustration** captions on the slide itself. Cover only existing header logo artwork with plain ACORN text, following its position, without hiding source/status labels. No app edits or proprietary device artwork. Phone frame is a responsive laptop-browser capture, not proof of physical iPhone deployment or tested AP mode. Source credits from `SHOTLIST.md` accompany any distributed deck.
 
@@ -60,9 +60,9 @@ Evidence references below are production notes, not extra on-slide prose. Shot I
 >
 > MCU: local IR sensor + on-board status LED
 >
-> Actual hardware
+> Documented hardware architecture
 
-**Visual:** Genuine shot 20 assembly photograph, large, caption Actual prototype · still photograph. Reuse a crop from the same original, keeping board, both cameras, sensor and on-board LED identifiable; no extra filming. Add two simple, static callout lines to the actual board: Linux analysis and MCU local sensing. Diagram describes the documented design; it is not a traced signal measurement. No external RGB LED, radio module or flight enclosure added.
+**Visual:** Genuine new English Station overview in our generic laptop frame, plus a static design diagram: Two USB cameras → UNO Q Linux → smoke suspicion; MCU local sensing is a separate branch. Caption Laptop demo · recorded footage and Documented hardware architecture. No actual hardware photograph has been supplied; this visual does not prove assembly.
 
 **Speaker notes:** “On the UNO Q, Linux captures two USB cameras, runs the smoke model on CPU, and stores evidence locally. The microcontroller reads a short-range infrared sensor and controls the on-board status LED. That sensor is separate from camera smoke; it does not confirm a fire.”
 
@@ -82,7 +82,7 @@ Evidence references below are production notes, not extra on-slide prose. Shot I
 >
 > Confirm suspicion / Reject
 
-**Visual:** Portrait iPhone-style Station mockup from shot 09/C2, showing the complete genuine saved clip frame and its source; an adjacent second state from shot 10 may show actual decision controls if the phone needs a panel scroll. Both are clearly labelled separate states of the same event, not one invented screen. Small English translations beside Doğrula / Reddet outside the phone. Use the film's front-on phone, matte background and soft silver light. Amber belongs to suspicion; no fire-detected banner or accuracy badge.
+**Visual:** Two genuine English phone states of the same paired-take event: saved clip playback and pending decision controls. Caption the states separately; Confirm suspicion / Reject is already English in the app. No invented screen or implication that a confirmed annotation establishes fire.
 
 **Speaker notes:** “Consistent smoke observations create a suspicion with a snapshot and clip. An operator confirms or rejects that record, and can correct the decision. The demonstration uses real recorded smoke and fog footage on a laptop. A confirmed record is a human annotation, never automatic confirmation of fire.”
 
@@ -134,27 +134,27 @@ Evidence references below are production notes, not extra on-slide prose. Shot I
 
 ## 7 · Measured, simulated, still open · 02:00–02:20
 
-**One thing:** The prototype has hardware evidence with clear limits.
+**One thing:** One constrained board demonstration worked; field detection remains open.
 
 **Exact on-slide text:**
 
 > Measured, simulated, still open
 >
-> Measured: 0.990 analyses/s per camera on UNO Q
+> Measured live: dense daytime smoke filling the camera view
 >
-> Simulated: LoRa transport; geometric coverage
+> UNO Q · centre crop · peak scores 0.62–0.76
 >
-> Unverified: board detection quality; real radio; AP; external RGB LED
+> Simulated: LoRa transport · geometric coverage
 >
-> Speed only · input 192 · confidence 0.35 · two live 320×240 YUYV cameras
+> Open: field sensitivity · real radio · power endurance
 >
-> CPU · 2 ORT threads · UVC quirk 128 · 30 s warm-up + 180.7 s sample
+> Screen replay · input 192 · threshold 0.35 · Center camera · 3 loops
 
-**Visual:** Crop of the actual shot 20 photograph, caption Still photograph, plus three calm text rows, no success score or chart equating speed with accuracy. The conditions are a readable footer, not hidden speaker-only qualification. If projection makes them unreadable, enlarge the footer and reduce the photo.
+**Visual:** Three restrained typographic evidence rows. These rows are the visual; the board measurement is separately cited, with conditions on the slide. No photograph, accuracy chart or generated hardware.
 
-**Speaker notes:** “The board sustained nearly one analysis per second per camera in the documented short speed test under the settings shown. That is throughput, not detection quality. LoRa transport and map coverage are simulations. Real radio, access-point mode, the external LED and board detection quality remain unverified.”
+**Speaker notes:** “The board did respond live to dense daytime smoke filling a camera view: three screen-clip loops with the centre crop, peak scores from 0.62 to 0.76. Those are model scores, not accuracy. It does not respond to arbitrary news footage: the tested Guardian aerial clip failed. LoRa and coverage remain simulated. One real module is present, but its variant is unidentified and it has not carried an ACORN link. Field sensitivity and power endurance are still open.”
 
-**Evidence:** `docs/ARDUINO_UNO_Q.md`, `firmware/BOARD_NOTES.md`. Use the 192 run only with the conditions printed here. The broader quality study used an Apple M5 Mac, one real smoke clip, three negatives and a synthetic distant-smoke proxy. Never call it a field accuracy test.
+**Evidence:** `DEMO.md` live camera screen demonstration, `firmware/BOARD_NOTES.md` live screen-smoke fix, `station/DETECTION_VS_INPUT_SIZE.md` live-screen investigation and `station/LORA_HARDWARE.md`. Center camera filming the project smoke clip; opening scores 0.36/0.44/0.40 and peak scores 0.74/0.76/0.62 in three loops. The 240×240 centre crop discards the outer 40-pixel strips of a 320×240 input. Dense daytime smoke is the demonstrated input; no field accuracy, arbitrary-video reliability, night sensitivity or detection range follows. The new English laptop captures are separate evidence from that board run; English UI on the board still needs verification.
 
 ## 8 · Next proof: a forest trial · 02:20–02:40
 
@@ -172,7 +172,7 @@ Evidence references below are production notes, not extra on-slide prose. Shot I
 >
 > Seeking a supervised test setting
 
-**Visual:** REAL shot 20 photograph, caption Actual prototype · still photograph, using the same crop, cool neutral treatment and name typography as the closing film frame. Three short labels next to the actual assembly, no rendered deployment, invented customer logo or rollout map. These labels are proposed work.
+**Visual:** Genuine English Placement Compare capture inside our generic laptop frame, beside the three proposed next steps. Caption Placement simulation · proposed work. It is not an approved trial or a hardware photograph.
 
 **Speaker notes:** “The next proof belongs in a supervised forest trial: real small-smoke evaluation on the board, real radio, and sustained power and thermal measurements. We also need a complete station cost. We are looking for a suitable test setting before claiming reliable coverage or a deployable service.”
 
@@ -196,7 +196,7 @@ Evidence references below are production notes, not extra on-slide prose. Shot I
 >
 > Next: live demo
 
-**Visual:** Reuse the same genuine shot 20 assembly photograph with plain challenge names. No separate team photo is required; no invented sponsor marks. Keep actual device and Still photograph caption visible. Small evidence pointers in distributed notes: `docs/ARDUINO_UNO_Q.md` and `docs/PROCESS.md`.
+**Visual:** Genuine English Station overview inside our generic laptop frame, caption Laptop demo · recorded footage, beside plain challenge names. No sponsor marks or generated hardware. A genuine assembly photograph can replace it later.
 
 **Speaker notes:** “We enter Green European Renaissance, Best use of Arduino UNO Q, and Best Use of Codex. Codex agents wrote nearly all code and tests with bounded ownership; humans directed the work, and Claude also orchestrated, reviewed and contributed some implementation. The repository records that distinction. Now, the demo.”
 
@@ -214,10 +214,10 @@ Open Station already authenticated and Ground already running, with downloads/pr
 | How fast is it? | At input 192, confidence 0.35, two live 320×240 YUYV cameras, CPU/two ORT threads and UVC quirk 128, mean total analysis was 282.21/282.55 ms left/centre, excluding capture/decode; both sustained 0.990 analyses/s after 30 s warm-up over 180.7 s. Those are speed observations, not alert latency. |
 | Why use 640 input if 192 is fast? | In the Mac study, the fast setting missed smoke shrunk two to four times in a synthetic proxy. Input 640 retained detections across those scales. That proxy is not real distant smoke. We need board quality evaluation, not a speed-only choice. |
 | Can the board sustain the larger input? | With two live 320×240 YUYV cameras, confidence 0.35, CPU/two ORT threads and UVC quirk 128, input 640 sustained 0.167 analyses/s per camera after 30 s warm-up over about 300 s. Mean total analysis was 2740.66/2763.43 ms, excluding capture/decode. Exact field profile at confidence 0.25 and final camera settings remains unmeasured. |
-| What are accuracy, range and false-alarm rate? | Not established. The broader quality study used one near-smoke clip, three negative clips and a synthetic distant-smoke proxy on an Apple M5 Mac. No field sensitivity, calibrated optical detection range or general false-alarm rate follows from that. |
+| What are accuracy, range and false-alarm rate? | Not established. The Mac study used selected clips and a synthetic small-smoke proxy. A later live UNO Q screen replay succeeded on three dense-smoke loops with centre crop (peak 0.62–0.76); arbitrary news footage is not a reliable trigger. No field sensitivity, calibrated range or general false-alarm rate follows. |
 | Is this your model? | No. It is the pinned Pyronear YOLO11s ONNX smoke detector, not retrained by us. We built capture, event handling, evidence, review, interfaces and communication around it. Its documented licence is AGPL-3.0. |
 | Does confirm mean a fire is confirmed? | It is the operator's annotation on a smoke-suspicion record. The system does not establish a confirmed fire or dispatch emergency services. A suspicion can be sent before an operator decides. |
-| Does LoRa work, and how far? | The packet format, scheduling and Ground dashboard work with simulated UDP transport. No real LoRa hardware or range is verified. Current v2 smoke alerts are 42 bytes; 40 bytes describes status. |
+| Does LoRa work, and how far? | The packet format, scheduling and Ground dashboard work with simulated UDP transport. One real radio module is present, but its variant/firmware is unidentified and no ACORN radio link or range is verified. Current v2 smoke alerts are 42 bytes; 40 bytes describes status. |
 | How long until Ground receives an alert? | In the runbook's simulated SF7/BW125/CR4/5, strict 1% setting, calculated slots are 12 seconds; an alert may wait up to about 12 seconds without backlog, plus event creation. At SF12 the calculated slot is 241 seconds. These are simulation/calculation conditions, not measured radio delivery, and overload can queue alerts. |
 | Why can I see video on Ground? | Only the explicitly enabled Wi-Fi demo fetches imagery separately. With it off, the remote packet view shows no imagery. It does not travel over LoRa. Saved evidence is collected over Wi-Fi for a particular received alert. |
 | Does it work without internet? | Runtime uses local models, assets and storage after initial preparation; denied-socket integration tests and local-only browser audits support that. No physical internet-switch-off test was performed. Remote real-radio operation and UNO Q AP mode are still unverified. |
@@ -243,3 +243,11 @@ Open Station already authenticated and Ground already running, with downloads/pr
 The film needs one REAL photograph shot and no live-action filming; slides 3/7/8/9 reuse it. It proves the prototype exists; documented board operation comes from the cited repository records, not animation of that photo. App layout verdicts and the phone fallback are in `MOCKUPS.md`; no planned phone page requires a responsive fix by source inspection, subject to capture preflight.
 
 No new external statistics were researched or used. All factual claims and figures above come from the requested repository sources; proposed audience, trial and affordability goals are explicitly proposals.
+
+## Built deck production update — 2026-11-14
+
+`deck/acorn-pitch.html` is the self-contained offline deck; `deck/acorn-pitch.pdf` is its print export. `deck/NOTES.md` contains the suggested reads and evidence. Arrow keys navigate, F enters full screen, N opens notes, Home/End jump. Capture provenance is in `captures/README.md`.
+
+No actual assembly photograph has been supplied. Until shot 20 is replaced, slides 3 and 9 use the genuine English Station overview inside our generic laptop frame, explicitly labelled Laptop demo · recorded footage; slide 3 says “Documented hardware architecture” instead of “Actual hardware”. Slides 7 and 8 use the Station and Placement captures respectively. These visuals do not prove the physical assembly. Film shot 20 remains an explicit photograph placeholder. This is the weakest visual evidence in the pitch.
+
+Slides 1 and 2 use hardware-free crops of `photos/concept-illustration-station-medium-v2.png`, labelled Illustration. They are visual context only; the uncropped balloon/solar concept is not a built enclosure, energy system or airborne demonstration. Slide 6's current captured settings are logged in the capture index. All placeholders for cost, demand and field figures above remain open.

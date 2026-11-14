@@ -33,9 +33,15 @@
           "duration": 7,
           "sources": [
             {
-              "file": "pitch/edit/media/shot-01-forest-dawn.mp4",
+              "file": "pitch/photos/concept-illustration-station-medium-v2.png",
               "in_seconds": 0,
-              "out_seconds": 7
+              "out_seconds": 7,
+              "crop": [
+                0,
+                80,
+                920,
+                518
+              ]
             }
           ]
         }
@@ -56,9 +62,15 @@
           "duration": 6,
           "sources": [
             {
-              "file": "pitch/edit/media/shot-02-canopy.mp4",
+              "file": "pitch/photos/concept-illustration-station-medium-v2.png",
               "in_seconds": 0,
-              "out_seconds": 6
+              "out_seconds": 6,
+              "crop": [
+                0,
+                400,
+                920,
+                518
+              ]
             }
           ]
         }
@@ -81,9 +93,15 @@
           "duration": 6,
           "sources": [
             {
-              "file": "pitch/edit/media/shot-03-remote-ridge.mp4",
+              "file": "pitch/photos/concept-illustration-station-medium-v2.png",
               "in_seconds": 0,
-              "out_seconds": 6
+              "out_seconds": 6,
+              "crop": [
+                0,
+                280,
+                920,
+                518
+              ]
             }
           ]
         }
@@ -132,43 +150,30 @@
           "duration": 5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
-              "in_seconds": 0,
-              "out_seconds": 5,
+              "file": "pitch/captures/mockups/clips/B1-phone-mockup.mp4",
+              "in_seconds": 10.827,
+              "out_seconds": 15.827,
               "crop": [
                 704,
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             },
             {
-              "file": "pitch/captures/mockups/clips/shot-05-06-station-wide-fit-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C3-wide-mockup.mp4",
               "in_seconds": 0,
               "out_seconds": 5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                336,
-                58,
-                144,
-                45
+                1560,
+                818
               ]
             }
           ]
         }
-      ],
-      "translation": "Duman şüphesi = smoke suspicion"
+      ]
     },
     {
       "id": "06",
@@ -187,20 +192,14 @@
           "duration": 6,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-05-06-station-wide-fit-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C3-wide-mockup.mp4",
               "in_seconds": 6,
               "out_seconds": 12,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                336,
-                58,
-                144,
-                45
+                1560,
+                818
               ]
             }
           ]
@@ -224,7 +223,7 @@
           "duration": 7,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C1-arrival-screeny.mp4",
               "in_seconds": 0,
               "out_seconds": 7,
               "crop": [
@@ -232,19 +231,12 @@
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             }
           ]
         }
       ],
-      "note": "Held fallback · new arrival not captured",
-      "translation": "Duman şüphesi = smoke suspicion\nDoğrula = confirm suspicion · Reddet = reject"
+      "note": "Separate arrival take · Screeny phone frame"
     },
     {
       "id": "08",
@@ -256,7 +248,7 @@
       ],
       "caption": [
         "Laptop demo · recorded footage",
-        "Edited wait · not a latency measurement"
+        "Real-time paired take · not a radio-latency measurement"
       ],
       "subtitle": "That suspicion also reaches the remote desk. Today, LoRa transport is simulated.",
       "edits": [
@@ -264,44 +256,31 @@
           "duration": 7,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
-              "in_seconds": 0,
-              "out_seconds": 7,
+              "file": "pitch/captures/mockups/clips/B1-phone-mockup.mp4",
+              "in_seconds": 1.327,
+              "out_seconds": 8.327,
               "crop": [
                 704,
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             },
             {
-              "file": "pitch/captures/mockups/clips/shot-08-17-ground-mockup.mp4",
-              "in_seconds": 0,
-              "out_seconds": 7,
+              "file": "pitch/captures/mockups/clips/B1-ground-mockup.mp4",
+              "in_seconds": 4.5,
+              "out_seconds": 11.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
         }
       ],
-      "note": "Held fallback · new arrival not captured",
-      "translation": "Duman şüphesi = smoke suspicion"
+      "note": "Matching new suspicion · simulated transport · real-time paired take"
     },
     {
       "id": "09",
@@ -320,7 +299,7 @@
           "duration": 5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-09-station-phone-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/B2-phone-mockup.mp4",
               "in_seconds": 1,
               "out_seconds": 6,
               "crop": [
@@ -328,18 +307,11 @@
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             }
           ]
         }
-      ],
-      "translation": "Duman şüphesi = smoke suspicion\nDoğrula = confirm suspicion · Reddet = reject"
+      ]
     },
     {
       "id": "10",
@@ -359,37 +331,25 @@
           "duration": 3,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
-              "in_seconds": 3,
-              "out_seconds": 6,
+              "file": "pitch/captures/mockups/clips/B2-phone-mockup.mp4",
+              "in_seconds": 4.5,
+              "out_seconds": 7.5,
               "crop": [
                 704,
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             },
             {
-              "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
-              "in_seconds": 3,
-              "out_seconds": 6,
+              "file": "pitch/captures/mockups/clips/B2-ground-mockup.mp4",
+              "in_seconds": 4.5,
+              "out_seconds": 7.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -398,44 +358,31 @@
           "duration": 5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
-              "in_seconds": 12,
-              "out_seconds": 17,
+              "file": "pitch/captures/mockups/clips/B2-phone-mockup.mp4",
+              "in_seconds": 10.5,
+              "out_seconds": 15.5,
               "crop": [
                 704,
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             },
             {
-              "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
-              "in_seconds": 12,
-              "out_seconds": 17,
+              "file": "pitch/captures/mockups/clips/B2-ground-mockup.mp4",
+              "in_seconds": 10.5,
+              "out_seconds": 15.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
         }
       ],
-      "note": "Recorded decision correction · not a first decision",
-      "translation": "Duman şüphesi = smoke suspicion\nDoğrula = confirm suspicion · Reddet = reject\nDeğiştir = change"
+      "note": "First operator confirmation · simulated transport · shared wait shortened"
     },
     {
       "id": "11",
@@ -455,21 +402,20 @@
           "duration": 6,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-11-ground-details-mockup.mp4",
-              "in_seconds": 7,
-              "out_seconds": 13,
+              "file": "pitch/captures/mockups/clips/C4-ground-mockup.mp4",
+              "in_seconds": 10,
+              "out_seconds": 16,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": null
+                1560,
+                818
+              ]
             }
           ]
         }
       ],
-      "note": "42 B = smoke-alert schema · captured last packet = 40 B"
+      "note": "Separate details take · 42 B smoke schema · latest packet may be status"
     },
     {
       "id": "12",
@@ -489,20 +435,14 @@
           "duration": 1,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-12-ground-wifi-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C5-ground-mockup.mp4",
               "in_seconds": 0,
               "out_seconds": 1,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -511,20 +451,14 @@
           "duration": 4,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-12-ground-wifi-mockup.mp4",
-              "in_seconds": 8,
-              "out_seconds": 12,
+              "file": "pitch/captures/mockups/clips/C5-ground-mockup.mp4",
+              "in_seconds": 5,
+              "out_seconds": 9,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -533,26 +467,20 @@
           "duration": 2,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-12-ground-wifi-mockup.mp4",
-              "in_seconds": 22,
-              "out_seconds": 24,
+              "file": "pitch/captures/mockups/clips/C5-ground-mockup.mp4",
+              "in_seconds": 24,
+              "out_seconds": 26,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
         }
       ],
-      "note": "Edited sequence"
+      "note": "Separate Wi-Fi evidence · edited off/on/off sequence"
     },
     {
       "id": "13",
@@ -592,20 +520,14 @@
           "duration": 7,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-14-19-placement-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C6-map-mockup.mp4",
               "in_seconds": 0,
               "out_seconds": 7,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -629,20 +551,14 @@
           "duration": 1.5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C7-map-mockup.mp4",
               "in_seconds": 1,
               "out_seconds": 2.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -651,20 +567,14 @@
           "duration": 1.5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
-              "in_seconds": 9,
-              "out_seconds": 10.5,
+              "file": "pitch/captures/mockups/clips/C7-map-mockup.mp4",
+              "in_seconds": 13,
+              "out_seconds": 14.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -673,20 +583,14 @@
           "duration": 1.5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
-              "in_seconds": 15,
-              "out_seconds": 16.5,
+              "file": "pitch/captures/mockups/clips/C7-map-mockup.mp4",
+              "in_seconds": 19.5,
+              "out_seconds": 21,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -695,20 +599,14 @@
           "duration": 2,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
-              "in_seconds": 21,
-              "out_seconds": 23,
+              "file": "pitch/captures/mockups/clips/C7-map-mockup.mp4",
+              "in_seconds": 26.5,
+              "out_seconds": 28.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -717,20 +615,14 @@
           "duration": 1.5,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
-              "in_seconds": 28,
-              "out_seconds": 29.5,
+              "file": "pitch/captures/mockups/clips/C7-map-mockup.mp4",
+              "in_seconds": 33,
+              "out_seconds": 34.5,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -752,9 +644,15 @@
           "duration": 4,
           "sources": [
             {
-              "file": "pitch/edit/media/shot-16-forest-reprise.mp4",
+              "file": "pitch/photos/concept-illustration-station-medium-v2.png",
               "in_seconds": 0,
-              "out_seconds": 4
+              "out_seconds": 4,
+              "crop": [
+                0,
+                80,
+                920,
+                518
+              ]
             }
           ]
         }
@@ -766,55 +664,41 @@
       "source_type": "MOCKUP",
       "description": "Held phone/desk recap with unverified limits",
       "on_screen_text": [
-        "Unverified: board detection quality · real radio · AP · external RGB LED"
+        "Measured board screen-smoke response · field sensitivity still open"
       ],
       "caption": [
-        "LoRa transport simulated",
-        "Laptop demo · recorded footage · recap"
+        "Laptop demo · recorded footage · LoRa transport simulated"
       ],
-      "subtitle": "Board detection quality and real radio still need testing.",
+      "subtitle": "Field smoke sensitivity and real radio still need testing.",
       "edits": [
         {
           "duration": 4,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
-              "in_seconds": 0,
-              "out_seconds": 4,
+              "file": "pitch/captures/mockups/clips/B1-phone-mockup.mp4",
+              "in_seconds": 10.827,
+              "out_seconds": 14.827,
               "crop": [
                 704,
                 36,
                 512,
                 1008
-              ],
-              "wordmark_rect": [
-                762,
-                120,
-                118,
-                42
               ]
             },
             {
-              "file": "pitch/captures/mockups/clips/shot-08-17-ground-mockup.mp4",
-              "in_seconds": 0,
-              "out_seconds": 4,
+              "file": "pitch/captures/mockups/clips/B1-ground-mockup.mp4",
+              "in_seconds": 14,
+              "out_seconds": 18,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
         }
-      ],
-      "translation": "Duman şüphesi = smoke suspicion"
+      ]
     },
     {
       "id": "18",
@@ -834,21 +718,20 @@
           "duration": 4,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-18-sensor-phone-mockup.mp4",
-              "in_seconds": 5.3,
-              "out_seconds": 9.3,
+              "file": "pitch/captures/mockups/clips/C8-phone-mockup.mp4",
+              "in_seconds": 5,
+              "out_seconds": 9,
               "crop": [
                 704,
                 36,
                 512,
-                1008
-              ],
-              "wordmark_rect": null
+                500
+              ]
             }
           ]
         }
       ],
-      "note": "Separate short-range IR sensor · simulated local state"
+      "note": "Separate simulated IR sensor · editorial close-up"
     },
     {
       "id": "19",
@@ -867,20 +750,14 @@
           "duration": 3,
           "sources": [
             {
-              "file": "pitch/captures/mockups/clips/shot-14-19-placement-mockup.mp4",
+              "file": "pitch/captures/mockups/clips/C6-map-mockup.mp4",
               "in_seconds": 0,
               "out_seconds": 3,
               "crop": [
-                280,
+                180,
                 16,
-                1360,
-                804
-              ],
-              "wordmark_rect": [
-                337,
-                59,
-                107,
-                37
+                1560,
+                818
               ]
             }
           ]
@@ -1030,7 +907,36 @@
         {
           "shot": "08",
           "duration": 5,
-          "subtitle": "A suspicion reaches the desk. LoRa transport is simulated."
+          "subtitle": "A suspicion reaches the desk. LoRa transport is simulated.",
+          "edits": [
+            {
+              "duration": 5,
+              "sources": [
+                {
+                  "file": "pitch/captures/mockups/clips/B1-phone-mockup.mp4",
+                  "in_seconds": 1.327,
+                  "out_seconds": 6.327,
+                  "crop": [
+                    704,
+                    36,
+                    512,
+                    1008
+                  ]
+                },
+                {
+                  "file": "pitch/captures/mockups/clips/B1-ground-mockup.mp4",
+                  "in_seconds": 4.5,
+                  "out_seconds": 9.5,
+                  "crop": [
+                    180,
+                    16,
+                    1560,
+                    818
+                  ]
+                }
+              ]
+            }
+          ]
         },
         {
           "shot": "10",
@@ -1041,37 +947,25 @@
               "duration": 2,
               "sources": [
                 {
-                  "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
-                  "in_seconds": 4.5,
-                  "out_seconds": 6.5,
+                  "file": "pitch/captures/mockups/clips/B2-phone-mockup.mp4",
+                  "in_seconds": 5.5,
+                  "out_seconds": 7.5,
                   "crop": [
                     704,
                     36,
                     512,
                     1008
-                  ],
-                  "wordmark_rect": [
-                    762,
-                    120,
-                    118,
-                    42
                   ]
                 },
                 {
-                  "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
-                  "in_seconds": 4.5,
-                  "out_seconds": 6.5,
+                  "file": "pitch/captures/mockups/clips/B2-ground-mockup.mp4",
+                  "in_seconds": 5.5,
+                  "out_seconds": 7.5,
                   "crop": [
-                    280,
+                    180,
                     16,
-                    1360,
-                    804
-                  ],
-                  "wordmark_rect": [
-                    337,
-                    59,
-                    107,
-                    37
+                    1560,
+                    818
                   ]
                 }
               ]
@@ -1080,37 +974,25 @@
               "duration": 3,
               "sources": [
                 {
-                  "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
-                  "in_seconds": 12.5,
-                  "out_seconds": 15.5,
+                  "file": "pitch/captures/mockups/clips/B2-phone-mockup.mp4",
+                  "in_seconds": 10.5,
+                  "out_seconds": 13.5,
                   "crop": [
                     704,
                     36,
                     512,
                     1008
-                  ],
-                  "wordmark_rect": [
-                    762,
-                    120,
-                    118,
-                    42
                   ]
                 },
                 {
-                  "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
-                  "in_seconds": 12.5,
-                  "out_seconds": 15.5,
+                  "file": "pitch/captures/mockups/clips/B2-ground-mockup.mp4",
+                  "in_seconds": 10.5,
+                  "out_seconds": 13.5,
                   "crop": [
-                    280,
+                    180,
                     16,
-                    1360,
-                    804
-                  ],
-                  "wordmark_rect": [
-                    337,
-                    59,
-                    107,
-                    37
+                    1560,
+                    818
                   ]
                 }
               ]

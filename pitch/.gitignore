@@ -1,0 +1,5 @@
+# Local capture checkout, credentials, intermediates and review images
+.work/
+deck/review/
+deck/*.pdf
+!deck/acorn-pitch.pdf

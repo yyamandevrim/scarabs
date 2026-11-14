@@ -1,5 +1,6 @@
 # ACORN — shot and sound package
 
+**Current production:** English takes and the built deck supersede the earlier text-only capture plan below. See [capture index](captures/README.md), [film assembly](edit/README.md) and [deck](deck/README.md). Remaining picture gaps: 04, 13, 20.
 Master: **20 shots / 114 seconds**. Sources: **13 MOCKUP / 6 GENERATED / 1 REAL**. Before: **6 REAL / 8 SCREEN / 6 GENERATED**. MOCKUP is a real running-app capture inside a generic device frame, never a recreated interface. No raw SCREEN shots remain. The social cut reuses 01, 06, 08, 10, 14, 04 and 20. This file gives later production instructions only; no media has been made.
 
 ## One visual family
@@ -12,7 +13,7 @@ Add **Illustration** to every generated frame in the edit, and **Station concept
 
 ## Capture preparation and minimum hardware evidence
 
-Follow `DEMO.md` A–B privately, Ground before Station, sustainable demo config and preserved duty ledger. Actual app output only. Record C1–C8 in `MOCKUPS.md` order, with English Ground/Placement and actual Turkish Station plus adjacent English translations. Wide screens 1440×900 CSS px/DPR2; phone 393×852/DPR3. Record native viewport, no terminal/credentials/browser bars. Check native output dimensions and phone expanded-card readability first. No main page needs a responsive fix at the chosen width by source inspection; dense wide workflows stay wide. A failed phone preflight switches to a genuine wide Station capture, never a compressed desktop phone mockup.
+Follow `DEMO.md` A–B privately, Ground before Station, sustainable demo config and preserved duty ledger. Actual app output only. Record C1–C8 in `MOCKUPS.md` order, with all three interfaces in English. Wide screens 1440×810 CSS px/DPR2; phone 393×852/DPR3. Record native viewport, no terminal/credentials/browser bars. Check native output dimensions and phone expanded-card readability first. No main page needs a responsive fix at the chosen width by source inspection; dense wide workflows stay wide. A failed phone preflight switches to a genuine wide Station capture, never a compressed desktop phone mockup.
 
 Station inputs are real recorded smoke/fog on the laptop; MCU and LoRa transport are simulated. Preserve source/host, simulated transport, Wi-Fi-only and map simulation labels, repeating important ones outside devices for legibility. Do not accelerate events or link waits into latency claims. C1/C2 paired scenes retain matching UUIDs and clock alignment; any removed wait cuts both tracks at once and carries Edited wait. Never inject an event. C4's 42-byte smoke size is a documented v2 schema caption, not Ground's changing last-packet metric.
 
@@ -40,7 +41,7 @@ All MOCKUP rows inherit the stage/light above; `MOCKUPS.md` specifies each camer
 | 14 | 7 s | MOCKUP | Desktop Placement C6 Compare; loaded Haukilahti/Nuuksio smoke + canopy, 600 m/quick 120 m/left+centre/180° Haukilahti, actual logged inputs. Map, legend, figures and simulation tags. Slow push-in. Deck 6 still. |
 | 15 | 8 s | MOCKUP | Desktop Placement C7 heading 180°→0°→restored and achievable two-camera pair change/restoration. Completed results only; Planning estimate · edited sequence. Never three-camera reference as working hardware. |
 | 16 | 4 s | GENERATED | G16 unchanged forest reprise. Illustration; no outcome implied. |
-| 17 | 4 s | MOCKUP | Static C1 phone/desktop recap with limitations above devices: board quality, real radio, AP, external RGB LED unverified. LoRa simulated + laptop recorded-demo labels. No new event. |
+| 17 | 4 s | MOCKUP | Static C1 phone/desktop recap with limitations above devices: field smoke sensitivity and real radio still open; board screen-smoke response measured. LoRa simulated + laptop recorded-demo labels. No new event. |
 | 18 | 4 s | MOCKUP | Portrait phone Station C8 local sensor section; authenticated runbook simulation of trigger/release, logical LED only. Simulated sensor + logical LED / Does not confirm camera smoke. No physical-response claim. |
 | 19 | 3 s | MOCKUP | Desktop Placement C6 static real map; proposed field/radio/power/cost work outside device, no fresh result. Simulation caption retained. |
 | 20 | 3 s | REAL | Genuine prototype still, slow crop move, Actual prototype · still photograph. Board/cameras/sensor/on-board LED visible. ACORN · Scarabs / Junction 2026 · Helsinki. End on actual assembly, no logo/slogan card. |
@@ -116,3 +117,12 @@ Copy the following into the accompanying video description/credits and the deck'
 If a fallback capture includes cloud or glare rather than the default fog, copy its exact attribution and licence from `station/README.md`'s Real footage table too. Keep the source and licence information with redistributed annotated media; do not strip it when making the social cut.
 
 Asset log fields: shot ID, capture date, actual host, live/recorded source, profile and camera settings if any performance figure is visible, chosen event, Wi-Fi toggle state, simulation state, viewport/DPR, raw output dimensions, paired-track clock/action times, Placement model inputs, and sensor simulation state. Physical IR stimulus/distance is not applicable to this simulated sensor take. These are capture notes, not new validation results.
+
+
+## English production refresh — 2026-11-14
+
+All current product takes are English, recorded from a fresh clone of pushed `origin/main`; dated Turkish clips are kept under `captures/archive-2026-11-14-tr/`. See `captures/README.md` for accepted takes, matching arrival UUID/times, device-frame provenance and Screeny accounting. Translation overlays are retired. Events remain smoke suspicions. LoRa transport remains simulated; smoke alerts are 42 bytes (status 40, decision/local-sensor 37). A physical radio module exists but is unidentified and unused for an ACORN link.
+
+Detection claims follow `DEMO.md`: dense daytime smoke filling the camera view worked live on UNO Q with centre crop, three loops and peak scores 0.62–0.76; arbitrary news footage is not a reliable trigger. The new film's file-source inference is a laptop demonstration, separate from that board run. No accuracy/range/endurance claim is added.
+
+Current production overrides earlier text-only handoff language. Hardware-free crops from the existing concept illustration supply forest context in shots 01/02/03/16, with Illustration captions and slow push-ins. Shots 04 and 13 retain labelled cards because the flying/solar concepts do not fit an inert ridge station or a clearly occluding ridge. Shot 20 still needs a genuine assembly photograph. Never substitute the generated hardware. Film renders remain silent with English script subtitles pending recorded narration/music.

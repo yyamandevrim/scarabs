@@ -1,41 +1,34 @@
-# ACORN — ordered asset checklist
+# ACORN — current production checklist
 
-Text-only handoff for later production. **20 shots / 114 s: 13 MOCKUP / 6 GENERATED / 1 REAL**, previously 8 SCREEN / 6 GENERATED / 6 REAL. Social cut reuses 01/06/08/10/14/04/20. Deck uses the same device-frame stills and single hardware photo. **Required hardware capture: one photograph, no filming.** Estimates are human production planning estimates, not device measurements or service guarantees.
+Updated 2026-11-14. Master: 20 shots / 114 seconds; social: 30 seconds. [English captures](captures/README.md), [film sources and outputs](edit/README.md), [offline deck](deck/README.md).
 
-## Capture owner — first
+## Completed
 
-- [ ] **P1 · Prepare privately, 25–45 min if dependencies/assets ready.** Follow `DEMO.md` A–B and `MOCKUPS.md`. Download/verify model, real smoke/fog footage and terrain data ahead of takes; allow additional download/retry time. Ground starts before Station. Use stage config, 1% ledger, no resets for faster results. Secrets stay private.
-- [ ] **P2 · Capture preflight/log, 5–10 min.** Wide 1440×900/DPR2 → 2880×1800, phone 393×852/DPR3 → 1179×2556, 100% zoom, target 30 fps. Check actual recorder dimensions; no browser chrome/private details. Station expanded card must fit phone width with full evidence and accessible actions via panel scroll. Source audit found no required main-page fix; if preflight fails, log responsive fix required and use wide Station per `MOCKUPS.md`. Fixing app code is outside this task.
-- [ ] **C1 · Simultaneous phone suspicion + desk receipt, 8–12 min plus legal waits.** Two active capture contexts, common clock, Station pointer/focus outside queue, Ground Wi-Fi off. Raw 120 s initially, extend until matching new smoke event and packet plus 10 s hold. Record UUID and actual arrival times. Supplies 05/07/08/17 and deck 5. Never stage first-ever receipt by deleting history.
-- [ ] **C2 · Same event evidence → decision → desk update, 5–8 min plus waits.** Keep paired captures; raw 45 s minimum. Play saved clip, actual panel scroll, save pre-decision still for deck 4, Doğrula, persisted annotation; leave queue focus and wait for real Ground update. Supplies 09/10. No local acknowledgement substituted for Station decision.
-- [ ] **C3 · Wide Station feeds, 3–5 min.** Raw 25 s, two complete recorded smoke/fog feeds and inactive right slot. Scroll honestly for host/profile/slot as needed; recorded-demo caption beside device. Supplies 06 and 05 laptop.
-- [ ] **C4 · Ground packet identity + calculated link details, 3–5 min.** Raw 25 s with Wi-Fi off. Packet details shows UUID, not byte size; size caption 42-byte v2 smoke alert is sourced to `DEMO.md` C5. Last packet size may be 37/40 B: never alter it or label it smoke size. Supplies 11.
-- [ ] **C5 · Separate Wi-Fi evidence on/off, 5–8 min plus loads.** Prepare collected saved evidence for same received smoke UUID per `DEMO.md` D. Raw 35 s minimum; off → on, built-in Wi-Fi-only label and saved clip → off/imagery gone. Keep live-feed disclosure closed; honest error fallback if needed. Supplies 12.
-- [ ] **C6 · Loaded Placement Compare, 3–5 min plus initial calculation.** Raw 25 s; Haukilahti/Nuuksio, smoke+canopy, quick 120 m, 600 m, left+centre, Haukilahti 180°, no priority area/reference mode. Record actual max-range/smoke-target inputs too. Preserve map attribution, legend and simulation tags by figures. Supplies 14/19 and deck 6; no prewritten hectare values.
-- [ ] **C7 · Heading/pair changes, 5–10 min plus computation.** Raw 90 s initially, extend: 180°→0°→restore then available pair→restore. Wait for complete results; recalculate both if pending. Supplies 15. All wait removal labelled edited sequence; no three-camera working mode.
-- [ ] **C8 · Separate sensor simulation, 4–6 min.** Phone Station MCU section, raw 25 s. Exact authenticated `DEMO.md` D true→debounce→false simulation privately; keep Simülasyon/scope visible. Supplies 18, Simulated sensor + logical LED throughout. No hardware-response or camera-confirmation claim. Delete private cookie jar.
-- [ ] **P3 · Save selects/provenance, 10 min.** Archive raw takes, clock/UUID/action log, date/actual host/profile/source, viewport/DPR/output dimensions, Wi-Fi/simulation state and Placement assumptions. Export genuine state stills for fallbacks and frame them for deck later. Carry `SHOTLIST.md` source credits into export/deck notes. Stop started apps afterwards.
+- [x] Fresh clone of pushed main; English Station, Ground and Placement. Same native capture viewports/DPR as the accepted earlier takes, verified viewport-only output. No private screens or credentials.
+- [x] Archive old Turkish captures and editable Screeny projects in `captures/archive-2026-11-14-tr/`.
+- [x] Ground before Station; real file-source inference triggers a new smoke suspicion and matching packet. Primary paired UUID and source-clock offsets logged; Ground history and the duty ledger preserved.
+- [x] Native evidence playback, first confirmation, later matching Ground decision; packet details; Wi-Fi off/on/off; completed Placement heading/pair comparisons; separate authenticated local-sensor simulation.
+- [x] One Screeny phone-arrival export, credits 4→1; no purchase. Shot 07 only. All remaining device scenes and every deck still use our original generic bezels.
+- [x] Hardware-free concept-image forest crops in 01/02/03/16, slow push-in and Illustration captions.
+- [x] English 1920×1080 / 30 fps master and social renders, every shot reviewed; complete decoding and frame/duration verification.
+- [x] Nine-slide self-contained offline HTML deck, embedded fonts/stills/notes, arrow navigation/full screen, small PDF export. All slides reviewed at 1920×1080. English UI, 42-byte smoke packet, centre-crop live evidence and measured/simulated/open limits updated in DECK.md.
 
-## Hardware photo owner — second
+## Pictures still needed
 
-- [ ] **R1 · One required actual assembly still, 10–15 min including check.** Owner's established powered UNO Q, hub/wiring, two connected USB cameras, KY-026 and on-board LED all visible at venue. Landscape ≥3840×2160, support phone, diffuse cool room/window light, no flash/private screens. No stimulus, unplugging, firmware change, external LED staging, hands sequence, team photo, venue clip or video needed. Log date/setup and preserve original. Optional second detail photo only if necessary for readable components; no extra film shot.
-- [ ] **R2 · Reuse, 3 min.** Full photo for shot 20 and deck 8/9; board crop for deck 3/7. Slow 100→103% move over 3 s. No animated LED or invented parallax. Caption Actual prototype · still photograph. One REAL shot is the minimum direct proof the hardware exists, not proof that it is running. Close with “This is the prototype we built.”
+- [ ] **04:** six-second inert generic station concept. Current flying/solar illustration does not fit. Caption Illustration · not deployed.
+- [ ] **13:** five-second ridge visibly obscuring forest, keeping the map's visibility question clear. Caption Illustration.
+- [ ] **20:** a genuine landscape assembly photograph of board, hub, two cameras and local sensor. Record date/setup; no private screen in the background. A still can establish physical assembly, not operation. No generated substitute. This is the weakest film shot; its absence also weakens slide 3.
 
-## Edit/generation owner — third
+Deck 3/9 currently use the genuine Station overview; 8 uses Placement and 7 uses evidence rows. These are openly described substitutes for the missing hardware photograph, not purported hardware evidence.
 
-- [ ] **E1 · Scratch voice/readability, 8–10 min.** Exact `VIDEO_SCRIPT.md` voice cells against 114/30 s windows. Never read placeholders/captions. Check suspicion/simulated/unverified phrasing. Pauses fit the UI; do not speed product events to fit narration.
-- [ ] **E2 · Shared generic device stage, 25–40 min within E5 budget.** Follow `MOCKUPS.md`: self-drawn CSS/SVG generic laptop/desktop/portrait phone, matte mineral palette, diffuse silver light, real capture as screen texture clipped at correct ratio. No Apple logo/unlicensed render. Group screen/bezel/shadow for rigid motion. Cover only header logo art with plain ACORN, tracking scroll; no app modifications.
-- [ ] **G1 · Context selects, 30–50 min labour plus queue.** Reuse approved G01/G02/G03/G04/G13/G16 if available; otherwise use `SHOTLIST.md` still prompts/negative lists. Same fictional cool dawn geography. G04 is an inert unbranded landscape concept, never the team's device. Illustration on all frames, concept/not-deployed caption on G04; no generated product/result pixels.
-- [ ] **G2 · Animate context, 20–35 min labour plus queue.** Existing prompts/durations 7/6/6/6/5/4 s, 16:9. Check stable horizons and vegetation. No fire prevented, detection or transmission implication. Do not use Higgsfield to generate device scenes for product shots.
-- [ ] **G3 · Voice and music later, 20–35 min labour plus queue.** `SHOTLIST.md` prompts and exact scripts. Dry voice stems, quiet music, no sirens/transmission beep/fake hardware sound. Fade before final photo; photo has no room-tone recording. No audio generation in this repository task.
-- [ ] **E3 · Linked event edit.** For 08 and 10 remove the same waiting interval from both C1/C2 tracks, keep UUID/chronology, retain Edited wait · not a latency measurement. First suspicion reaches Ground before human confirmation. Ground default remote view stays imagery-free; shot 12's Wi-Fi area is separately labelled. This is part of E5, not additional time.
-- [ ] **E4 · Slide-7 evidence, 5 min.** Retain board throughput and every measurement condition in `DECK.md`; verify against `docs/ARDUINO_UNO_Q.md` / `firmware/BOARD_NOTES.md`. Speed is not detection quality. Do not substitute laptop metrics.
-- [ ] **E5 · Coded composition and export, 2–3 hours total including E2/E3.** Recommended later Remotion-style project assembles mockups, generated context, photo, titles/subtitles, voice and ducked music; 1920×1080/30 fps master and social. Preserve 20-shot timing and all caveats. No code is created in this task. `MOCKUPS.md` compares design-tool and tracked Higgsfield options. Rendering time additional.
-- [ ] **E6 · Nine-slide deck, 35–50 min.** Export exact mockup states/compositions for slides 4–6, same frame/light/type/captions as film; single photo/crops for 3/7/8/9, G01/G03 for 1/2. Map fills most of desktop screen/slide 6. No raw screenshot paste, team-photo dependency or invented sponsor logo. Preserve source notes and readable slide-7 conditions.
-- [ ] **E7 · Final review, 15 min.** Confirm 20 shots, 114/30 s cuts, 180 s deck; 13 MOCKUP/6 GENERATED/1 REAL; no filmed take; all capture pixels genuine; source/host/illustration/LoRa/Wi-Fi/simulation labels readable; physical-photo vs simulation distinction; no AP/external-LED/real-radio/board-quality claim. Final image genuine photo. No exported placeholders or secrets. Carry credits with every distribution.
+## Audio and release work
 
-Prepared-app capture + photo + composition + deck + review is about **4–6 hours human work**; generation/voice/music service queues, downloads and missing dependencies add time. Estimates overlap where explicitly included; they are not a promise of completion today.
+- [ ] Record the exact timed English narration for each cut. Current exports are silent with subtitles.
+- [ ] Supply cleared quiet music if wanted, with explicit licence/credits. No invented hardware/transmission sound.
+- [ ] Replace the three cards, rerender, inspect all shots and retain source credits. Keep annotations and time cuts honest.
 
-## Placeholder close-out
+## Evidence placeholders remain open
 
-Keep `[LOGO SLOT]` empty and use ACORN text. Fill `[CAPTURE DATE / ACTUAL TAKE CONDITIONS]` from capture logs. Preserve `[LOCAL IR STIMULUS / OBSERVED DISTANCE]` as not applicable to this simulated sensor take; do not invent a physical measurement. Optional context, complete-station cost and customer/market figures remain marked in `DECK.md`, omitted until sourced with conditions. Board quality, actual radio, AP, external LED and endurance stay pending.
+Keep the logo slot empty and use ACORN text. Do not insert unsourced context statistics, complete-station cost, customer demand or market-size figures. Field sensitivity, range, night response, weather/power endurance and real-radio link are unestablished. A radio module exists but its variant/firmware is unidentified and it has not carried an ACORN link. Board live screen-smoke replay with centre crop reached peak scores 0.62–0.76 on three loops; scores are not accuracy and arbitrary news footage is not a reliable trigger. LoRa and geometric coverage remain simulated.
+
+The local sensor scene is simulated; physical stimulus/distance is not applicable. Preserve that placeholder for a future real test. Keep recordings, film exports, raw footage, private logs and temporary clone ignored. Commit sources, Markdown, concept-illustration stills and the small deck HTML/PDF only. Stop task-started servers.
