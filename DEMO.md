@@ -2,7 +2,7 @@
 
 ACORN — Aerial Canopy Observation and Reporting Node. Scarabs, Junction 2026 Helsinki, Green European Renaissance challenge. This replaces the rehearsal-2 draft and its short-lived-ledger workaround.
 
-The laptop demo uses real recorded smoke/fog footage and real on-device inference, **LoRa link (simulated transport)** over UDP, plus an explicit Wi-Fi imagery aid. No radio range, calibrated bearing, fire location, battery percentage or confirmed fire is claimed.
+The laptop demo uses real recorded smoke/fog footage and real on-device inference, **LoRa link (simulated transport)** over UDP, plus an explicit Wi-Fi imagery aid. No radio range, calibrated bearing, fire location, battery percentage or confirmed fire is claimed. One MicroMesh has arrived, but its physical variant/firmware and real ACORN link remain unverified; see [the hardware investigation and single-radio demo limits](station/LORA_HARDWARE.md).
 
 | App | Purpose | Demo address |
 |---|---|---|
