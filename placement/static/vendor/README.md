@@ -49,3 +49,24 @@ The measurement file uses Chromium CDP `Network.loadingFinished` for actual unco
 The smoke footage is “Wildfire Near Monserrate”, Peter Angritt (Mrtony77), CC BY-SA 4.0; derivatives resize/crop/re-encode and retain detection overlays. Attribution is on the Overview and in `demo/README.md`. Sources: `station/footage.json`. No runtime directory, database or credential is committed.
 
 `map-terrain-interim.webp` is the single interim map image. It uses actual terrain/visibility pixels from the existing planner, with no forward wedge as the subject. **Re-capture this file from the separately rebuilt 360° map when that work lands.** No map implementation is changed by this asset.
+
+## Measured acceptance run — 2026-11-14
+
+Chromium 159.0.8154.6 / Playwright 1.65.1, 1440×900, SwiftShader, development FastAPI server, fresh context:
+
+| Measure | Result |
+| --- | ---: |
+| Initial transferred bytes, including HTTP headers | 1,051,404 B |
+| Full scroll + phone walkthrough transfer | 1,184,230 B |
+| GLB | 111,784 B |
+| 3D bundle | 673,461 B raw / 173,004 B gzip |
+| JS heap after load + GC | 5,150,504 B |
+| Settled / off-screen / untouched after idle period | 0 draws/s |
+| Evidence video, fetched on collection | 143,406 B |
+| Phone decision video | 57,741 B |
+
+The full-scroll measurement precedes the explicit LoRa evidence collection, whose media is additional on-demand traffic. JS heap excludes GPU/native allocations. Idle movement is capped at 30 fps and expires after five visible seconds even without interaction. No shadows or outline geometry are allocated. The scene exposes 18 draw calls in its assembled view before observation overlays.
+
+Acceptance: **90 placement tests passed** (one upstream Starlette/httpx deprecation warning). Browser suite passed with 31 screenshots, real WebGL, 0 console errors, 0 external requests, 0 failed responses, no 393px overflow, real touch and wheel scrolling, direct pod selection, keyboard controls, context loss/recovery and no-WebGL fallback. Both phone and evidence videos advanced in view and paused off-screen. The 12-second visible status cadence was checked, and generated smoke/status frames decoded with the actual station codec. `check_language.js` passed on Overview desktop/phone and the current map with a stored Turkish preference and URL language parameters.
+
+The owner-requested claim-removal log and screenshot/measurement files are delivered in the external scratch output directory, not committed as runtime assets. The map preview remains interim. Shared changes were isolated in commit `b79b999`; no map implementation edits followed the ownership split.

@@ -1,22 +1,18 @@
-// Run as preview_evaluate's expression on / or /map after the page is ready.
+// Evaluate in Playwright or preview_evaluate after / or /map is ready.
+// Run twice with language=tr in storage and ?lang=tr on initial navigation as well.
 (async () => {
-  const mapPage=location.pathname==='/map';
-  const identity=await (await fetch('/api/brand')).json();
-  const coordinates=mapPage?[document.querySelector('#lat').value,document.querySelector('#lon').value]:null;
-  const checks=[];
-  for(const lang of ['en','tr']){
-    if(document.documentElement.lang!==lang)document.querySelector('.language').click();
-    await new Promise(resolve=>setTimeout(resolve,40));
-    const text=document.body.innerText;
-    const expected=mapPage?(lang==='en'?'Occluded in FOV':'Görüş içinde perdelenmiş'):(lang==='en'?'Compare launch points by forest in view.':'Kalkış noktalarını görünen ormana göre karşılaştırın.');
-    if(!text.includes(expected))throw Error('Missing rendered '+lang+' text: '+expected);
-    if(document.querySelector('[data-brand-name]').textContent!==identity.name)throw Error('Brand config not rendered');
-    if(!document.title.includes(identity.tagline[lang]))throw Error('Localized config tagline not rendered');
-    if(document.documentElement.scrollWidth>innerWidth)throw Error('Horizontal page overflow');
-    if(mapPage&&JSON.stringify(coordinates)!==JSON.stringify([document.querySelector('#lat').value,document.querySelector('#lon').value]))throw Error('Language switch lost candidate coordinates');
-    checks.push({lang,rendered:true,brand:true,overflow:false});
-  }
-  const external=performance.getEntriesByType('resource').filter(r=>!r.name.startsWith(location.origin));
-  if(external.length)throw Error('Unexpected external resources');
-  return {page:location.pathname,width:innerWidth,checks,externalResources:0};
+ const mapPage=location.pathname==='/map';
+ const identity=await (await fetch('/api/brand')).json();
+ const text=document.body.innerText;
+ const expected=mapPage?'Occluded in FOV':'Watch the forest.';
+ if(document.documentElement.lang!=='en')throw Error('Placement must always use English');
+ if(document.querySelector('.language'))throw Error('Unexpected language control');
+ if(!text.includes(expected))throw Error('Missing rendered English text: '+expected);
+ if(text.includes('Türkçe')||text.includes('Duman şüphesi'))throw Error('Unexpected Turkish text');
+ if(document.querySelector('[data-brand-name]').textContent!==identity.name)throw Error('Brand config not rendered');
+ if(!document.title.startsWith(identity.name+' · '))throw Error('Brand title not rendered');
+ if(document.documentElement.scrollWidth>innerWidth)throw Error('Horizontal page overflow');
+ const external=performance.getEntriesByType('resource').filter(r=>!r.name.startsWith(location.origin));
+ if(external.length)throw Error('Unexpected external resources');
+ return {page:location.pathname,width:innerWidth,language:'en',languageControl:false,brand:true,overflow:false,externalResources:0};
 })()

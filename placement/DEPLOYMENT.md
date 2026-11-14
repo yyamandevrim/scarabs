@@ -71,6 +71,6 @@ SDK **1.6.4** imports the app and validates decorators locally; CLI help command
 
 Edit only [brand.json](brand.json) to change the name (ACORN), expansion, the two taglines, team/event credit or the logo path; the logo is still a placeholder. The logo asset can live in `static/`; both pages, document title and favicon read the config. Scarabs appears only as the team credit.
 
-English is the default. The Turkish toggle covers both pages and dynamic map labels/results, persists in localStorage, and preserves map/candidate state. The app uses only same-origin local CSS, scripts, fonts and map assets. Without JavaScript the landing's English content remains readable; the live map requires JavaScript and the backend.
+Overview and map are English only. The language control is removed and stored Turkish preferences are reset to English; URL language parameters are ignored. The unused dictionary remains on disk. The Overview alone allows `wasm-unsafe-eval` for its local meshopt decoder; the map retains its previous CSP. The app uses only same-origin local CSS, scripts, fonts and map assets. Without JavaScript the landing's English content remains readable; the live map requires JavaScript and the backend.
 
 References checked 2026-11-13: [Modal ASGI and client IP](https://modal.com/docs/guide/webhooks), [Volumes](https://modal.com/docs/guide/volumes), [input concurrency](https://modal.com/docs/guide/concurrent-inputs), [image builds](https://modal.com/docs/guide/images).

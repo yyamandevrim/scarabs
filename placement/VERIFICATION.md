@@ -1,3 +1,7 @@
+> Current Overview: 90 Python tests and the expanded 31-screenshot Playwright suite pass. Initial transfer 1,051,404 B; GLB 111,784 B; 3D JS 173,004 B gzip; JS heap 5,150,504 B after GC; 0 idle draws/s. See `static/vendor/README.md` for methods and scope.
+
+> Historical verification below records the earlier bilingual interface. The current English-only Overview verification and performance measurements are in `static/vendor/README.md`; `scripts/check_language.js` now asserts English and no language control on both routes.
+
 # Verification report — public dynamic site and blind-forest audit
 
 Verified 2026-11-13 on this Apple M5 Mac, Python 3.12.10. **83 pytest tests pass** (74 placement + 9 artifact tests), zero failed/skipped. The original 36 remain included. One upstream Starlette/httpx deprecation warning remains. The browser assertion script separately checks both rendered languages on landing and map at desktop and phone widths.

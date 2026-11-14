@@ -9,7 +9,7 @@
   Aerial Canopy Observation and Reporting Node
 </p>
 
-**ACORN — Aerial Canopy Observation and Reporting Node.** This is the English-first project website and offline geometric visibility simulator (Turkish toggle) for ACORN, built by team Scarabs for the Green European Renaissance challenge at Junction 2026, Helsinki. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
+**ACORN — Aerial Canopy Observation and Reporting Node.** This is the English-only project website and offline geometric visibility simulator for ACORN, built by team Scarabs for the Green European Renaissance challenge at Junction 2026, Helsinki. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
 
 **The two-camera input change is implemented.** The module carries three cameras at −70°, 0°, +70°, but normal requests allow at most two active cameras. The default is **left + centre**. The disconnected sector remains visible in grey as **“disconnected”**. Every primary metric, heading sensitivity and priority ranking uses only the active cameras. The three pairs are compared side by side; all three cameras are available only as **“Three cameras, reference”**.
 
@@ -17,7 +17,7 @@ Coverage is **simulated geometric visibility**, not optical smoke-detection rang
 
 ## Public website and artifact handoff
 
-The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The header uses Yaman’s original vector wordmark (`logo`); the landing hero uses the complete stacked vector lockup (`stacked_logo`). Both are bundled under `static/brand/` for offline and deployed use. See [asset provenance and usage](../assets/brand/README.md). **Scarabs is the team**, not the product.
+The Overview at `/` lets visitors turn the real CAD with realistic materials, inspect Camera 1/2/3 and their combined 360° view, and separate the six identified assemblies. Its interactive LoRa demo shows 40-byte status and 42-byte smoke reports arriving at the main centre, followed by explicit Wi-Fi evidence collection. A phone walkthrough shows the camera view, saved evidence and human decision. The single `map-terrain-interim.webp` preview is awaiting re-capture from the separate map rebuild. Runtime assets are local and rendering stops at rest; a poster remains as fallback. Overview is English only. Shared English-only shell changes were committed early in `b79b999`; the unused dictionary remains on disk. Build, provenance and browser checks are documented in [`static/vendor/README.md`](static/vendor/README.md) and [`../assets/hardware/README.md`](../assets/hardware/README.md). Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The header uses Yaman’s original vector wordmark (`logo`); the landing hero uses the complete stacked vector lockup (`stacked_logo`). Both are bundled under `static/brand/` for offline and deployed use. See [asset provenance and usage](../assets/brand/README.md). **Scarabs is the team**, not the product.
 
 See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the exact Modal token → one-time data load → deploy commands, public API limits, storage/JIT decisions and account-free checks. See [`../tools/README.md`](../tools/README.md) for the checksum-pinned IronShard dry-run/upload/restore workflow and redistribution notices. **No deployment or upload was performed.**
 
@@ -107,7 +107,7 @@ Buildings, camera calibration, actual balloon/tether motion, registration error,
 
 ## API
 
-- `GET /`: jury landing page; `GET /map`: bilingual live map.
+- `GET /`: interactive product Overview; `GET /map`: English-only live map.
 - `GET /api/brand`: shared project identity.
 - `GET /api/config`: presets, availability, dataset provenance/assumptions.
 - `POST /api/analyze`: one candidate, all four scenarios, connected-camera union, blind/overlap/water/priority metrics, pair comparison, three-camera reference, heading sensitivity, local map URLs, uncertainty and field checks.
