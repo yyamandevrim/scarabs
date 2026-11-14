@@ -4,7 +4,7 @@ from html import escape
 from pathlib import Path
 import time
 from typing import Literal
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -56,9 +56,18 @@ def create_app(station, manage_lifecycle=True):
         # Default stays camera "suspected smoke" only; flame-sensor triggers are a separate kind.
         return station.store.events(kind=kind)
 
+    @app.get("/api/events/pending")
+    def pending_events(limit: int = Query(200, ge=1, le=200),
+                       order: Literal["newest", "oldest"] = "newest",
+                       cursor: str | None = Query(None, max_length=256)):
+        try:
+            return station.store.pending_page(limit=limit, order=order, cursor=cursor)
+        except ValueError as exc:
+            raise HTTPException(422, "Invalid pending cursor") from exc
+
     @app.post("/api/events/{event_id}/decision")
     def decide(event_id: str, body: Decision):
-        if not station.store.decide(event_id,body.decision,time.time()):
+        if not station.store.decide(event_id,body.decision):
             raise HTTPException(404, "Olay bulunamadı")
         return {"ok":True, "decision":body.decision}
 

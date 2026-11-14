@@ -56,7 +56,7 @@ class LoraBridge:
         self.stop_event = Event()
         self.thread = None
         self.seen = set()
-        self.decisions = {}
+        self.decision_cursor = None
         self.error = None
         self.next_heartbeat = 0
         if not c.enabled:
@@ -88,9 +88,12 @@ class LoraBridge:
                 kind = Kind.SMOKE if e['kind'] == 'smoke' else Kind.FLAME
                 if self.sender.enqueue(self.packet(kind, e['opened_at'], d), now):
                     self.seen.add(e['id'])
-            if e['decision'] != 'pending' and self.decisions.get(e['id']) != e['decided_at']:
-                if self.sender.enqueue(self.packet(Kind.DECISION, e['decided_at'], dict(event_id=e['id'], decision=1 if e['decision'] == 'confirmed' else 2)), now):
-                    self.decisions[e['id']] = e['decided_at']
+        # Alert startup filtering must not hide new reviews of persisted events.
+        # Advance only accepted changes: a full bounded outbox retries next poll.
+        for e in self.station.store.decision_changes(self.started, self.decision_cursor):
+            if not self.sender.enqueue(self.packet(Kind.DECISION, e['decided_at'], dict(event_id=e['id'], decision=1 if e['decision'] == 'confirmed' else 2)), now):
+                break
+            self.decision_cursor = (e['decided_at'], e['id'])
 
     def heartbeat(self, now):
         cameras = {c['name']: c for c in self.station.status()['cameras']}

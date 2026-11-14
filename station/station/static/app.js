@@ -12,6 +12,12 @@ let lastUpdate = null;
 let refreshing = false;
 let showOlderPending = false;
 let decisionRevision = 0;
+let pendingCount = 0;
+let pendingOrder = 'newest';
+let pendingCursor = null;
+let pendingNextCursor = null;
+let pendingTrail = [];
+let pendingNavigation = false;
 const $ = selector => document.querySelector(selector);
 const text = (tag, value, className) => {
   const element = document.createElement(tag);
@@ -117,11 +123,15 @@ function updateCoverage() {
   const warning = $('#system-warning');
   const failed = active.filter(camera => !receiving.includes(camera));
   const pipelineFailed = receiving.filter(camera => camera.pipeline_error);
-  warning.hidden = !failed.length && !pipelineFailed.length && active.length > 0;
+  const runtimeFailed = currentStatus.runtime?.error;
+  const retentionFailed = currentStatus.runtime?.retention_error;
+  warning.hidden = !failed.length && !pipelineFailed.length && !runtimeFailed && !retentionFailed && active.length > 0;
   if (!warning.hidden) {
-    const title = !receiving.length ? 'Gözlem kullanılamıyor' : failed.length ? 'Gözlem kapsamı azaldı' : 'Analiz kesintisi';
+    const title = !receiving.length ? 'Gözlem kullanılamıyor' : failed.length ? 'Gözlem kapsamı azaldı' : pipelineFailed.length || runtimeFailed ? 'Analiz kesintisi' : 'Kayıt bakımı kesintisi';
     const reason = failed.length ? `${failed.map(camera => labels[camera.name]).join(', ')} kamera bağlantısı koptu. Yeniden deneniyor.`
-      : pipelineFailed.length ? `${pipelineFailed.map(camera => labels[camera.name]).join(', ')} kamerada görüntü var; duman analizi çalışmıyor.` : 'Etkin kamera girişi yok.';
+      : runtimeFailed ? 'Görüntü var; duman analizi durdu. Yerel günlükleri kontrol edin.'
+      : pipelineFailed.length ? `${pipelineFailed.map(camera => labels[camera.name]).join(', ')} kamerada görüntü var; duman analizi çalışmıyor.`
+      : retentionFailed ? 'Eski kayıtlar temizlenemedi; yeniden deneniyor. Duman analizi sürüyor.' : 'Etkin kamera girişi yok.';
     warning.replaceChildren(text('strong', `${title} · ${receiving.length}/${active.length} giriş`), text('span', reason));
   }
 }
@@ -312,8 +322,16 @@ function flushQueue() {
 queuePanel.addEventListener('pointerenter', () => { queuePointerInside=true; });
 queuePanel.addEventListener('pointerleave', () => { queuePointerInside=false;flushQueue(); });
 queuePanel.addEventListener('focusout', () => { queueMicrotask(flushQueue); });
+function renderPendingTotal(events) {
+  $('#event-count').textContent = `${pendingCount} karar bekliyor`;
+  $('#event-count').classList.toggle('has-pending', pendingCount > 0);
+  $('#pending-summary').textContent = 'Kayıtları incele';
+  $('#pending-summary').classList.remove('has-pending');
+  document.title = pendingCount ? `(${pendingCount}) Duman şüphesi — ${[...new Set(events.filter(event=>event.decision==='pending').map(event => labels[event.camera]))].join(', ')} — ${stationTitle}` : stationTitle;
+}
 function renderEvents(events, deliberate=false) {
-  if (!deliberate && eventElements.size && queueIsEngaged()) {
+  renderPendingTotal(events);
+  if (!deliberate && $('#events').getAttribute('aria-busy') !== 'true' && eventElements.size && queueIsEngaged()) {
     queuedEvents=events;
     const arrivals=events.filter(event=>event.decision==='pending'&&!eventElements.has(event.id)).length;
     $('#queue-arrivals').hidden=!arrivals;
@@ -322,18 +340,13 @@ function renderEvents(events, deliberate=false) {
   }
   queuedEvents=null;
   $('#queue-arrivals').hidden=true;
-  const pending = events.filter(event => event.decision === 'pending').sort((a,b)=>b.opened_at-a.opened_at);
+  const pending = events.filter(event => event.decision === 'pending').sort((a,b)=>pendingOrder === 'newest' ? b.opened_at-a.opened_at || b.id.localeCompare(a.id) : a.opened_at-b.opened_at || a.id.localeCompare(b.id));
   const history = events.filter(event => event.decision !== 'pending');
   if (nextReviewId) {
     const next = eventElements.get(nextReviewId);
     if (next && pending.some(event => event.id === nextReviewId)) next.row.open = true;
     nextReviewId = null;
   }
-  $('#event-count').textContent = `${pending.length} karar bekliyor`;
-  $('#event-count').classList.toggle('has-pending', pending.length > 0);
-  $('#pending-summary').textContent = 'Kayıtları incele';
-  $('#pending-summary').classList.remove('has-pending');
-  document.title = pending.length ? `(${pending.length}) Duman şüphesi — ${[...new Set(pending.map(event => labels[event.camera]))].join(', ')} — ${stationTitle}` : stationTitle;
   $('#events').querySelectorAll('.empty').forEach(element => element.remove());
   for (const [id, item] of eventElements) {
     if (!events.some(event => event.id === id)) { item.row.remove(); eventElements.delete(id); editing.delete(id); }
@@ -345,7 +358,10 @@ function renderEvents(events, deliberate=false) {
     item.row.className = `event ${isPending ? 'pending' : editing.has(event.id) ? 'editing' : 'decided'}`;
     if (isNew && isPending && pending.indexOf(event) === 0 && ![...eventElements.values()].some(other => other !== item && other.row.open)) item.row.open = true;
     if (item.row.classList.contains('decided') && !item.video.paused) item.video.pause?.();
-    const position = isPending && event === pending[0] ? 'En yeni · ' : isPending && event === pending[pending.length-1] ? 'En eski yanıtsız · ' : '';
+    const first = event === pending[0], last = event === pending[pending.length-1];
+    const newest = pendingOrder === 'newest' ? first && !pendingCursor : last && !pendingNextCursor;
+    const oldest = pendingOrder === 'oldest' ? first && !pendingCursor : last && !pendingNextCursor;
+    const position = isPending && newest ? 'En yeni · ' : isPending && oldest ? 'En eski yanıtsız · ' : '';
     item.title.textContent = `${position}${labels[event.camera]} kamera · Duman şüphesi`;
     item.row.dataset.queuePosition = isPending && event === pending[pending.length-1] && pending.length > 1 ? 'oldest' : isPending && event === pending[0] ? 'newest' : '';
     const keepVisible = pending.indexOf(event) < 3 || event === pending[pending.length-1] || item.row.open || item.row.contains(document.activeElement);
@@ -361,9 +377,11 @@ function renderEvents(events, deliberate=false) {
     const index = group.indexOf(event);
     if (target.children[index] !== item.row) target.insertBefore(item.row, target.children[index] || null);
   }
-  if (!pending.length) $('#events').append(text('p', events.length ? 'Karar bekleyen kayıt yok.' : 'Henüz duman şüphesi kaydı yok.', 'empty'));
+  if (!pending.length) $('#events').append(text('p', pendingCount ? 'Bu sayfada karar bekleyen kayıt yok. En yeni veya önceki sayfayı açın.' : events.length ? 'Karar bekleyen kayıt yok.' : 'Henüz duman şüphesi kaydı yok.', 'empty'));
   const olderCount = [...$('#events').children].filter(row => row.hidden).length;
-  $('#queue-controls').hidden = pending.length < 2;
+  $('#queue-controls').hidden = pendingCount < 2;
+  $('#queue-next-page').hidden = !pendingNextCursor;
+  $('#queue-prev-page').hidden = !pendingTrail.length;
   $('#older-toggle').hidden = !olderCount && !showOlderPending;
   $('#older-toggle').textContent = showOlderPending ? 'Eski kayıtları daralt' : `Önceki ${olderCount} kaydı göster`;
   $('#older-toggle').setAttribute('aria-expanded', String(showOlderPending));
@@ -375,8 +393,25 @@ function renderEvents(events, deliberate=false) {
     $('#history').dataset.initialized = 'true';
   }
 }
-function jumpToPending(oldest) {
-  const pending = currentEvents.filter(event=>event.decision==='pending').sort((a,b)=>a.opened_at-b.opened_at);
+let pendingJump = null;
+async function loadPendingPage(order, cursor = null, trail = [], jump = null) {
+  pendingJump = jump;
+  pendingOrder = order;
+  pendingCursor = cursor;
+  pendingTrail = trail;
+  decisionRevision++;
+  await refresh(true);
+}
+async function jumpToPending(oldest) {
+  const loaded = currentEvents.filter(event=>event.decision==='pending');
+  if (pendingCount > loaded.length || pendingCursor) {
+    await loadPendingPage(oldest ? 'oldest' : 'newest', null, [], oldest);
+    return;
+  }
+  focusPending(oldest);
+}
+function focusPending(oldest) {
+  const pending = currentEvents.filter(event=>event.decision==='pending').sort((a,b)=>a.opened_at-b.opened_at || a.id.localeCompare(b.id));
   const event = oldest ? pending[0] : pending[pending.length-1];
   if (!event) return;
   const item = eventElements.get(event.id);
@@ -387,6 +422,12 @@ function jumpToPending(oldest) {
 }
 $('#queue-newest').onclick = () => jumpToPending(false);
 $('#queue-oldest').onclick = () => jumpToPending(true);
+$('#queue-next-page').onclick = () => {
+  if (pendingNextCursor) loadPendingPage(pendingOrder, pendingNextCursor, [...pendingTrail, pendingCursor]);
+};
+$('#queue-prev-page').onclick = () => {
+  if (pendingTrail.length) loadPendingPage(pendingOrder, pendingTrail.at(-1), pendingTrail.slice(0,-1));
+};
 $('#older-toggle').onclick = () => {showOlderPending=!showOlderPending;renderEvents(currentEvents, true);};
 async function decide(id, decision) {
   const item = eventElements.get(id);
@@ -399,6 +440,7 @@ async function decide(id, decision) {
   try {
     await json(`/api/events/${id}/decision`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({decision})});
     decisionRevision++;
+    if (item.event.decision === 'pending') pendingCount = Math.max(0, pendingCount-1);
     editing.delete(id);
     item.row.open = true;
     const nextPending=currentEvents.find(event=>event.id!==id&&event.decision==='pending');
@@ -410,6 +452,7 @@ async function decide(id, decision) {
     // A successful write is authoritative even if the next polling request fails.
     currentEvents = currentEvents.map(event => event.id === id ? {...event, decision, decided_at: Date.now() / 1000} : event);
     if (online) {
+      renderPendingTotal(currentEvents);
       if(queueIsEngaged()){if(!item.video.paused)item.video.pause?.();item.event=currentEvents.find(event=>event.id===id);renderActions(item,item.event);queuedEvents=currentEvents;}
       else renderEvents(currentEvents, true);
       $('#history').open = true;
@@ -453,24 +496,30 @@ function serverLost() {
   $('#events').setAttribute('aria-busy', 'true');
   $('#history').hidden = true;
 }
-async function refresh() {
-  if (refreshing) return;
+async function refresh(deliberate = false) {
+  if (refreshing) { if (deliberate) pendingNavigation = true; return; }
   refreshing = true;
   const revision = decisionRevision;
   try {
-    const [status, events] = await Promise.all([json('/api/status'), json('/api/events')]);
+    const params = new URLSearchParams({order:pendingOrder});
+    if (pendingCursor) params.set('cursor',pendingCursor);
+    const [status, history, page] = await Promise.all([json('/api/status'), json('/api/events'), json(`/api/events/pending?${params}`)]);
+    const events = [...page.events, ...history.filter(event => event.decision !== 'pending')];
     // A poll started before a successful write must not restore the old decision.
     if (revision !== decisionRevision) return;
     currentStatus = status;
+    pendingCount = page.pending_count;
+    pendingNextCursor = page.next_cursor;
     currentEvents = events;
     online = true;
     lastUpdate = Date.now() / 1000;
     $('#connection').textContent = `İstasyon bağlı · ${time(lastUpdate)}`;
     $('#connection').className = '';
-    renderEvents(events);
+    renderEvents(events, deliberate);
     renderStatus(status);
+    if (pendingJump !== null) { const oldest = pendingJump; pendingJump = null; focusPending(oldest); }
   } catch (error) { serverLost(); }
-  finally { refreshing = false; }
+  finally { refreshing = false; if (pendingNavigation) { pendingNavigation=false; await refresh(true); } }
 }
 async function poll() {
   await refresh();

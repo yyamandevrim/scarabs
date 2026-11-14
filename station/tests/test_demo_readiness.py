@@ -209,3 +209,126 @@ def test_archive_cli_requires_typed_confirmation(tmp_path):
 def test_team_board_device_tree_spelling_is_recognised():
     actual=machine.describe('Linux','aarch64','test','QRB2210','Arduino UnoQ')
     assert actual['is_uno_q'] and not actual['label'].endswith('UNO Q değil')
+
+
+@pytest.mark.parametrize("delete", [False, True])
+def test_maintenance_excludes_station_journal_construction_until_archive_completes(config, monkeypatch, delete):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+    store = EventStore(config.data_dir)
+    old = store.create('left', Detection((.1,.1,.4,.4), .8), time.time())
+    store.shutdown()
+    entered, resume = Event(), Event()
+    summary = maintenance.event_summary
+    def blocked_summary(path):
+        entered.set()
+        assert resume.wait(3)
+        return summary(path)
+    monkeypatch.setattr(maintenance, 'event_summary', blocked_summary)
+    accidental = None
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        job = executor.submit(maintenance.archive_events, config.data_dir, delete=delete)
+        try:
+            assert entered.wait(3)
+            with pytest.raises(datalock.DataDirBusy):
+                accidental = Station(config, detector=EmptyDetector())
+        finally:
+            if accidental:
+                accidental.stop(); accidental.store.shutdown()
+            resume.set()
+        result = job.result()
+    station = Station(config, detector=EmptyDetector())
+    try:
+        assert station.store.events() == []
+        fresh = station.store.create('left', Detection((.1,.1,.4,.4), .8), time.time())
+        if not delete:
+            archived = EventStore(Path(result['archive']))
+            try:
+                assert archived.event(old) and archived.event(fresh) is None
+            finally: archived.shutdown()
+    finally: station.stop(); station.store.shutdown()
+
+
+def test_station_initialization_excludes_maintenance_before_start(config, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Event
+    from station import runtime
+    entered, resume = Event(), Event()
+    def blocked_store(path):
+        store = EventStore(path)
+        entered.set()
+        assert resume.wait(3)
+        return store
+    monkeypatch.setattr(runtime, 'EventStore', blocked_store)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        job = executor.submit(Station, config, detector=EmptyDetector())
+        try:
+            assert entered.wait(3)
+            with pytest.raises(datalock.DataDirBusy):
+                maintenance.archive_events(config.data_dir)
+        finally:
+            resume.set()
+            station = job.result()
+            station.stop(); station.store.shutdown()
+    assert not datalock.in_use(config.data_dir)
+
+
+@pytest.mark.parametrize('phase', ['store', 'workers', 'start'])
+def test_failed_station_initialization_or_start_releases_journal(config, monkeypatch, phase):
+    from station import runtime
+    def fail(*args, **kwargs): raise RuntimeError('injected initialization failure')
+    station = None
+    with monkeypatch.context() as patch:
+        if phase == 'store': patch.setattr(runtime, 'EventStore', fail)
+        if phase == 'workers': patch.setattr(runtime, 'CaptureWorker', fail)
+        try:
+            with pytest.raises(RuntimeError, match='injected'):
+                station = Station(config, detector=EmptyDetector())
+                if phase == 'start':
+                    patch.setattr(station.workers['centre'], 'start', fail)
+                    station.start()
+            assert not datalock.in_use(config.data_dir)
+            if station:
+                assert not any(w.thread and w.thread.is_alive() for w in station.workers.values())
+        finally:
+            if station: station.stop(); station.store.shutdown()
+    replacement = Station(config, detector=EmptyDetector())
+    replacement.stop(); replacement.store.shutdown()
+    assert not datalock.in_use(config.data_dir)
+
+
+def test_stop_closes_journal_before_releasing_lock_and_restart_archive_is_safe(config):
+    import sqlite3
+    station = Station(config, detector=EmptyDetector())
+    event_id = station.store.create('left', Detection((.1,.1,.4,.4), .8), time.time())
+    assert datalock.in_use(config.data_dir)
+    station.stop()
+    with pytest.raises(sqlite3.ProgrammingError): station.store.create('left', Detection((.1,.1,.4,.4), .8), time.time())
+    result = maintenance.archive_events(config.data_dir)
+    assert result['events'] == 1
+    restarted = Station(config, detector=EmptyDetector())
+    try: assert restarted.store.event(event_id) is None
+    finally: restarted.stop(); restarted.store.shutdown()
+
+
+def test_data_lock_metadata_failure_closes_acquired_handle(tmp_path, monkeypatch):
+    import builtins
+    handles = []
+    def tracked_open(*args, **kwargs):
+        handle = builtins.open(*args, **kwargs); handles.append(handle); return handle
+    def fail(): raise OSError('injected metadata failure')
+    monkeypatch.setattr(datalock, 'open', tracked_open, raising=False)
+    monkeypatch.setattr(datalock.os, 'getpid', fail)
+    with pytest.raises(OSError, match='metadata'):
+        datalock.acquire(tmp_path)
+    assert all(handle.closed for handle in handles)
+    assert not datalock.in_use(tmp_path)
+
+
+def test_maintenance_releases_exclusion_after_io_failure(tmp_path, monkeypatch):
+    store = EventStore(tmp_path)
+    store.shutdown()
+    def fail(*args): raise PermissionError('injected archive failure')
+    monkeypatch.setattr(maintenance.shutil, 'move', fail)
+    with pytest.raises(PermissionError): maintenance.archive_events(tmp_path)
+    assert not datalock.in_use(tmp_path)

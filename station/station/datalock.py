@@ -1,4 +1,4 @@
-"""One running station per data directory; maintenance commands check it."""
+"""Shared exclusion for journal initialization/lifetime and full maintenance."""
 import fcntl
 import os
 from pathlib import Path
@@ -11,7 +11,7 @@ class DataDirBusy(RuntimeError):
 
 
 def acquire(data_dir):
-    """Hold an exclusive advisory lock for the life of the server process."""
+    """Acquire exclusive access; the owner must retain it until its journal closes."""
     path = Path(data_dir) / LOCK_NAME
     path.parent.mkdir(parents=True, exist_ok=True)
     handle = open(path, "a+")
@@ -20,10 +20,14 @@ def acquire(data_dir):
     except OSError:
         handle.close()
         raise DataDirBusy(f"Another station process is using {Path(data_dir)}; stop it first")
-    handle.seek(0)
-    handle.truncate()
-    handle.write(str(os.getpid()))
-    handle.flush()
+    try:
+        handle.seek(0)
+        handle.truncate()
+        handle.write(str(os.getpid()))
+        handle.flush()
+    except BaseException:
+        handle.close()
+        raise
     return handle
 
 

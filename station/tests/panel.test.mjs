@@ -34,7 +34,23 @@ async function panel(events = [], options = {}) {
       state.events = state.events.map(item => url === `/api/events/${item.id}/decision` ? {...item, decision, decided_at: Date.now() / 1000} : item);
       return {ok: true, json: async () => ({ok: true, decision})};
     }
-    return {ok: true, json: async () => structuredClone(url === '/api/status' ? state.status : state.events)};
+    if (url.startsWith('/api/events/pending')) {
+      const params = new URL(url, 'http://127.0.0.1').searchParams;
+      const order = params.get('order') || 'newest';
+      const compare = (a,b) => a.opened_at-b.opened_at || a.id.localeCompare(b.id);
+      let pending = state.events.filter(e => e.decision === 'pending').sort(compare);
+      if (order === 'newest') pending.reverse();
+      const total = pending.length;
+      const cursor = params.get('cursor');
+      if (cursor) {
+        const anchor = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+        pending = pending.filter(e => order === 'newest' ? compare(e, anchor) < 0 : compare(e, anchor) > 0);
+      }
+      const items = pending.slice(0,200);
+      const next = pending.length > 200 ? Buffer.from(JSON.stringify(items.at(-1))).toString('base64url') : null;
+      return {ok:true, json: async () => structuredClone({events:items,pending_count:total,next_cursor:next})};
+    }
+    return {ok: true, json: async () => structuredClone(url === '/api/status' ? state.status : state.events.slice(0,200))};
   };
   window.document.write(html);
   window.eval(`${script}\nwindow.testRefresh = refresh;`);
@@ -454,4 +470,94 @@ test('one completed analysis reports its time but waits for a second analysis be
   p.state.status.cameras[0].analysis_hz = 1/6;
   await p.refresh();
   assert.match(p.$('.camera-info').textContent,/0,17 analiz\/sn/);
+});
+
+
+test('old pending behind newest 200 decided records remains reviewable with truthful total', async () => {
+  const old = event({id:'hidden-old', opened_at:1, clip:webm});
+  const p = await panel([...Array.from({length:200}, (_,i) => event({id:`decided-${i}`,opened_at:1000-i,decision:'rejected'})), old]);
+  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  const row = p.$('[data-event-id="hidden-old"]');
+  assert.ok(row && row.parentNode === p.$('#events'));
+  row.querySelector('.confirm').click(); await flush();
+  assert.equal(p.$('#event-count').textContent, '0 karar bekliyor');
+  assert.equal(p.state.posts[0].url, '/api/events/hidden-old/decision');
+});
+
+test('bounded pending pages reach all 405 records and global oldest/newest with stable decisions and video', async () => {
+  const p = await panel(Array.from({length:405}, (_,i) => event({id:`pending-${String(i).padStart(3,'0')}`,opened_at:1000-i,clip:webm})));
+  assert.equal(p.$('#event-count').textContent, '405 karar bekliyor');
+  assert.equal(p.window.document.querySelectorAll('#events .event').length,200);
+  assert.equal(p.$('#queue-next-page').hidden, false);
+  const watched = p.$('#events .event video');
+  await p.refresh(); assert.equal(p.$('#events .event video'),watched);
+  p.$('#queue-next-page').click(); await flush();
+  assert.ok(p.$('[data-event-id="pending-200"]'));
+  assert.equal(p.window.document.querySelectorAll('#events .event').length,200);
+  p.$('#queue-next-page').click(); await flush();
+  assert.ok(p.$('[data-event-id="pending-404"]'));
+  assert.equal(p.$('#queue-next-page').hidden, true);
+  p.$('#queue-oldest').click(); await flush();
+  assert.equal(p.$('#events .event').dataset.eventId,'pending-404');
+  assert.equal(p.$('#events .event').open,true);
+  p.$('#events .confirm').click(); await flush();
+  assert.equal(p.$('#event-count').textContent, '404 karar bekliyor');
+  p.$('#queue-newest').click(); await flush();
+  assert.equal(p.$('#events .event').dataset.eventId,'pending-000');
+  assert.equal(p.$('#event-count').textContent, '404 karar bekliyor');
+});
+
+test('jump to oldest during an in-flight poll focuses the newly loaded global page', async () => {
+  const p = await panel(Array.from({length:405}, (_,i) => event({id:`pending-${String(i).padStart(3,'0')}`,opened_at:1000-i})));
+  const original = p.window.fetch;
+  let release;
+  p.window.fetch = (url, init) => {
+    if (url === '/api/status' && !release) return new Promise(resolve => {release=()=>resolve(original(url,init));});
+    return original(url,init);
+  };
+  const polling = p.refresh(); await flush();
+  p.$('#queue-oldest').click(); await flush();
+  release(); await polling; await flush();
+  const oldest = p.$('#events .event');
+  assert.equal(oldest.dataset.eventId, 'pending-404');
+  assert.equal(oldest.open, true);
+  assert.ok(p.window.document.activeElement === oldest.querySelector('summary'), 'focus must follow the newly loaded page');
+});
+
+
+test('successful poll restores attached usable queue while pointer remains across connection loss', async () => {
+  const p = await panel([event()]);
+  const panelElement = p.$('#event-panel');
+  const row = p.$('#events .event');
+  panelElement.dispatchEvent(new p.window.Event('pointerenter'));
+  p.state.fail = true; await p.refresh();
+  assert.equal(row.isConnected, false);
+  assert.equal(p.$('#events').getAttribute('aria-busy'), 'true');
+  p.state.fail = false; await p.refresh();
+  assert.match(p.$('#connection').textContent, /İstasyon bağlı/);
+  assert.ok(p.$('#events .event') === row, 'recovery reattaches the existing row');
+  assert.equal(row.isConnected, true);
+  assert.equal(p.$('#events').getAttribute('aria-busy'), 'false');
+  assert.ok(p.$('#events .confirm'));
+  assert.equal(p.$('#queue-arrivals').hidden, true);
+  // Subsequent ordinary arrivals still defer under the held pointer.
+  p.state.events.unshift(event({id:'after-recovery',opened_at:1700000100}));
+  await p.refresh();
+  assert.equal(p.$('#events').firstElementChild, row);
+  assert.equal(p.$('#queue-arrivals').hidden, false);
+});
+
+
+test('runtime death and retention faults are visible separately from live camera capture', async () => {
+  const p = await panel();
+  p.state.status.runtime = {state:'failed',analysis_running:false,error:'Analysis loop stopped unexpectedly',retention_error:null};
+  await p.refresh();
+  assert.equal(p.$('#system-warning').hidden, false);
+  assert.match(p.$('#system-warning').textContent,/Analiz kesintisi/);
+  p.state.status.runtime = {state:'running',analysis_running:true,error:null,retention_error:'Retention unavailable'};
+  await p.refresh();
+  assert.match(p.$('#system-warning').textContent,/Kayıt bakımı/);
+  assert.match(p.$('.camera-info').textContent,/54,8 ms/);
+  p.state.status.runtime.retention_error = null; await p.refresh();
+  assert.equal(p.$('#system-warning').hidden, true);
 });

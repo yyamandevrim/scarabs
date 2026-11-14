@@ -43,14 +43,18 @@ class EventTracker:
         self.last_analysis = None
         self.events: list[OpenEvent] = []
 
-    def update(self, detections, now, create, extend, close):
-        if self.history_gap is not None and self.last_analysis is not None and now-self.last_analysis > self.history_gap:
-            self.rule.reset()
-        self.last_analysis = now
+    def expire(self, now, close):
+        """Expire accepted observations without inventing an analysis or a vote."""
         for event in list(self.events):
             if now - event.last_seen > self.timeout:
                 close(event.id, now)
                 self.events.remove(event)
+
+    def update(self, detections, now, create, extend, close):
+        if self.history_gap is not None and self.last_analysis is not None and now-self.last_analysis > self.history_gap:
+            self.rule.reset()
+        self.last_analysis = now
+        self.expire(now, close)
         candidates = self.rule.observe(detections)
         matched = set()
         for detection in sorted(detections, key=lambda d: d.confidence, reverse=True):

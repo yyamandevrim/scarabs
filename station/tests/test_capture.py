@@ -1,6 +1,7 @@
 from dataclasses import replace
 import time
 import numpy as np
+import pytest
 from station.capture import LatestFrame, CaptureWorker
 from station.runtime import Station
 from conftest import wait_until
@@ -94,3 +95,49 @@ def test_no_loop_eof_disconnected(config,video):
         wait_until(lambda:not worker.status()['connected'])
         assert worker.latest.get() is None
     finally:worker.stop()
+
+
+@pytest.mark.parametrize("frame_count", [0, 2])
+def test_nonlooping_finished_file_stays_at_eof_beyond_retry_delay(config, frame_count):
+    import cv2
+    class TwoFrames:
+        def __init__(self): self.position = 0
+        def isOpened(self): return True
+        def get(self, prop):
+            return {cv2.CAP_PROP_FPS:100, cv2.CAP_PROP_FRAME_COUNT:frame_count, cv2.CAP_PROP_POS_FRAMES:self.position}.get(prop, 0)
+        def read(self):
+            if self.position == 2: return False, None
+            self.position += 1
+            return True, np.zeros((24,32,3),np.uint8)
+        def release(self): pass
+    opens = []
+    worker = CaptureWorker(replace(config.cameras[0],loop=False,width=32,height=24), replace(config,retry_seconds=.03), lambda:(opens.append(1),TwoFrames())[1])
+    worker.start()
+    try:
+        wait_until(lambda:worker.latest.sequence >= 2)
+        wait_until(lambda:not worker.status()['connected'])
+        # Observe well beyond several retry periods; the previous regression only
+        # checked the brief disconnected state before the first generic retry.
+        time.sleep(.15)
+        assert worker.latest.sequence == 2 and len(opens) == 1
+        assert 'end' in worker.status()['error'].lower()
+    finally: worker.stop()
+
+
+def test_nonlooping_file_read_failure_before_eof_still_retries(config):
+    import cv2
+    class Dropout:
+        position = 0
+        def isOpened(self): return True
+        def get(self, prop):
+            return {cv2.CAP_PROP_FPS:100, cv2.CAP_PROP_FRAME_COUNT:10, cv2.CAP_PROP_POS_FRAMES:self.position}.get(prop, 0)
+        def read(self):
+            if self.position: return False, None
+            self.position += 1
+            return True, np.zeros((24,32,3),np.uint8)
+        def release(self): pass
+    opens = []
+    worker = CaptureWorker(replace(config.cameras[0],loop=False,width=32,height=24),replace(config,retry_seconds=.03),lambda:(opens.append(1),Dropout())[1])
+    worker.start()
+    try: wait_until(lambda:len(opens) >= 3)
+    finally: worker.stop()

@@ -55,10 +55,25 @@ class DutyBudget:
         if self.path and self.path.exists():
             try:
                 state = json.loads(self.path.read_text())
-                self.entries = [tuple(x) for x in state['entries']]
-                self.last_time = state['last_time']
-                self.not_before = state.get('not_before', 0)
-            except (ValueError, KeyError, TypeError):
+                if not isinstance(state, dict) or not isinstance(state['entries'], list):
+                    raise ValueError('Invalid ledger shape')
+                def number(value):
+                    if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+                        raise ValueError('Invalid ledger number')
+                    return value
+                last_time = number(state['last_time'])
+                not_before = number(state.get('not_before', 0))
+                entries = []
+                for row in state['entries']:
+                    if not isinstance(row, list) or len(row) != 2:
+                        raise ValueError('Invalid ledger entry')
+                    end, duration = map(number, row)
+                    if not 0 < duration <= window or end < duration or end-duration > last_time+1e-6:
+                        raise ValueError('Invalid ledger accounting range')
+                    entries.append((end, duration))
+                # Publish only a completely validated ledger, never partial accounting.
+                self.entries, self.last_time, self.not_before = entries, last_time, not_before
+            except (ValueError, KeyError, TypeError, OverflowError):
                 # Corrupt accounting fails closed; one full quiet hour required.
                 import time
                 self.blocked_until = time.time()+window

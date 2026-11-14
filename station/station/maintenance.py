@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import shutil
 import sqlite3
-from .datalock import DataDirBusy, in_use
+from . import datalock
 
 EVENT_FILES = ("events.sqlite3", "events.sqlite3-wal", "events.sqlite3-shm")
 UNPLUGGED_SUFFIX = ".unplugged"
@@ -34,27 +34,29 @@ def archive_events(data_dir, delete=False, now=None):
     self-contained copy: data/archive/<UTC time>/events.sqlite3 plus events/.
     """
     data_dir = Path(data_dir)
-    if in_use(data_dir):
-        raise DataDirBusy(f"A station server is running on {data_dir}; stop it first (Ctrl+C)")
-    items = [data_dir / name for name in EVENT_FILES] + [data_dir / "events"]
-    present = [p for p in items if p.exists()]
-    summary = event_summary(data_dir)
-    if not present:
-        return {**summary, "action": "nothing", "archive": None}
-    if delete:
+    handle = datalock.acquire(data_dir)
+    try:
+        items = [data_dir / name for name in EVENT_FILES] + [data_dir / "events"]
+        present = [p for p in items if p.exists()]
+        summary = event_summary(data_dir)
+        if not present:
+            return {**summary, "action": "nothing", "archive": None}
+        if delete:
+            for path in present:
+                shutil.rmtree(path) if path.is_dir() else path.unlink()
+            return {**summary, "action": "deleted", "archive": None}
+        stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
+        target = data_dir / "archive" / stamp
+        suffix = 1
+        while target.exists():
+            target = data_dir / "archive" / f"{stamp}-{suffix}"
+            suffix += 1
+        target.mkdir(parents=True)
         for path in present:
-            shutil.rmtree(path) if path.is_dir() else path.unlink()
-        return {**summary, "action": "deleted", "archive": None}
-    stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
-    target = data_dir / "archive" / stamp
-    suffix = 1
-    while target.exists():
-        target = data_dir / "archive" / f"{stamp}-{suffix}"
-        suffix += 1
-    target.mkdir(parents=True)
-    for path in present:
-        shutil.move(str(path), str(target / path.name))
-    return {**summary, "action": "archived", "archive": str(target)}
+            shutil.move(str(path), str(target / path.name))
+        return {**summary, "action": "archived", "archive": str(target)}
+    finally:
+        datalock.release(handle)
 
 
 def _file_slot(config, name):

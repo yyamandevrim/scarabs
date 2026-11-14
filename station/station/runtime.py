@@ -5,6 +5,7 @@ from dataclasses import asdict
 from pathlib import Path
 from threading import Event, Lock, Thread
 import logging
+import sqlite3
 import time
 import cv2
 from . import clip, datalock
@@ -21,52 +22,94 @@ class Station:
     def __init__(self, config, detector=None, capture_factory=None):
         self.config = config
         self.detector = detector if detector is not None else SmokeDetector(config.model, config.input_size, config.confidence, config.nms_iou, config.ort_threads)
-        self.store = EventStore(config.data_dir)
-        self.workers = {c.name: CaptureWorker(c, config, factory=(lambda c=c: capture_factory(c)) if capture_factory else None) for c in config.cameras if c.active}
-        self.trackers = {name: EventTracker(config.similarity_iou, config.event_timeout, config.alarm_gap_seconds) for name in self.workers}
-        self.led = LedHook(config.led_path)
-        self.mcu = McuBridge(self, config.mcu)
-        self.data_lock = None
-        self.stop_event = Event()
-        self.lock = Lock()
-        self.metrics = {name: {"analyses":0, "preprocess_ms":None, "inference_ms":None, "analysis_ms":None, "analysis_hz":0.0, "pipeline_error":None} for name in self.workers}
-        self.pending = []
-        self.media_jobs = []
-        self.encoder = ThreadPoolExecutor(max_workers=1, thread_name_prefix="evidence", initializer=clip.lower_thread_priority)
-        self.clip_timings = deque(maxlen=50)
-        self.thread = None
-        self.lora = LoraBridge(self)
+        self.data_lock = datalock.acquire(config.data_dir)
+        try:
+            self.store = EventStore(config.data_dir)
+            self.workers = {c.name: CaptureWorker(c, config, factory=(lambda c=c: capture_factory(c)) if capture_factory else None) for c in config.cameras if c.active}
+            self.trackers = {name: EventTracker(config.similarity_iou, config.event_timeout, config.alarm_gap_seconds) for name in self.workers}
+            self.led = LedHook(config.led_path)
+            self.mcu = McuBridge(self, config.mcu)
+            self.stop_event = Event()
+            self.lock = Lock()
+            self.metrics = {name: {"analyses":0, "preprocess_ms":None, "inference_ms":None, "analysis_ms":None, "analysis_hz":0.0, "pipeline_error":None} for name in self.workers}
+            self.pending = []
+            self.media_jobs = []
+            self.encoder = ThreadPoolExecutor(max_workers=1, thread_name_prefix="evidence", initializer=clip.lower_thread_priority)
+            self.clip_timings = deque(maxlen=50)
+            self.thread = None
+            self.runtime_state = "ready"
+            self.runtime_error = None
+            self.retention_error = None
+            self.lora = LoraBridge(self)
+        except BaseException:
+            try:
+                if hasattr(self, "encoder"):
+                    self.encoder.shutdown(wait=True)
+            finally:
+                try:
+                    if hasattr(self, "store"):
+                        self.store.shutdown()
+                finally:
+                    datalock.release(self.data_lock)
+                    self.data_lock = None
+            raise
 
     def start(self):
-        self.data_lock = datalock.acquire(self.config.data_dir)
-        self.store.close_previous(time.time())
-        self.store.prune(time.time(), self.config.retention_days)
-        for worker in self.workers.values():
-            worker.start()
-        self.thread = Thread(target=self._run, name="shared-detector", daemon=True)
-        self.thread.start()
-        self.mcu.start()
-        self.lora.start()
+        if self.runtime_state != "ready":
+            raise RuntimeError("Station instances can only be started once")
+        try:
+            self.store.close_previous(time.time())
+            self._prune_retention()
+            for worker in self.workers.values():
+                worker.start()
+            self.runtime_state = "running"
+            self.thread = Thread(target=self._run_guarded, name="shared-detector", daemon=True)
+            self.thread.start()
+            self.mcu.start()
+            self.lora.start()
+        except BaseException:
+            self.runtime_state = "failed"
+            self.runtime_error = "Station start failed; check local logs"
+            self.stop()
+            raise
 
     def stop(self):
+        if self.data_lock is None:
+            return
         self.lora.stop()
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=30)
-        for worker in self.workers.values():
-            worker.stop()
-        for pending in self.pending:
-            self._submit_clip(pending)
-        self.pending.clear()
-        self.encoder.shutdown(wait=True)
-        now = time.time()
-        for tracker in self.trackers.values():
-            for event in tracker.events:
-                self.store.close_event(event.id, now)
-        self.led.set_alarm(False)
-        self.mcu.stop()
-        datalock.release(self.data_lock)
-        self.data_lock = None
+            if self.thread.is_alive():
+                self.runtime_state = "failed"
+                self.runtime_error = "Analysis loop did not stop; journal remains locked"
+                raise RuntimeError(self.runtime_error)
+        try:
+            try:
+                for worker in self.workers.values():
+                    worker.stop()
+                for pending in self.pending:
+                    self._submit_clip(pending)
+                self.pending.clear()
+            finally:
+                self.encoder.shutdown(wait=True)
+            now = time.time()
+            for tracker in self.trackers.values():
+                for event in tracker.events:
+                    self.store.close_event(event.id, now)
+            self.led.set_alarm(False)
+        finally:
+            try:
+                self.mcu.stop()
+            finally:
+                # No open journal may outlive maintenance exclusion.
+                try:
+                    self.store.shutdown()
+                finally:
+                    datalock.release(self.data_lock)
+                    self.data_lock = None
+        if self.runtime_state != "failed":
+            self.runtime_state = "stopped"
 
     def status(self):
         now = time.time()
@@ -84,7 +127,34 @@ class Station:
                 item.update(state)
                 item.update(connected=connected, status="connected" if connected else "disconnected", status_text="bağlı" if connected else "bağlantı koptu")
             cameras.append(item)
-        return {"cameras": cameras, "analysis_profile":self.config.analysis_profile_status(), "target_analysis_hz":self.config.analysis_hz, "input_size":self.config.input_size, "confidence_threshold":self.config.confidence, "offline":True, "measured_on":machine_identity(), "mcu":self.mcu.status()}
+        running = self.thread is not None and self.thread.is_alive()
+        state = self.runtime_state
+        error = self.runtime_error
+        if state == "running" and not running and not self.stop_event.is_set():
+            state, error = "failed", "Analysis loop stopped unexpectedly"
+        return {"cameras": cameras, "runtime": {"state":state, "analysis_running":running, "error":error, "retention_error":self.retention_error}, "analysis_profile":self.config.analysis_profile_status(), "target_analysis_hz":self.config.analysis_hz, "input_size":self.config.input_size, "confidence_threshold":self.config.confidence, "offline":True, "measured_on":machine_identity(), "mcu":self.mcu.status()}
+
+    def _prune_retention(self):
+        try:
+            self.store.prune(time.time(), self.config.retention_days)
+        except (OSError, sqlite3.Error) as exc:
+            error = f"Retention unavailable ({type(exc).__name__}); retrying"
+            if error != self.retention_error:
+                logging.exception("Event retention failed; analysis continues")
+            self.retention_error = error
+        else:
+            self.retention_error = None
+
+    def _run_guarded(self):
+        try:
+            self._run()
+        except Exception:
+            logging.exception("Shared analysis loop terminated")
+            self.runtime_error = "Analysis loop stopped unexpectedly; check local logs"
+        finally:
+            if self.runtime_error or not self.stop_event.is_set():
+                self.runtime_state = "failed"
+                self.runtime_error = self.runtime_error or "Analysis loop stopped unexpectedly"
 
     def jpeg(self, name):
         worker = self.workers.get(name)
@@ -152,6 +222,7 @@ class Station:
                 if self.stop_event.is_set():
                     break
                 now = time.time()
+                self.trackers[name].expire(now, self.store.close_event)
                 frame = worker.latest.get()
                 connected = frame is not None and now-frame.timestamp <= self.config.stale_seconds and worker.status()["connected"]
                 if not connected:
@@ -161,7 +232,6 @@ class Station:
                         with self.lock:
                             self.metrics[name]["analysis_hz"] = 0.0
                     was_connected[name] = False
-                    self.trackers[name].update([],now,lambda *args:None,self.store.extend,self.store.close_event)
                     continue
                 was_connected[name] = True
                 if time.monotonic() < due[name] or frame.sequence == seen[name]:
@@ -185,11 +255,12 @@ class Station:
                 except Exception as exc:
                     logging.exception("Analysis failed for %s", name)
                     self.trackers[name].rule.reset()
+                    self.detections[name] = []
                     with self.lock:
                         self.metrics[name]["pipeline_error"] = str(exc)
             self._collect_evidence(time.time())
             self.led.set_alarm(any(t.events for t in self.trackers.values()))
             if time.monotonic() >= prune_at:
-                self.store.prune(time.time(), self.config.retention_days)
+                self._prune_retention()
                 prune_at = time.monotonic()+60
             self.stop_event.wait(.02)

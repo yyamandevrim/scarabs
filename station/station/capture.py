@@ -123,6 +123,7 @@ class CaptureWorker:
                 fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
                 capture_format = ''.join(chr((fourcc >> (8*i)) & 255) for i in range(4)).rstrip('\x00')
                 next_frame = time.monotonic()
+                frames_read = 0
                 last_sample, previous = 0.0, None
                 next_check = time.monotonic()+self.watch_interval
                 while not self.stop_event.is_set():
@@ -132,6 +133,17 @@ class CaptureWorker:
                             raise OSError("Source path disappeared (file removed or device unplugged)")
                     ok, image = cap.read()
                     if not ok:
+                        if self.camera.kind == "file" and not self.camera.loop:
+                            total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+                            position = cap.get(cv2.CAP_PROP_POS_FRAMES)
+                            # Decoders without a frame count signal EOF after a valid
+                            # prefix. A known premature end, missing path or unopened
+                            # decoder remains a recoverable input failure.
+                            finished = np.isfinite(total) and (position >= total if total > 0 else frames_read > 0)
+                            if (finished and cap.isOpened()
+                                    and (self.watched is None or self.watched.exists())):
+                                self._lost("End of clip")
+                                return
                         if self.camera.kind == "file" and self.camera.loop:
                             # Reopen by path instead of seeking the open handle, so a file
                             # that was removed or replaced is noticed at the loop point too.
@@ -143,6 +155,7 @@ class CaptureWorker:
                         if not ok:
                             raise OSError("Source disconnected or end of unreadable clip")
                     validate_frame(image)
+                    frames_read += 1
                     now = time.time()
                     # Preserve actual USB pixels: a driver's fallback must not be
                     # enlarged to the requested size or distorted to another aspect ratio.

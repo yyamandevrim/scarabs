@@ -73,6 +73,7 @@ def test_rolling_duty_persistence_and_clock_reversal(tmp_path):
 class FakeLink:
     def __init__(self):self.raw=[]
     def send(self,payload,airtime):self.raw.append(payload)
+    def close(self): pass
 
 def test_priority_repeats_bounded_heartbeat_yields():
     link=FakeLink();s=Sender(link,Radio(),DutyBudget(.01),repeats=2,repeat_interval=5)
@@ -248,3 +249,112 @@ def test_partial_legacy_budget_announces_the_real_recovery_window_without_early_
     remaining=b.remaining(124)
     assert b.available_at(.1,4000)==4000
     assert b.remaining(124)==pytest.approx(remaining), 'forecasting must never refill the live ledger early'
+
+
+def test_restart_delivers_new_decisions_and_corrections_for_old_events_beyond_scan(config, tmp_path, monkeypatch):
+    import sys
+    from types import SimpleNamespace
+    from station.storage import EventStore
+    from station import runtime
+    from station.lora import bridge as bridge_module
+    # Receiver is read-only integration dependency; no sockets/radio are created.
+    monkeypatch.syspath_prepend(str(__import__('pathlib').Path(__file__).resolve().parents[2] / 'ground'))
+    from ground.receiver import Receiver
+    monkeypatch.setattr(bridge_module, 'SimulatedLink', lambda **kwargs: FakeLink())
+    clock = [100.]
+    monkeypatch.setattr(bridge_module, 'time', SimpleNamespace(time=lambda:clock[0]))
+    cfg = replace(config, lora=LoraConfig(enabled=True, sf=7, repeats=0, airtime_delay=False))
+    station = runtime.Station(cfg, detector=object())
+    receiver = Receiver(tmp_path / 'receiver', Radio(7))
+    try:
+        event_id = station.store.create_flame(101, {'source':'simulated'})
+        station.lora.poll(101)
+        receiver.ingest(station.lora.sender.tick(101), 101)
+        station.store.decide(event_id, 'confirmed', 102)
+        station.lora.poll(113)
+        receiver.ingest(station.lora.sender.tick(113), 113)
+        assert receiver.snapshot(113)['alerts'][0]['decision'] == 'confirmed'
+        # Ensure old event lies beyond even the previous internal 10000-row alert scan.
+        with station.store.lock, station.store.db:
+            station.store.db.executemany("INSERT INTO events(id,camera,opened_at,last_seen,box,confidence,decision,decided_at) VALUES(?,'left',150,150,'[]',.8,'rejected',151)", [(f'{i:032x}',) for i in range(10001)])
+        station.stop()
+        clock[0] = 200.
+        station = runtime.Station(cfg, detector=object())
+        station.lora.poll(200)
+        assert station.lora.sender.queue == []  # unchanged historical alerts/decisions stay quiet
+        station.store.decide(event_id, 'rejected', 201.1)
+        station.lora.poll(201.1)
+        assert len(station.lora.sender.queue) == 1
+        raw = station.lora.sender.tick(201.1)
+        assert decode(raw).kind == Kind.DECISION and decode(raw).data['event_id'] == event_id
+        receiver.ingest(raw, 201.1)
+        assert receiver.snapshot(201.1)['alerts'][0]['decision'] == 'rejected'
+        station.store.decide(event_id, 'confirmed', 201.9)
+        station.lora.poll(213.1)
+        receiver.ingest(station.lora.sender.tick(213.1), 213.1)
+        assert receiver.snapshot(213.1)['alerts'][0]['decision'] == 'confirmed'
+        station.lora.poll(214)
+        assert station.lora.sender.queue == []
+    finally:
+        station.stop(); station.store.shutdown(); receiver.close()
+
+
+def test_decision_change_cursor_retries_bounded_full_outbox_without_losing_old_rows(config, monkeypatch):
+    from types import SimpleNamespace
+    from station.runtime import Station
+    from station.lora import bridge as bridge_module
+    monkeypatch.setattr(bridge_module, 'SimulatedLink', lambda **kwargs: FakeLink())
+    monkeypatch.setattr(bridge_module, 'time', SimpleNamespace(time=lambda:100.))
+    station = Station(replace(config,lora=LoraConfig(enabled=True,repeats=0)),detector=object())
+    try:
+        ids = [station.store.create_flame(1, {}) for _ in range(405)]
+        for event_id in ids: station.store.decide(event_id, 'confirmed', 101)
+        station.lora.sender.max_queue = 10
+        seen = []
+        for _ in range(45):
+            station.lora.poll(102)
+            assert len(station.lora.sender.queue) <= 10
+            seen.extend(x[3].data['event_id'] for x in station.lora.sender.queue)
+            station.lora.sender.queue.clear()  # model a drained bounded outbox, never actual transport
+        assert len(seen) == len(set(seen)) == 405
+        assert set(seen) == set(ids)
+    finally: station.stop(); station.store.shutdown()
+
+
+@pytest.mark.parametrize('state', [
+    [], None, True, {}, {'entries':'bad','last_time':100},
+    {'entries':{},'last_time':100}, {'entries':[None],'last_time':100},
+    {'entries':[[101]],'last_time':100}, {'entries':[[101,.1,0]],'last_time':100},
+    {'entries':[[101,'bad']],'last_time':100}, {'entries':[[101,True]],'last_time':100},
+    {'entries':[[101,0]],'last_time':100}, {'entries':[[101,-.1]],'last_time':100},
+    {'entries':[[101,float('nan')]],'last_time':100}, {'entries':[[101,float('inf')]],'last_time':100},
+    {'entries':[[float('inf'),.1]],'last_time':100}, {'entries':[[-1,.1]],'last_time':100},
+    {'entries':[[True,.1]],'last_time':100}, {'entries':[[101,4000]],'last_time':100},
+    {'entries':[[101,.1]],'last_time':'bad'}, {'entries':[[101,.1]],'last_time':True},
+    {'entries':[],'last_time':-1}, {'entries':[],'last_time':float('nan')},
+    {'entries':[],'last_time':10**400}, {'entries':[],'last_time':None},
+    {'entries':[],'last_time':100,'not_before':[]},
+    {'entries':[],'last_time':100,'not_before':False},
+    {'entries':[],'last_time':100,'not_before':-1},
+    {'entries':[],'last_time':100,'not_before':float('inf')},
+    {'entries':[[99,.2],[101,'bad']],'last_time':100},
+    {'entries':[[101,.1]],'last_time':10},
+])
+def test_malformed_duty_ledger_fails_closed_without_partial_state_or_startup_crash(tmp_path, state):
+    import json
+    import time
+    path = tmp_path / 'malformed.json'
+    original = json.dumps(state)
+    path.write_text(original)
+    before = time.time()
+    budget = DutyBudget(path=path)
+    assert budget.blocked_until >= before+budget.window
+    assert budget.entries == [] and budget.last_time == budget.not_before == 0
+    sender = Sender(FakeLink(), Radio(), budget)
+    sender.enqueue(packet(), before)
+    assert sender.tick(before) is None and budget.remaining(before) == 0
+    assert path.read_text() == original  # bad accounting is not overwritten to gain airtime
+    assert sender.next_tx_at(before) >= budget.blocked_until
+    assert sender.tick(budget.blocked_until) is not None
+    recovered = DutyBudget(path=path)
+    assert recovered.remaining(budget.blocked_until) < recovered.capacity

@@ -72,3 +72,16 @@ def test_unrelated_smoke_opens_separate_event():
 @pytest.mark.parametrize('a,b,expected',[(A.box,A.box,1),(A.box,B.box,0),((0,0,0,0),A.box,0)])
 def test_iou(a,b,expected):
     assert iou(a,b)==expected
+
+
+def test_expiration_does_not_add_votes_or_claim_a_successful_analysis():
+    from station.alarm import EventTracker, Detection
+    tracker = EventTracker(.25, 2, 10)
+    detection = Detection((.1,.1,.4,.4), .8)
+    closed = []
+    for now in (1,2,3):
+        tracker.update([detection], now, lambda *args:'event', lambda *args:None, lambda *args:closed.append(args))
+    history = list(tracker.rule.history)
+    tracker.expire(6, lambda *args:closed.append(args))
+    assert closed == [('event', 6)] and tracker.events == []
+    assert list(tracker.rule.history) == history and tracker.last_analysis == 3
