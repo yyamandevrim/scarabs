@@ -1,105 +1,85 @@
-# Verification report — public dynamic site and blind-forest audit
+# Verification report — 360° launch map
 
-Verified 2026-11-13 on this Apple M5 Mac, Python 3.12.10. **83 pytest tests pass** (74 placement + 9 artifact tests), zero failed/skipped. The original 36 remain included. One upstream Starlette/httpx deprecation warning remains. The browser assertion script separately checks both rendered languages on landing and map at desktop and phone widths.
+Verified 2026-11-14 on macOS, Python 3.12.10. **83 placement pytest tests pass**, zero failed/skipped. One upstream Starlette/httpx deprecation warning remains. The suite includes Node presentation and DOM request-sequencing checks. Playwright uses the locally cached Chromium 1255; its npm packages were installed in a temporary directory outside the repo.
 
-## Finding: height insensitivity is real in this geometric scenario
+## Current model
 
-No LOS/height defect was found. The former blind total mixed forest outside the active camera frusta with forest hidden along sightlines inside them. With the default smoke target 50 m above the obstruction surface, 500–700 m observers look down over most intermediate terrain/canopy. Low-height controls produce large occlusion, particularly in inland Nuuksio. At 100 m, coast smoke occlusion is already zero; a claim that both low heights must be strongly occluded everywhere would be incorrect.
+Three simultaneously active cameras on the faces of a triangular housing, yaw **0° / 120° / 240°**. Each camera is modelled as a **120° horizontal sector by product decision**, not a measured lens calibration. Half-open seams give every eligible azimuth exactly one camera. Common tilt and VFOV are evaluated in the radial vertical plane: heading rotates ownership without changing the union. The old rectilinear horizontal/vertical coupling, forward fan, pair/reference modes and heading sensitivity are superseded. Terrain/canopy LOS, target heights, curvature and raster weighting are unchanged.
 
-The small 500–700 m differences mostly reflect target points crossing the tilted 3D frustum boundaries, plus raster sampling. Raising the observer shifts vertical and horizontal frustum coordinates; it does not guarantee a larger fixed-camera footprint. This result is specific to the elevated smoke-point scenario, not a general claim about forest-floor visibility or optical smoke detection. Bare-ground results show considerably stronger height sensitivity.
+Cache algorithm: `opaque-ray-half-cell-v8-360-sectors-en`. Tests reject old v7 cache entries and retired public camera modes. Default geometry is 600 m AGL, 10° down, 50° VFOV, 12 km maximum range and smoke 50 m above the local canopy/surface. Coast: 60.159 / 24.773, seam heading 180°; inland: 60.293 / 24.557, seam heading 20°. No priority polygon.
 
-Baseline: left + centre active; offsets −70°/0°/+70°, tilt 10° down, HFOV 80°, VFOV 50°, range 12 km, smoke 50 m above canopy. Coast: 60.159 / 24.773, heading 180°. Inland: 60.293 / 24.557, heading 20°. All area values below are **simulated hectares**. No priority polygon; range disks clipped only to the prepared rectangle.
+The annular guides solve the vertical boundaries, including curvature, on a level target plane through the launch cell. The inner blind disc is not filled by a camera wedge. Actual visibility masks use the local terrain/canopy target at every cell. Steeper settings can also reduce the outer guide radius below maximum range.
 
-`blind_forest_ha = outside_fov_forest_ha + occluded_forest_ha` (rounding ±0.003 ha). FOV is the union of the active full 3D frusta, before applying LOS. Each forest fraction is counted once. The split is scenario-specific and present for all pairs, reference and heading sensitivities. Unknown-elevation forest is zero in these prepared grids. For other datasets, unknown rays remain unverified rather than proven occlusion and trigger the existing explicit warning.
+## Default sanity check against the retired three-camera reference
 
-## Interface finding: blind total beside two zero parts
+All values below are **simulated hectares** at 600 m. Historical values were read from the pre-change committed blind-audit.json before regeneration. The old reference used yaw −70°/0°/+70° and 80° rectilinear HFOV (nominal ~220° horizontal union; the task calls it the ~210° fan).
 
-A design review saw a 7,335 ha blind total next to 0 outside FOV and 0 occluded. The engine always returns the split (`blind = outside + occluded`, checked for every scenario, pair, reference and heading). The screen came from a mixed version: a long-running server predating the split, a newer page, and a formatter that turned missing values into 0 (`value??0`). The coast value itself is real: 7,334.48 ha outside FOV + 0.00 ha occluded. The map now renders any missing or inconsistent part as “—” (not computed), rounds parts before adding so the displayed sum is exact, and versions every static asset so a browser cannot mix old and new files. Regression tests: `tests/ui_metrics.cjs`, `tests/test_ui_metrics.py`.
-
-## Canopy-obstructed smoke: detailed 40 m
-
-| Preset | AGL m | Visible | Outside active FOV | Occluded inside FOV | Blind total |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Coast · Haukilahti | 30 | 491.36 | 7,346.68 | 267.56 | 7,614.24 |
-| Coast · Haukilahti | 100 | 762.40 | 7,343.20 | 0.00 | 7,343.20 |
-| Coast · Haukilahti | 500 | 771.84 | 7,333.76 | 0.00 | 7,333.76 |
-| Coast · Haukilahti | 600 | 771.12 | 7,334.48 | 0.00 | 7,334.48 |
-| Coast · Haukilahti | 700 | 771.92 | 7,333.68 | 0.00 | 7,333.68 |
-| Inland · Nuuksio | 30 | 1,762.88 | 14,491.68 | 10,689.28 | 25,180.96 |
-| Inland · Nuuksio | 100 | 12,347.16 | 14,476.24 | 120.44 | 14,596.68 |
-| Inland · Nuuksio | 500 | 12,514.04 | 14,429.16 | 0.64 | 14,429.80 |
-| Inland · Nuuksio | 600 | 12,511.80 | 14,431.68 | 0.36 | 14,432.04 |
-| Inland · Nuuksio | 700 | 12,502.88 | 14,440.64 | 0.32 | 14,440.96 |
-
-## Canopy-obstructed smoke: coarse 120 m
-
-| Preset | AGL m | Visible | Outside active FOV | Occluded inside FOV | Blind total |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Coast · Haukilahti | 30 | 455.76 | 7,346.88 | 302.16 | 7,649.04 |
-| Coast · Haukilahti | 100 | 760.68 | 7,344.12 | 0.00 | 7,344.12 |
-| Coast · Haukilahti | 500 | 770.92 | 7,333.88 | 0.00 | 7,333.88 |
-| Coast · Haukilahti | 600 | 769.56 | 7,335.24 | 0.00 | 7,335.24 |
-| Coast · Haukilahti | 700 | 770.32 | 7,334.48 | 0.00 | 7,334.48 |
-| Inland · Nuuksio | 30 | 1,695.16 | 14,488.68 | 10,750.36 | 25,239.04 |
-| Inland · Nuuksio | 100 | 12,408.32 | 14,481.68 | 44.20 | 14,525.88 |
-| Inland · Nuuksio | 500 | 12,519.76 | 14,414.44 | 0.00 | 14,414.44 |
-| Inland · Nuuksio | 600 | 12,523.56 | 14,410.64 | 0.00 | 14,410.64 |
-| Inland · Nuuksio | 700 | 12,518.04 | 14,416.16 | 0.00 | 14,416.16 |
-
-## Ground-height control (detailed 40 m, simulation ha)
-
-| Preset | AGL m | Bare-ground visible | Canopy-ground visible |
+| Site | Grid | Old all-camera fan | New full circle |
 | --- | ---: | ---: | ---: |
-| Coast · Haukilahti | 30 | 263.52 | 0.00 |
-| Coast · Haukilahti | 100 | 436.28 | 0.00 |
-| Coast · Haukilahti | 500 | 731.64 | 0.00 |
-| Coast · Haukilahti | 600 | 748.44 | 0.00 |
-| Coast · Haukilahti | 700 | 757.32 | 0.00 |
-| Inland · Nuuksio | 30 | 173.76 | 0.00 |
-| Inland · Nuuksio | 100 | 2,543.96 | 0.00 |
-| Inland · Nuuksio | 500 | 8,733.36 | 0.00 |
-| Inland · Nuuksio | 600 | 9,422.16 | 0.04 |
-| Inland · Nuuksio | 700 | 9,964.64 | 0.04 |
+| Haukilahti | 120 m | 3,083.08 | 8,072.24 |
+| Nuuksio | 120 m | 17,309.76 | 26,849.84 |
+| Haukilahti | 40 m | 3,088.80 | 8,072.92 |
+| Nuuksio | 40 m | 17,298.84 | 26,856.96 |
 
-## All pairs at 600 m (detailed 40 m, simulation ha)
+Both sites increase. Default quick headlines round to ≈8,070 and ≈26,850 simulated ha; water share is 43% and 8%. The 360° model still has a vertical blind disc, terrain/canopy occlusion and raster sampling effects. A larger height can reduce visible forest because the inner blind region grows; no monotonic-height claim is made.
 
-| Preset | Pair | Visible | Outside FOV | Occluded inside FOV | Overlap |
-| --- | --- | ---: | ---: | ---: | ---: |
-| Coast · Haukilahti | Left + centre | 771.12 | 7,334.48 | 0.00 | 6.24 |
-| Coast · Haukilahti | Centre + right | 2,784.16 | 5,321.44 | 0.00 | 222.12 |
-| Coast · Haukilahti | Left + right | 2,850.68 | 5,254.92 | 0.00 | 0.00 |
-| Inland · Nuuksio | Left + centre | 12,511.80 | 14,431.68 | 0.36 | 845.32 |
-| Inland · Nuuksio | Centre + right | 11,430.32 | 15,513.16 | 0.36 | 965.28 |
-| Inland · Nuuksio | Left + right | 12,466.16 | 14,477.68 | 0.00 | 0.00 |
+## Height audit
 
-## Implementation and checks
+`blind_forest_ha = outside_fov_forest_ha + occluded_forest_ha` within rounding ±0.003 ha. Each forest fraction is counted once; camera forest areas sum to the union within rounding. Overlap is zero. Outside FOV is vertical exclusion; low-height occlusion remains substantial. Unknown-elevation rays remain blind and the candid API uncertainty metadata is retained.
 
-- Landing at `/`, live bilingual map at `/map`; config-driven project name/tagline/logos and team credit. English default, Turkish toggle with persistent choice. No station-feed proxy or fabricated panel screenshot.
-- Blind split and distinct grey/rust overlays; all existing scenario, pair, reference, priority and heading functionality retained. The numeric algorithm did not need a height fix. Numba releases the GIL; warm-up compiles the strided production signature, with numeric normalization to avoid request-time specialization.
-- API caps, 12/client/min and 60/global/min budgets, single concurrent analysis, bounded result cache, request body limits, finite inputs, polygon validation and explicit file routes. Tests cover rejection paths and original real-data outputs.
-- Modal SDK 1.6.4 app import and CLI help pass offline. The same ASGI app was started in production mode locally. Volume read-only mount, scale-to-zero and image build steps are declared but not cloud-executed.
-- Browser: 1280×800 and 390×844 CSS viewports; landing→map, live click at land locations, pair selection including zero-overlap left+right, both languages and persistence across navigation. No horizontal page overflow, inspected console errors or external resource requests. Layer controls collapse on phones to avoid legend overlap.
-- Artifact scripts: only dry-run executed; 13 artifacts, 112,267,118 bytes plus manifest. SHA-256/size/provenance recorded. Fog excluded for unresolved licence review; smoke+cloud alternative config supplied in tools/ without changing station/.
+### Coarse canopy-smoke scenario
 
-## Local production timings
+| Site | AGL m | Visible | Outside vertical FOV | Occluded | Blind total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Coast · Haukilahti | 30 | 3,229.36 | 0.92 | 4,874.52 | 4,875.44 |
+| Coast · Haukilahti | 100 | 8,100.56 | 0.12 | 4.12 | 4.24 |
+| Coast · Haukilahti | 500 | 8,083.68 | 21.12 | 0.00 | 21.12 |
+| Coast · Haukilahti | 600 | 8,072.24 | 32.56 | 0.00 | 32.56 |
+| Coast · Haukilahti | 700 | 8,064.68 | 40.12 | 0.00 | 40.12 |
+| Inland · Nuuksio | 30 | 5,319.20 | 0.64 | 21,614.36 | 21,615.00 |
+| Inland · Nuuksio | 100 | 26,889.28 | 0.08 | 44.84 | 44.92 |
+| Inland · Nuuksio | 500 | 26,885.76 | 48.44 | 0.00 | 48.44 |
+| Inland · Nuuksio | 600 | 26,849.84 | 84.36 | 0.00 | 84.36 |
+| Inland · Nuuksio | 700 | 26,792.68 | 141.52 | 0.00 | 141.52 |
 
-Fresh process with empty generic JIT cache: **0.6159 s** to HTTP readiness. With populated cache: **0.4124 s**. Startup includes module import, warm-up and loading both prepared grids. Fresh HTTP analysis: **59.8–81.4 ms coarse**, **398.1–450.7 ms detailed**. Repeated identical requests: **1.4–1.9 ms**. No new Numba signature appeared after warm-up on first coarse/detailed analysis. These are Mac measurements, exclude image installation/data upload, and are not Modal/Linux/cold-network timings. Samples in [production-timings.json](production-timings.json).
+### Detailed canopy-smoke scenario
+
+| Site | AGL m | Visible | Outside vertical FOV | Occluded | Blind total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Coast · Haukilahti | 30 | 4,544.32 | 0.68 | 3,560.60 | 3,561.28 |
+| Coast · Haukilahti | 100 | 8,098.36 | 0.00 | 7.24 | 7.24 |
+| Coast · Haukilahti | 500 | 8,084.20 | 21.36 | 0.04 | 21.40 |
+| Coast · Haukilahti | 600 | 8,072.92 | 32.68 | 0.00 | 32.68 |
+| Coast · Haukilahti | 700 | 8,064.52 | 41.08 | 0.00 | 41.08 |
+| Inland · Nuuksio | 30 | 4,931.28 | 1.08 | 22,011.48 | 22,012.56 |
+| Inland · Nuuksio | 100 | 26,815.40 | 0.20 | 128.24 | 128.44 |
+| Inland · Nuuksio | 500 | 26,894.44 | 48.76 | 0.64 | 49.40 |
+| Inland · Nuuksio | 600 | 26,856.96 | 86.52 | 0.36 | 86.88 |
+| Inland · Nuuksio | 700 | 26,802.32 | 141.20 | 0.32 | 141.52 |
+
+## UI and browser verification
+
+- Compare: site A/B totals and verdict; selected-site height and detail; three per-camera forest bars. Shared tilt/VFOV, position, range and smoke height are in a disclosure. Breakdown includes scenario accounting and camera rows. Data keeps real data provenance, assumed-canopy percentage and CC BY 4.0 attribution.
+- English is forced in the shared loader, saved preference is reset to en, dictionary loading is removed, and language controls are removed. URL language parameters do not affect rendering. The server strips the legacy Overview toggle without modifying its template.
+- Playwright checks 1440×900 default, Breakdown, Data, site B, 100 m height, and 393×852 top/scrolled and each tab. All captures were visually inspected; the full ring, inner blind boundary, sector labels, balanced dock and mobile overflow were checked. Secondary place labels yield to camera/site labels. Zero console errors and external requests.
+- `scripts/check_language.js` passes at every captured state after seeding localStorage language=tr and requesting ?lang=tr&language=tr. Tests include no obsolete pair/disconnected copy.
+- Evidence: `browser-verification.json`; screenshots under `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/map/`. Clean Overview capture: `map-preview-1440.png`. The owner copy review is one level up at `claims-for-owner-map.md`.
+- Historical public browser evidence is explicitly marked superseded in `public-browser-verification.json`. No deployment was performed. The other agent owns the rebuilt Overview template/scripts/styles; its integration must supply the updated landing copy and preview.
 
 ## Reproduce
 
 ```sh
-uv run pytest -q tests ../tools/tests
-uv run python scripts/blind_audit.py
-uv run python scripts/production_benchmark.py
-uv run python scripts/write_report.py
+uv run --offline --frozen pytest
+uv run --offline --frozen python scripts/blind_audit.py
+uv run --offline --frozen python scripts/benchmark.py --url http://127.0.0.1:56232 --fresh
+uv run --offline --frozen python scripts/production_benchmark.py
+uv run --offline --frozen python scripts/write_report.py
 ```
 
-Full scenario/pair/reference/sensitivity values: [blind-audit.json](blind-audit.json). Earlier live-verified 500–700 m benchmark remains in [benchmark-results.json](benchmark-results.json) as a historical baseline. Updated split chart: [comparison-chart.html](comparison-chart.html).
+`blind-audit.json` has 20 current analyses (2 sites × 5 heights × 2 grids), including every scenario and per-camera breakdown. `benchmark-results.json` contains the fresh-engine/live-HTTP verification at 500/600/700 m. `production-timings.json` was regenerated against this model, in isolated temporary caches. Timing measurements are local Mac observations, not cloud/cold-network measurements. `comparison-chart.html` is regenerated from the current audit.
 
-## Not verified, omitted or intentionally provisional
+## Engineering limitations and ownership
 
-- No Modal account access, Linux image build, deployment, Volume upload, public IP forwarding test, scale-to-zero/resume or cloud latency measurement. Owner commands are in [DEPLOYMENT.md](DEPLOYMENT.md).
-- No IronShard upload/download, endpoint compatibility or judge bucket-read policy tested. AGPL model licence and upstream editable-weight/training-source links provided; a complete corresponding-source archive was not independently audited. Fog is deliberately excluded pending provenance review.
-- The name is ACORN; supplied wordmark and stacked artwork are configured in `brand.json` and bundled locally in `static/brand/`. Roadmap mission modes are proposed, not implemented.
-- Existing physical limits remain: no USB/tether/field validation of this placement model (the station’s recorded-clip/MCU/KY-026/on-board LED run on a real UNO Q is separate); no optical detection range, weather, calibration or smoke dynamics. No building heights; 5.47% of forest canopy values assumed; real NLS 2019 / CORINE 2024 / Luke 2023 vintages differ. No ecological impact quantities are claimed.
-- Station code, root README and root .gitignore were not edited. No git state-changing commands were run. No physical Wi-Fi-disconnection test. Station screenshots were optional and were not added.
+No measured lens calibration, field detection accuracy, smoke transport, weather, refraction or balloon/tether motion model. No building-height dataset; positive canopy cover is opaque, Luke mean height is not maximum treetop height, 5.47% of forest cells use assumed 20 m canopy, and raster years differ (NLS 2019 / CORINE 2024 / Luke 2023). Land launch validation is approximate; permission/access/tether suitability remain field checks. No physical Wi-Fi-off test or cloud deployment was performed. Investor-facing limitations text removed from the map is recorded verbatim for the owner; no replacement accuracy/range claims were added.
+
+Only this worktree uses the prepared-data symlink; writes go to its own results cache. The main server on 18787 and main checkout data were left alone. Overview-owned landing.html, landing.js and site.css were not changed. Shared integration points changed here: i18n.js and forest_placement/api.py. tokens.css and shell.js were not changed.

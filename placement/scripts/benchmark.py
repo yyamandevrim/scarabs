@@ -16,7 +16,7 @@ def main():
                     c=preset.model_copy(update=dict(height=height,resolution=resolution))
                     if args.fresh:analyze(c,use_cache=False)
                     started=time.perf_counter();response=client.post(args.url+'/api/analyze',json=c.model_dump());response.raise_for_status();r=response.json()
-                    output.append(dict(name=c.name,height=height,resolution=resolution,seconds=r['computed_seconds'],api_seconds=round(time.perf_counter()-started,4),metrics=r['metrics'],pairs=r['pair_comparison'],reference=r['reference']['metrics'],heading_sensitivity=r['heading_sensitivity'],id=r['id']))
+                    output.append(dict(name=c.name,height=height,resolution=resolution,seconds=r['computed_seconds'],api_seconds=round(time.perf_counter()-started,4),metrics=r['metrics'],algorithm=r['algorithm'],camera_breakdown=r['camera_breakdown'],id=r['id']))
                     print(c.name,resolution,height,r['computed_seconds'],r['metrics']['canopy_smoke'],flush=True)
     path=Path(__file__).resolve().parents[1]/'benchmark-results.json';path.write_text(json.dumps(output,ensure_ascii=False,indent=2));print('Saved',path)
 if __name__=='__main__':main()

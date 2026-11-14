@@ -1,27 +1,18 @@
 # ACORN launch point map
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.svg">
-    <img src="../assets/brand/acorn-wordmark-black.svg" width="400" alt="ACORN">
-  </picture>
-  <br>
-  Aerial Canopy Observation and Reporting Node
-</p>
+**ACORN — Aerial Canopy Observation and Reporting Node.** An English-only investor website and offline geometric visibility simulator, built by team Scarabs for the Green European Renaissance challenge at Junction 2026, Helsinki. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
 
-**ACORN — Aerial Canopy Observation and Reporting Node.** This is the English-first project website and offline geometric visibility simulator (Turkish toggle) for ACORN, built by team Scarabs for the Green European Renaissance challenge at Junction 2026, Helsinki. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
+The module sits under a tethered balloon above forest. Three cameras on the faces of its triangular housing operate simultaneously, with yaw offsets **0° / 120° / 240°**. By product decision, the horizontal model assigns each camera a **120° azimuth sector**: a full circle with no gaps or overlap. This is a product model, not a measured optical calibration. The previous forward fan, two-input restriction, camera pairs, special reference mode and heading sensitivity have been removed.
 
-**The two-camera input change is implemented.** The module carries three cameras at −70°, 0°, +70°, but normal requests allow at most two active cameras. The default is **left + centre**. The disconnected sector remains visible in grey as **“disconnected”**. Every primary metric, heading sensitivity and priority ranking uses only the active cameras. The three pairs are compared side by side; all three cameras are available only as **“Three cameras, reference”**.
-
-Coverage is **simulated geometric visibility**, not optical smoke-detection range, probability of detection, fire prediction, smoke transport or smoke-model accuracy. A larger balloon height does not guarantee more hectares inside a fixed tilted camera frustum.
+Coverage is simulated geometric visibility, not optical smoke-detection range or probability, fire prediction or smoke transport. Tilt, vertical field of view, target heights, terrain/canopy occlusion and the LOS algorithm remain in use. Vertical angles are evaluated in the radial plane so heading rotates sector ownership without changing the union. The former rectilinear horizontal/vertical coupling is superseded by this sector model.
 
 ## Public website and artifact handoff
 
-The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The header uses Yaman’s original vector wordmark (`logo`); the landing hero uses the complete stacked vector lockup (`stacked_logo`). Both are bundled under `static/brand/` for offline and deployed use. See [asset provenance and usage](../assets/brand/README.md). **Scarabs is the team**, not the product.
+`/` is the Overview; `/map` is the launch map. Identity comes from `brand.json` and local vector artwork. Both pages force English regardless of stored language preference or URL parameters. `i18n.js` no longer loads a translation dictionary; the map control is removed, and the server strips the legacy Overview language button without editing its template.
 
-See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the exact Modal token → one-time data load → deploy commands, public API limits, storage/JIT decisions and account-free checks. See [`../tools/README.md`](../tools/README.md) for the checksum-pinned IronShard dry-run/upload/restore workflow and redistribution notices. **No deployment or upload was performed.**
+Compare owns the two site totals, verdict, selected site's balloon height and per-camera visible forest. Breakdown owns area accounting and scenario tables. Data retains concise provenance, the actual assumed-canopy fraction and required CC BY 4.0 attribution. Public limitations copy removed for owner review is recorded verbatim in the external scratchpad `overview/claims-for-owner-map.md`; engineering limitations remain below and in API uncertainty metadata.
 
-The blind-forest diagnosis and full 30/100/500/600/700 m results are in [`VERIFICATION.md`](VERIFICATION.md) and [`blind-audit.json`](blind-audit.json). At 600 m / 40 m resolution: Nuuksio blind forest is **14,431.68 simulated ha outside active FOV + 0.36 ha occluded inside it**; coast is **7,334.48 + 0.00 ha**. The low-height control shows strong occlusion. No height-insensitivity defect was found.
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for deployment and [`../tools/README.md`](../tools/README.md) for artifact handling. Neither deployment nor upload is part of this update. Current height/scenario/camera results are in [`blind-audit.json`](blind-audit.json), HTTP benchmarks in [`benchmark-results.json`](benchmark-results.json), and checks in [`VERIFICATION.md`](VERIFICATION.md).
 
 ## Cold start
 
@@ -90,68 +81,56 @@ This takes the maximum of canopy and building height at each cell. No building d
 
 ## Model and outputs
 
-The regional extent is a **75.12 km × 75.12 km rectangle**: `(345000, 6650000, 420120, 6725120)` in EPSG:3067. It covers Helsinki, Espoo, Vantaa, Kauniainen, Nuuksio, Sipoonkorpi, and the Helsinki–Espoo coast, plus surrounding land and sea. Metrics are within the candidate's range disk and this rectangle, **not clipped to municipal borders**. A warning appears if a disk reaches the data boundary. No missing-elevation land cells remain in the prepared data. NLS nodata over **CORINE-confirmed sea only** is filled with 0 m (472,641 native 20 m cells).
+The prepared **75.12 km × 75.12 km** rectangle is `(345000, 6650000, 420120, 6725120)` in EPSG:3067. Metrics use the candidate's range disk intersected with this rectangle, not municipal borders. `range_clipped` and missing-elevation flags remain in the API.
 
-1. CORINE forest is national codes **3111–3133** (broad-leaved, coniferous and mixed forest, the 311/312/313 groups). Transitional woodland/clearcut classes `324*` are excluded. Water includes rivers/lakes/sea `51**/52**`; wetlands `41**/42**` and built-up `11**–14**` appear on the background. These definitions are reproducible classification choices, not a claim about all ecological forest land.
-2. Native rasters are aligned to 20 m. Fast comparison uses **120 m** cells; detailed analysis uses **40 m** cells. Target forest/water areas retain the 20 m class fractions inside each analysis cell. Terrain and obstruction surfaces use conservative maximum-height aggregation. Coarse and detailed totals differ slightly because the range disk and polygons are sampled at cell centres.
-3. Height is above the selected cell's ground estimate. Headings/yaw are clockwise from **EPSG:3067 grid north** (not magnetic/true north); positive tilt points down. Defaults: 600 m AGL, 10° downward tilt, 80° horizontal FOV, 50° vertical FOV, 12 km maximum range, smoke target 50 m above the obstruction/canopy surface. Camera geometry uses a full rectilinear 3D frustum, including tilt. The map sector guides show horizontal yaw/FOV only.
-4. The default three physical yaw offsets span nominally about **220°** in total, with about 10° overlap between neighbours. Default active left+centre spans nominally about **150°**. Left+right has a **60° central gap and zero overlap** at default FOV. With changed FOV/tilt, actual overlap is recomputed, rather than forced to zero.
-5. For each target cell, Numba samples the ray at intervals no greater than half an analysis cell, checking terrain and the opaque obstruction surface. Cell-constant heights, raster sampling and cell-centre target placement are approximations; this is not an exact solid-surface ray tracer. Observer and target cells are excluded as intermediate blockers. The target cell's own opaque canopy explicitly blocks its ground target. Unknown intermediate cells invalidate visibility.
-6. Curvature subtracts `distance² / (2 × radius)` from terrain, obstruction and target heights in the observer tangent frame. The default radius is 6,371,000 m, configurable through the API. Atmospheric refraction is not modelled. This local spherical approximation is adequate for a prototype, not survey-grade geodesy.
-7. Four separate scenarios are returned and selectable on the map: bare-terrain ground; bare-terrain elevated smoke; canopy-obstructed ground; canopy-obstructed elevated smoke. The elevated target remains at the same physical canopy/surface+smoke height in the bare comparison. Any positive measured canopy cover makes the height cell opaque; cover is not used as a linear visibility-probability multiplier. Ground under that opaque canopy is invisible, so **0 forest-floor hectares in the default connected views is an expected conservative result**, not proof that forest is absent.
-8. A cell is counted **once** in the active-camera union. Overlap requires at least two active cameras to see it. Forest and water fractions contribute separate hectare totals; water contributes **zero forest target hectares**. Lines of sight can cross water. Water-view area and water share use the selected scenario's target-plane footprint (the smoke view therefore uses the elevated plane over water too). Select the ground scenario for a water-surface footprint. `blind_forest_ha` is the total unseen forest in the range disk. It is split into `outside_fov_forest_ha` (outside the active cameras’ union of full 3D frusta, regardless of line of sight) and `occluded_forest_ha` (in that union but not visible along the terrain/canopy ray). The target elevation is scenario-specific. The split is returned for every scenario, pair, reference and heading sensitivity; maps show outside FOV in grey and in-view occlusion in rust. With the current complete elevation grid, the latter is terrain/canopy obstruction; if unknown cells are introduced, it also includes unverified rays. `unknown_forest_ha` counts only invalid forest target cells in the range disk. The separate `unknown_elevation_in_window` flag and uncertainty note conservatively disclose any unknown elevation in the local analysis window, including non-forest intermediate cells. This warning does not identify which rays are affected or estimate their area; unknown rays remain blind. Neither split is a detection range.
-9. The priority polygon is transformed from map lon/lat into EPSG:3067. Cells with centres inside it form the priority mask; only their visible **forest fraction** counts. Ranking is first by active-camera visible priority forest, then visible total forest, using the canopy-obstructed smoke scenario. No generic land/water polygon area is added to priority forest.
-10. Heading sensitivity evaluates −20°, −10°, 0°, +10°, +20° with the **current active cameras**, full frusta and the fixed **canopy-obstructed smoke-target** scenario, regardless of the map scenario selector. The disclosure and accessible chart label identify this fixed context. Every possible pair and the three-camera reference reuse the same LOS result. The sensitivity chart and pair cards label all hectare figures **simulated**.
-
-Buildings, camera calibration, actual balloon/tether motion, registration error, vegetation gaps/season, low smoke columns, haze, atmospheric refraction and illumination remain uncertainties. MS-NFI years, CORINE year and archived elevation year differ. Coarse views can smooth or exaggerate occlusion differently from detailed views. The main smoke view is more stable between resolutions than the bare forest-floor comparison; use detailed results for a selected site and inspect both scenarios.
+1. CORINE forest is national codes **3111–3133**. Transitional woodland/clearcut `324*` is excluded; water is `51**/52**`. Forest and water fractions retain native 20 m area weights. Fast comparison uses **120 m**, detailed analysis **40 m**. Terrain and obstruction surfaces use conservative maximum-height aggregation.
+2. Defaults: **600 m AGL**, **10° down tilt**, **50° VFOV**, **12 km maximum range**, smoke targets **50 m above the local obstruction surface**. All cameras share vertical geometry. Bearings are clockwise from EPSG:3067 grid north. Horizontal sectors are half-open at seams: every ray belongs to exactly one of Camera 1/2/3. Public validation rejects inactive cameras, different yaw/HFOV and old reference inputs.
+3. The vertical test preserves the radial-plane tilt and VFOV angle limits. Curvature subtracts `distance²/(2 × radius)` from targets, terrain and obstruction heights; default radius is 6,371,000 m. Rays are sampled at intervals no greater than half an analysis cell by the unchanged Numba LOS function. Observer and target cells are excluded as intermediate blockers; unknown intermediate cells invalidate the ray. The target's own opaque canopy blocks ground targets.
+4. Four scenarios remain: bare ground, bare elevated smoke, canopy ground, canopy elevated smoke. The bare smoke comparison uses the same physical canopy/surface+smoke target height. Positive measured canopy cover is opaque, not a visibility probability. Water adds no forest hectares; rays can cross water.
+5. The union counts forest fractions once. Three nonoverlapping sector masks sum to the union; `overlap_forest_ha` remains a compatibility accounting field and is zero in this model. `camera_breakdown` returns all four scenario metrics for each camera. Heading remains an API seam orientation; it is absent from public controls because it does not change totals.
+6. `blind_forest_ha = outside_fov_forest_ha + occluded_forest_ha`. Outside FOV now means vertical exclusion (including the inner blind region), not a missing horizontal camera. Missing target elevations and unverified intermediate rays remain blind and are disclosed in API uncertainty metadata.
+7. Sector guides form an annulus, including its inner boundary. The guide radii solve the selected scenario's vertical limits on a level target plane through the launch cell, with curvature. For smoke this uses local canopy+smoke height; ground uses local terrain. The actual raster uses each cell's terrain/canopy target height. Positive lower downward angle can also make the outer vertical limit smaller than maximum range. Guides are not a claim that all cells inside are visible.
+8. Priority polygons are transformed to EPSG:3067; cell centres determine membership and only visible forest fractions contribute. Ranking uses canopy-smoke visible priority forest first, then total visible forest. All compared candidates must share an equivalent priority polygon (or all omit it).
+9. Cache algorithm **`opaque-ray-half-cell-v8-360-sectors-en`** supersedes v7. Keys still include all candidate inputs and dataset checksums. The worktree reads prepared rasters through a symlink and writes only its own `data/results` cache.
 
 ## API
 
-- `GET /`: jury landing page; `GET /map`: bilingual live map.
-- `GET /api/brand`: shared project identity.
-- `GET /api/config`: presets, availability, dataset provenance/assumptions.
-- `POST /api/analyze`: one candidate, all four scenarios, connected-camera union, blind/overlap/water/priority metrics, pair comparison, three-camera reference, heading sensitivity, local map URLs, uncertainty and field checks.
-- `POST /api/compare`: 2–6 candidates, results and priority-first, total-visible-forest-second ranking. All candidates must share a geometrically equal priority polygon (or all omit it) and the same connected-camera/reference mode; otherwise 422 is returned before analysis. Equivalent polygon vertex order is accepted. Different connected pairs, headings, heights and ranges remain valid comparisons.
-- `GET /maps/{filename}`, `/results/{filename}`, `/static/*`: allowlisted map/result PNGs and local UI assets. Numeric datasets, metadata and result JSON are not exposed as files.
-- `GET /openapi.json`: local API schema. Swagger/ReDoc pages are disabled so no optional CDN assets can be requested.
-
-Example (left+centre, remaining settings default):
+- `GET /`, `GET /map`: English-only Overview and map.
+- `GET /api/brand`, `GET /api/config`: identity, fixed three-camera presets and data metadata.
+- `POST /api/analyze`: four scenario unions, per-camera breakdown, annular sector guides, PNG overlays and candid uncertainty metadata. No pair/reference/sensitivity outputs.
+- `POST /api/compare`: 2–6 candidates with shared priority geometry, priority-first ranking. Height, position, range and vertical geometry may differ. Heading changes camera assignment only.
+- `GET /maps/{filename}`, `/results/{filename}`, `/static/*`: allowlisted local maps/results and UI assets. Numeric datasets and cached JSON are not exposed as files.
+- `GET /openapi.json`: local schema; Swagger/ReDoc CDN pages are disabled.
 
 ```sh
 curl -s http://127.0.0.1:8787/api/analyze \
   -H 'Content-Type: application/json' \
-  -d '{"name":"Haukilahti","lon":24.773,"lat":60.159,"height":600,"heading":180,"resolution":"detailed"}'
+  -d '{"name":"Haukilahti","lon":24.773,"lat":60.159,"height":600,"resolution":"detailed"}'
 ```
 
-For explicit camera settings, supply three `cameras` objects with `yaw`, `tilt`, `hfov`, `vfov`, `active`. A third active camera returns HTTP 422 unless `reference:true` is explicitly supplied. Reference mode is labelled throughout the response and UI. Invalid/self-crossing priority polygons, out-of-region locations and mostly-water launch cells are rejected. Launch validation at the working resolution is approximate and never replaces a site inspection.
+Explicit `cameras` must have yaw 0/120/240, HFOV 120 and `active:true`, with identical tilt/VFOV across all three. Invalid/self-crossing priorities, out-of-region locations and mostly-water launch cells return 422.
 
 ## Demo sequence
 
-1. Disconnect internet after preparation. Start on port 8787 and open the local page. Choose **Open the launch point map** on the landing page (or open `/map` directly). The initial map compares **Haukilahti** `(60.159, 24.773)`, heading **180°**, and **Nuuksio** `(60.293, 24.557)`, heading **20°**, both at 600 m. Left+centre are connected; right is grey **disconnected**.
-2. Read the **Smoke · including canopy obstructions** table. The south-facing coast spends about **84%** of its target-plane view over water; the inland preset about **7%**. Water is not forest target area. Click the inland tab to see its own cells/sectors.
-3. Change height to 500/700 m, then choose **Detailed · 40 m** for a selected point. Select ground and bare-terrain scenarios to explain the canopy assumption.
-4. At the coastal site, compare the three pair cards. Click **Left + right**: the centre sector becomes grey, the central gap is visible and overlap becomes zero. Use **Centre + right** if useful. Return to **Left + centre** for the baseline.
-5. Turn on **Three cameras, reference** to show the physically unachievable all-connected comparison. Turn it off before presenting the two-input production result.
-6. Move the coastal heading from **180° to 0°**. The visible smoke-target forest changes from about **770 to 5,541 simulated ha** in the coarse pass. The API is rerun automatically. Expand the heading-sensitivity disclosure to inspect the ±10°/±20° chart.
-7. Click **Draw priority forest**, click at least three corners near Nuuksio or Sipoonkorpi, then **Finish area** (or Enter). Candidates are reranked by visible priority forest. **Clear area** resets it. Escape cancels an unfinished drawing. You can also click the map to move the selected candidate or enter coordinates directly.
-8. Road access, shadow, site constraints and permission suitability remain to be verified on site. They are not computed or validated launch-site recommendations.
+1. Open `/map`: **Haukilahti** `(60.159, 24.773)` and **Nuuksio** `(60.293, 24.557)`, both 600 m. Three cameras watch the full circle.
+2. The quick default canopy-smoke view shows approximately **8,070** and **26,850 simulated ha**, with **43%** and **8%** water share. Select either site to show its own raster and per-camera breakdown.
+3. Change the selected site's height, then use Detailed · 40 m if needed. Shared tilt/VFOV, position, range and smoke elevation are in Position and geometry. Ground/bare scenarios remain available.
+4. Draw a priority forest polygon to compare visible priority forest; Clear area restores the total-forest comparison. Clicking the map moves the selected site.
+5. Access, tether/ground suitability and flight permission require field assessment. These are not computed launch authorizations.
 
 ## Verification on this Mac
 
+Use Python 3.12 for the cached offline dependencies (`uv sync --offline --frozen --python 3.12`). The DOM request tests also require happy-dom, normally supplied by `npm ci` in `station/`; browser verification used Playwright and happy-dom installed outside the repo in a temporary directory.
+
 ```sh
-uv run pytest -q tests ../tools/tests
-uv run python -m compileall -q forest_placement scripts
-# In a second terminal while the server runs:
-uv run python scripts/benchmark.py --fresh
+uv run --offline --frozen pytest
+uv run --offline --frozen python scripts/blind_audit.py
+uv run --offline --frozen python scripts/benchmark.py --url http://127.0.0.1:8787 --fresh
+uv run --offline --frozen python scripts/production_benchmark.py
+uv run --offline --frozen python scripts/write_report.py
 ```
 
-The full placement and artifact suites pass with prepared real data. The expanded suite and production/browser checks are recorded in [`VERIFICATION.md`](VERIFICATION.md). One upstream Starlette/httpx deprecation warning remains. Tests cover flat terrain, a blocking ridge, curved-earth horizon, canopy/unknown blockers, 3D frusta and boundaries, unique union/overlap counting, water exclusion, empty active sets, priority counting/ranking, max-two validation, three-camera reference, pair gaps/overlap, real data for both presets at both resolutions, heading changes, API responses, local assets, cache invalidation by inputs and fresh analysis with socket access blocked.
-
-The server was actually started and both presets were called over HTTP at **500/600/700 m in both resolutions**. `scripts/benchmark.py --fresh` first performs uncached calculations with the same engine and then verifies their live API responses; it records compute and HTTP response times separately. Timings include metric aggregation, all pair/reference and sensitivity comparisons, and four warped PNG overlays. They exclude initial package install, data preparation and cold Numba compilation. The machine reports **macOS 27.0.1, arm64, 10 logical CPUs**, Python 3.12.10.
-
-A shared-browser check loaded the page and verified the rendered numbers, grey disconnected sector, disabled third input, heading update, pair switch, and priority polygon. The recorded page resource URLs were **all same-origin localhost**, with zero external resource requests. Fresh engine analyses also passed while socket connection functions were blocked. The Mac's physical Wi-Fi/network interface was **not disabled** during the check. No cloud tile service, CDN/font request, analytics, API key or WMS image is required at runtime. CSP permits same-origin connections only.
-
-Full numerical results, including every scenario, all pairs, reference and sensitivity values for all heights/resolutions, are committed as the small report artifact [`benchmark-results.json`](benchmark-results.json). Human-readable tables are in [`VERIFICATION.md`](VERIFICATION.md). Large real rasters stay out of git.
+Checks cover full-circle tiling, exact seam ownership, unchanged totals under heading rotation, inner/outer vertical limits, unique forest accounting, priority ranking, low-height occlusion, real data at both resolutions, old-cache rejection, offline operation and UI request sequencing. `scripts/check_language.js` asserts English-only rendering and no obsolete camera copy, overflow or external resources. Current browser evidence is local, not a deployment check; the historical public-browser JSON is marked superseded.
 
 ## Known limits / not verified
 
