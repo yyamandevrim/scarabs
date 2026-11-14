@@ -1,56 +1,74 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Launch point simulation</title><meta name="description" content="Compare tethered-balloon launch points in the Helsinki capital region by simulated visible forest."><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/site.css"><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/landing.js"></script></head>
-<body class="landing" data-page-title="Launch point simulation">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Overview</title><meta name="description" content="Turn the real observation module, follow a ranger’s smoke review, and compare simulated forest visibility."><link rel="icon" href="/static/favicon.svg"><link rel="stylesheet" href="/static/tokens.css"><link rel="stylesheet" href="/static/site.css"><script defer src="/static/i18n.js"></script><script defer src="/static/metrics.js"></script><script defer src="/static/landing.js"></script><script type="module" src="/static/overview-radio.js"></script></head>
+<body class="landing" data-page-title="Overview">
 <header class="shell-bar">
  <a class="shell-brand" href="/"><img data-brand-logo width="639" height="207" alt=""><span class="visually-hidden" data-brand-name></span></a>
  <nav class="shell-nav" aria-label="Sections"><a href="/" aria-current="page">Overview</a><a href="/map">Launch map</a></nav>
- <span class="shell-spacer"></span>
- <button class="language" aria-label="Switch language">Türkçe</button>
+ <span class="shell-spacer"></span><span class="shell-context">Forest observation</span>
 </header>
 <main>
- <section class="hero">
+ <section class="hero" aria-labelledby="hero-title">
   <div class="hero-copy">
-   <div class="hero-identity"><img class="brand-stacked" data-brand-stacked width="871" height="408" alt=""><span class="visually-hidden"><span data-brand-name></span> — <span data-brand-expansion></span></span><p class="hero-eyebrow"><span data-brand-event></span> · <span data-brand-challenge></span> challenge</p></div>
-   <h1>A forest watch starts with the right launch point.</h1>
-   <div class="hero-description"><p class="lead"><span data-brand-tagline></span></p><p class="hardware-note">Three mounted cameras. Two active inputs. Terrain and canopy determine what they can see.</p></div>
-   <div class="hero-action"><a class="button primary action" href="/map">Open the launch point map</a><a class="button" href="#method">Method and limits</a></div>
-
+   <img class="brand-stacked" data-brand-stacked width="871" height="408" alt=""><span class="visually-hidden"><span data-brand-name></span> — <span data-brand-expansion></span></span>
+   <h1 id="hero-title">Watch the forest.<br> In every direction.</h1>
+   <p>Turn the three-camera module. Follow its reports home, then review the evidence over Wi-Fi.</p>
+   <a class="text-link" href="#ranger">See what the ranger sees <span aria-hidden="true">↓</span></a>
   </div>
-  <figure class="product-view">
-   <a href="/map" class="product-link" aria-label="Open the launch point map"><picture><source data-product-phone width="390" height="844" media="(max-width:650px)" srcset="/static/placement-preview-phone-en.png"><img data-product-desktop src="/static/placement-preview-en.png" width="1280" height="800" alt="Launch point map comparing Haukilahti and Nuuksio: simulated visible forest for each site, the verdict and the best camera pair."></picture></a><p class="small">Simulated geometric visibility, not a detection range.</p>
-   <figcaption>Screenshot of the live map · default setup: 600 m, quick 120 m grid, left and centre cameras connected</figcaption>
-  </figure>
+  <div class="hardware-demo">
+   <div id="model-stage" class="model-stage" aria-label="Interactive observation module">
+    <picture id="model-poster"><source media="(max-width:760px)" srcset="/static/hardware/acorn-poster-phone.webp" width="738" height="740"><img src="/static/hardware/acorn-poster.webp" width="1794" height="1154" alt="The real CAD: a triangular housing with three round camera pods on short arms, suspended by thin tether lines."></picture>
+    <canvas id="model-canvas" tabindex="0" role="img" aria-label="3D observation module. Drag horizontally to turn, use arrow keys to orbit, plus and minus to zoom. Vertical touch gestures scroll the page. Pinch to zoom." aria-describedby="model-alternative"></canvas>
+    <p id="model-alternative" class="visually-hidden">Three cameras surround the housing. The three pod directions surround the housing, about 120 degrees apart. The housing contains an Arduino UNO Q. Top and bottom plates have tether openings. The controls below also work without 3D.</p>
+    <svg class="leaders" aria-hidden="true"><path data-leader="left"/><path data-leader="centre"/><path data-leader="right"/><path data-leader="eye"/><path data-leader="housing"/></svg>
+    <div class="part-labels" aria-label="Module parts">
+     <button data-part="left" class="part-label label-left">Camera 3</button>
+     <button data-part="centre" class="part-label label-centre">Camera 1</button>
+     <button data-part="right" class="part-label label-right">Camera 2</button>
+     <button data-part="eye" class="part-label label-eye">Tether openings</button>
+     <button data-part="housing" class="part-label label-housing">Housing <span>UNO Q inside</span></button>
+    </div>
+    <p id="drag-hint" class="drag-hint">Drag to turn</p><p id="model-fallback" class="model-fallback" hidden>3D unavailable. The CAD drawing and part guide are still available.</p>
+   </div>
+   <div class="model-controls" aria-label="Model controls">
+    <button id="fov-toggle" aria-pressed="false" disabled>Show fields of view</button>
+    <button id="explode-toggle" aria-pressed="false" disabled>Take it apart</button>
+    <button id="reset-model" disabled>Reset view</button>
+   </div>
+   <div id="part-detail" class="part-detail" aria-live="polite"><h2>Explore the module</h2><p>Select a part to see what it does. Three camera assemblies surround the on-device computer.</p></div>
+   <p class="drawing-note">Three cameras · a view in every direction</p>
+  </div>
  </section>
 
- <section class="modules" aria-label="Modules">
-  <article class="module">
-   <div class="module-head"><h2>Launch planning</h2><span class="tag tag-sim">Simulated</span></div>
-   <p>Compares candidate launch points by how much forest the two connected cameras can geometrically see over terrain and canopy, which camera pair to connect, and how sensitive the result is to the module heading.</p>
-   <ul class="facts">
-    <li><span>Inputs</span><b>NLS 10 m DEM · CORINE 2024 · Luke MS-NFI 2023</b></li>
-    <li><span>Grid</span><b class="mono">120 m quick · 40 m detailed</b></li>
-    <li><span>Outputs</span><b>Visible, occluded and outside-FOV forest · pairs · heading ±20°</b></li>
-   </ul>
-   <a href="/map">Open the launch point map</a>
-  </article>
-  <article class="module">
-   <div class="module-head"><h2>Operator station</h2><span class="tag tag-measured">Measured</span></div>
-   <p>Runs on the balloon module: analyses two camera inputs locally, raises a smoke suspicion when three of five analyses agree, and asks an operator to confirm or reject each one. Its panel is local to the device and is not published on this website.</p>
-   <ul class="facts">
-    <li><span>Detector</span><b>Pyronear YOLO11s · ONNX Runtime CPU</b></li>
-    <li><span>Inference</span><b class="mono">57.7 ms mean · 65.6 ms p95</b></li>
-    <li><span>Measured on</span><b>Apple M5 Mac benchmark, 640 px input. These figures are not UNO Q measurements.</b></li>
-   </ul>
-   <p class="small">Recorded wildfire clip, 54 analyses, 2026-11-13. Source: station README.</p>
-  </article>
+ <section id="radio-demo" class="radio-demo section-space" aria-labelledby="radio-title">
+  <div class="radio-intro"><div><h2 id="radio-title">Reports home<br>without Wi-Fi.</h2><p>Out in the forest, LoRa carries station status and smoke suspicions to the main centre — without Wi-Fi or mobile coverage.</p></div><span class="demo-label">Interactive data-link demo</span></div>
+  <div class="radio-controls"><label for="radio-camera">Choose a camera</label><select id="radio-camera"><option value="centre">Camera 1</option><option value="right">Camera 2</option><option value="left">Camera 3</option></select><button id="send-alert" class="primary">Spot smoke on camera 1</button><p id="radio-progress" role="status" aria-live="polite">Status reports are arriving at the centre. Choose a camera to spot smoke.</p></div>
+  <div class="radio-link" aria-hidden="true"><span>Forest module<small>No Wi-Fi or mobile coverage</small></span><div class="link-track"><i class="packet-token">42 B</i></div><span>Main centre</span></div>
+  <div class="radio-workspace">
+   <div class="packet-view"><h3>The data packet</h3><p id="packet-kind" class="packet-kind">Status · version 2 · <b>40 bytes</b></p><dl id="packet-fields" class="packet-fields"></dl><details class="binary-details"><summary id="packet-bytes-label">See all 40 bytes</summary><code id="packet-hex"></code><p id="packet-layout">18-byte header + 20-byte status body + 2-byte CRC-16</p></details></div>
+   <div class="ground-demo"><header><span>Ground · main centre</span><span id="ground-demo-state">Receiving station reports</span></header><div class="ground-demo-body"><div class="demo-direction"><h3>Approximate directions</h3><svg id="demo-compass" viewBox="0 0 400 400" role="img" aria-label="Ground azimuth compass waiting for a smoke suspicion"><g id="compass-scale"></g><g id="compass-sectors"></g><path class="heading-arrow" d="M200 169 L193 207 L207 207Z"/><g id="compass-bearing" hidden><path d="M200 185 L200 51"/><circle cx="200" cy="51" r="4"/></g><circle cx="200" cy="200" r="4" class="compass-origin"/><text x="200" y="249" class="compass-station">Station 1</text></svg><p class="heading-note">Configured module heading 0°</p></div><div class="demo-queue"><h3>Received reports <span id="demo-alert-count">0</span></h3><p id="status-report" class="status-report">Status · 40 B</p><p id="queue-empty">Station status received. Smoke suspicions appear here.</p><div id="demo-alerts" aria-live="polite"></div></div></div></div>
+  </div>
+  <p class="radio-settings">SF7 · BW125 · CR4/5 · 1% duty cycle · calculated 12-second transmission slots. New smoke reports take priority over a queued heartbeat.</p>
+  <div id="radio-evidence" class="radio-evidence" hidden><div><h3>Evidence collected over Wi-Fi.</h3><p>The report’s snapshot and clip stay together for review.</p><button id="close-evidence">Close evidence</button></div><figure><video id="evidence-video" src="/static/demo/evidence.mp4" poster="/static/demo/evidence.webp" width="640" height="360" muted playsinline controls preload="none" aria-label="Smoke suspicion evidence clip"></video><figcaption>Saved event clip · Wi-Fi</figcaption></figure><figure><img src="/static/demo/evidence.webp" width="640" height="360" loading="lazy" alt="Smoke suspicion snapshot saved by the station."><figcaption>Saved snapshot · Wi-Fi</figcaption></figure></div>
  </section>
 
- <section id="method" class="reading">
-  <div><h2>Forest the cameras miss has two causes</h2><p><b>Outside the field of view</b>, shown grey: forest beyond the two connected cameras’ view. <b>Occluded in the field of view</b>, shown rust: forest the cameras face but terrain or canopy hides along the sightline. The blind total is always the sum of the two.</p>
-   <div class="legend-row"><span><i class="visible"></i>Visible forest</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="water"></i>Water in view</span></div></div>
-  <div><h2>What the numbers do not say</h2><p>The figures are geometric visibility, not a smoke-detection range. The model treats canopy as opaque, uses estimated stand heights and a fixed smoke-target height, and leaves out buildings, weather, tether motion and camera calibration. Access, shadow, site use and flight permissions still need checks on site.</p><p>Smoke suspicions are not confirmed fires: the station only flags them, and an operator decides.</p></div>
-  <div class="sources"><h2>Data in use</h2><ul id="sources" class="source-list"><li class="muted">Checking data</li></ul></div>
+ <section id="ranger" class="ranger section-space" aria-labelledby="ranger-title">
+  <div class="ranger-copy"><h2 id="ranger-title">Close by, connect over Wi-Fi.</h2><p class="section-intro">Wi-Fi adds live camera video, saved evidence and your decision, together on the station panel.</p>
+   <div class="steps" role="group" aria-label="Wi-Fi walkthrough">
+    <button data-step="0" aria-pressed="true"><span class="step-number">01</span><span><b>Cameras</b><span>Look through a camera’s view and follow what it sees.</span></span></button>
+    <button data-step="1" aria-pressed="false"><span class="step-number">02</span><span><b>Smoke suspicion</b><span>Open the flagged record. Local analysis attaches evidence for you to review.</span></span></button>
+    <button data-step="2" aria-pressed="false"><span class="step-number">03</span><span><b>Decision</b><span>Watch the saved clip, then confirm or reject the suspicion. Your decision stays with the record.</span></span></button>
+   </div>
+   <p class="wifi-caption">Station · camera feeds and evidence over Wi-Fi</p>
+  </div>
+  <figure class="phone-figure"><div class="phone"><div class="phone-screen"><img id="phone-capture" class="feed-crop" src="/static/demo/iphone-station-cameras.webp" width="786" height="439" loading="lazy" alt="Station camera feeds over Wi-Fi."><video id="phone-video" src="/static/demo/phone-decision.mp4" poster="/static/demo/iphone-station-evidence.webp" width="392" height="724" muted playsinline controls preload="none" hidden aria-label="Station evidence and operator decision"></video></div></div><figcaption id="phone-caption">Camera view · Wi-Fi</figcaption></figure>
  </section>
+
+ <section id="flight" class="flight section-space" aria-labelledby="flight-title">
+  <div class="section-head"><div><h2 id="flight-title">Choose where those two views look.</h2><p>Three cameras, now over real terrain and canopy. Compare simulated visible forest from each launch point, then turn the heading to explore the combined view.</p></div><a class="button primary" href="/map">Open the launch point map <span aria-hidden="true">↗</span></a></div>
+  <figure class="product-view"><a href="/map" aria-label="Open the launch point map"><img src="/static/demo/map-terrain-interim.webp" width="595" height="370" loading="lazy" alt="Terrain from the launch planner, with simulated visible-forest coverage."></a><figcaption>Launch planning over Finnish terrain · simulated visible forest.</figcaption></figure>
+ </section>
+
+ <section class="closing" aria-labelledby="closing-title"><h2 id="closing-title">Built by Scarabs.</h2><p>On-device observation, a compact report, a human decision.</p><details><summary>Data sources and licences</summary><ul id="sources" class="source-list"><li class="muted">Checking data</li></ul></details></section>
 </main>
-<footer class="site-foot"><span><span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span> · <span data-brand-challenge></span> challenge</span><span data-brand-tagline></span><span>NLS Finland / Syke / Luke · CC BY 4.0</span></footer>
+<footer class="site-foot"><span><span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span></span><span data-brand-tagline></span><span><span data-brand-challenge></span> challenge · NLS Finland / Syke / Luke · CC BY 4.0</span><span>Smoke footage: <a href="https://commons.wikimedia.org/wiki/File:Wildfire_Near_Monserrate.ogv">Peter Angritt</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> · cropped and re-encoded</span></footer>
 </body></html>

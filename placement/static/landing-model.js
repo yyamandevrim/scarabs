@@ -31,7 +31,7 @@ export async function mountModel({selectPart}){
  const selectedFill=new MeshBasicMaterial({color:0x8fc3e3,opacity:.16,transparent:true,side:DoubleSide,depthWrite:false});
  const activeLine=new LineBasicMaterial({color:0x8fc3e3,transparent:true,opacity:.55});
  const parts={},meshes=[],geometries=new Set(),materials=new Set([body,plate,face,lens,lensCentre,highlight,ropeMaterial,activeFill,selectedFill,activeLine]);
- let destroyed=false,lost=false,visible=true,frame=0,last=0,totalDraws=0,activeTime=0,drift=!reduced.matches,interacted=false,explode=0,explodeTarget=0,showFov=false,selectedPart=null;
+ let destroyed=false,lost=false,visible=true,frame=0,last=0,totalDraws=0,activeTime=0,lastDraw=0,drift=!reduced.matches,interacted=false,explode=0,explodeTarget=0,showFov=false,selectedPart=null;
  let priorDistance=.49;
  let yaw=.93,pitch=.20,distance=.49,velocityX=0,velocityY=0,settle=reduced.matches?1:0;
  const pointers=new Map();let start=null,pinchDistance=0;
@@ -100,7 +100,7 @@ export async function mountModel({selectPart}){
  }
  function draw(now){
   frame=0;if(destroyed||lost||!visible||document.hidden){last=0;return;}
-  const dt=last?Math.min((now-last)/1000,.04):1/60;last=now;activeTime+=dt;
+  const elapsed=last?(now-last)/1000:1/60,dt=Math.min(elapsed,.04);last=now;activeTime+=elapsed;
   if(reduced.matches){settle=1;explode=explodeTarget;drift=false;velocityX=velocityY=0;}
   if(drift&&activeTime<5)yaw+=dt*.022;else drift=false;
   if(!pointers.size){yaw+=velocityX;pitch+=velocityY;velocityX*=.84;velocityY*=.84;}
@@ -112,7 +112,7 @@ export async function mountModel({selectPart}){
   for(const [id,s]of Object.entries(sectors))s.group.position.copy(offsets['camera_'+id]).multiplyScalar(explode);
   bridle.visible=explode<.02;
   camera.position.set(Math.sin(yaw)*Math.cos(pitch)*distance,Math.sin(pitch)*distance,Math.cos(yaw)*Math.cos(pitch)*distance);camera.lookAt(0,0,0);camera.updateMatrixWorld();assembly.updateMatrixWorld(true);
-  renderer.render(scene,camera);stage.classList.add('ready');totalDraws++;updateLabels();
+  if(drift&&settle===1&&!pointers.size&&now-lastDraw<33){request();return;}lastDraw=now;renderer.render(scene,camera);stage.classList.add('ready');totalDraws++;updateLabels();
   if(drift||settle<1||explode!==explodeTarget||Math.abs(velocityX)+Math.abs(velocityY)>.0001)request();else last=0;
  }
  function request(){if(!frame&&!destroyed&&!lost&&visible&&!document.hidden)frame=requestAnimationFrame(draw);}
