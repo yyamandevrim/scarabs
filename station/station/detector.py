@@ -8,8 +8,23 @@ import onnxruntime as ort
 from .alarm import Detection
 from . import overlay_text
 
+VIEWS = ("full", "center_crop")
+
+
 class SmokeDetector:
-    def __init__(self, model: Path, input_size=640, confidence=.35, nms_iou=.45, threads=2):
+    """Pyronear export on one frame.
+
+    ``view="full"`` letterboxes the whole frame. ``view="center_crop"`` analyses
+    only the centred square (min side) at full input resolution: on a 320x240
+    camera at input 192, letterboxing spends a quarter of the input on padding
+    and shrinks screen-sized smoke below what the model responds to. The crop
+    excludes the outer side strips (a narrower field of view); confidence,
+    NMS and alarm voting are unchanged.
+    """
+    def __init__(self, model: Path, input_size=640, confidence=.35, nms_iou=.45, threads=2, *, view="full"):
+        if view not in VIEWS:
+            raise ValueError(f"detector view must be one of {VIEWS}")
+        self.view = view
         if not model.is_file():
             raise FileNotFoundError(f"Missing smoke model: {model}. Run: uv run python scripts/fetch_model.py")
         options = ort.SessionOptions()
@@ -28,6 +43,12 @@ class SmokeDetector:
 
     def predict(self, frame):
         start = perf_counter()
+        fh, fw = frame.shape[:2]
+        ox = oy = 0
+        if self.view == "center_crop":
+            side = min(fh, fw)
+            ox, oy = (fw-side)//2, (fh-side)//2
+            frame = frame[oy:oy+side, ox:ox+side]
         h, w = frame.shape[:2]
         scale = min(self.size / w, self.size / h)
         nw, nh = round(w * scale), round(h * scale)
@@ -55,7 +76,9 @@ class SmokeDetector:
         indices = cv2.dnn.NMSBoxes(boxes, scores, self.confidence, self.nms_iou)
         for index in np.asarray(indices).reshape(-1):
             x, y, bw, bh = boxes[index]
-            box = tuple(float(v) for v in np.clip([(x-left)/scale/w, (y-top)/scale/h, (x+bw-left)/scale/w, (y+bh-top)/scale/h], 0, 1))
+            # Clip inside the analysed region, then express in full-frame coordinates.
+            x1, y1, x2, y2 = np.clip([(x-left)/scale/w, (y-top)/scale/h, (x+bw-left)/scale/w, (y+bh-top)/scale/h], 0, 1)
+            box = tuple(float(v) for v in ((ox+x1*w)/fw, (oy+y1*h)/fh, (ox+x2*w)/fw, (oy+y2*h)/fh))
             if box[2] > box[0] and box[3] > box[1]:
                 detections.append(Detection(box, scores[index]))
         return detections, {"preprocess_ms": (prepared-start)*1000, "inference_ms": (inferred-prepared)*1000, "analysis_ms": (perf_counter()-start)*1000}

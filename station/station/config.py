@@ -37,6 +37,7 @@ class Config:
     profile: str = "field"
     analysis_hz: float | None = None
     input_size: int | None = None
+    detector_view: str = "full"  # Optional centre square; excludes outer strips.
     confidence: float | None = None
     nms_iou: float = .45
     similarity_iou: float = .25
@@ -67,7 +68,7 @@ class Config:
         return max(self.stale_seconds, 2 * self.analysis_interval)
 
     def analysis_profile_status(self):
-        return {"name": self.profile, "input_size": self.input_size,
+        return {"name": self.profile, "input_size": self.input_size, "detector_view": self.detector_view,
                 "confidence": self.confidence, "analysis_hz": self.analysis_hz,
                 "interval_seconds": self.analysis_interval,
                 "event_timeout_seconds": self.event_timeout,
@@ -75,6 +76,8 @@ class Config:
                 "required_detections": 3, "window_analyses": 5}
 
     def __post_init__(self):
+        if self.detector_view not in ("full", "center_crop"):
+            raise ValueError("detector_view must be full or center_crop")
         if self.profile not in ANALYSIS_PROFILES:
             raise ValueError("profile must be field or demo")
         for name, value in ANALYSIS_PROFILES[self.profile].items():

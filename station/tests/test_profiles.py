@@ -65,7 +65,7 @@ def test_status_exposes_effective_profile_and_overrides(config):
     station = Station(cfg, detector=object())
     try:
         profile = station.status()['analysis_profile']
-        assert profile == {'name': 'demo', 'input_size': 192, 'confidence': .4,
+        assert profile == {'name': 'demo', 'input_size': 192, 'detector_view': 'full', 'confidence': .4,
                            'analysis_hz': 1, 'interval_seconds': 1, 'event_timeout_seconds': 12,
                            'history_gap_seconds': 3, 'required_detections': 3, 'window_analyses': 5}
     finally:

@@ -13,7 +13,7 @@ from .detector import SmokeDetector
 
 
 def benchmark(config, clip, frames, stride, warmup):
-    detector = SmokeDetector(config.model,config.input_size,config.confidence,config.nms_iou,config.ort_threads)
+    detector = SmokeDetector(config.model,config.input_size,config.confidence,config.nms_iou,config.ort_threads,view=config.detector_view)
     capture = cv2.VideoCapture(str(clip))
     if not capture.isOpened():
         raise ValueError(f"Cannot open clip: {clip}")
@@ -43,6 +43,7 @@ def benchmark(config, clip, frames, stride, warmup):
     for key in samples[0]:
         values = [sample[key] for sample in samples]
         result[key] = {"mean":float(np.mean(values)),"p50":float(np.percentile(values,50)),"p95":float(np.percentile(values,95))}
+    result["detector_view"] = config.detector_view
     print(json.dumps(result,indent=2))
     return result
 
