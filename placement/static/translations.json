@@ -124,7 +124,7 @@
  "Updated automatically.": "Otomatik güncellendi.",
  "Could not reach the server. Retry shortly.": "Sunucuya ulaşılamadı. Kısa süre sonra tekrar deneyin.",
  "Could not load regional map data. Use Recalculate both sites to retry.": "Bölge haritası yüklenemedi. Yeniden denemek için İki konumu yeniden hesapla düğmesini kullanın.",
- "Data unavailable": "Veri hazır değil",
+ "Data unavailable": "Veri kullanılamıyor",
  "Map overlay expired. Recalculate both sites.": "Harita katmanının süresi doldu. İki konumu yeniden hesaplayın.",
  "Placeholder logo": "Geçici logo",
  "Visible forest · smoke + canopy": "Görünür orman · duman + taç",
@@ -230,5 +230,8 @@
  "Simulated geometric visibility, not a detection range.": "Simüle edilmiş geometrik görünürlük; tespit menzili değildir.",
  "A forest watch starts with the right launch point.": "Orman gözlemi, doğru kalkış noktasıyla başlar.",
  "Three mounted cameras. Two active inputs. Terrain and canopy determine what they can see.": "Üç takılı kamera. İki etkin giriş. Görebildikleri alanı arazi ve ağaç taçları belirler.",
- "Other site’s field of view": "Diğer konumun görüş alanı"
+ "Other site’s field of view": "Diğer konumun görüş alanı",
+ "national 20m raster": "ulusal 20 m raster",
+ "National 20m raster": "Ulusal 20 m raster",
+ "simulated": "simüle"
 }

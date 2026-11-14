@@ -136,7 +136,7 @@ uv run python -m compileall -q forest_placement scripts
 uv run python scripts/benchmark.py --fresh
 ```
 
-The original **36 tests remain passing** with prepared real data. The expanded suite and production/browser checks are recorded in [`VERIFICATION.md`](VERIFICATION.md). One upstream Starlette/httpx deprecation warning remains. Tests cover flat terrain, a blocking ridge, curved-earth horizon, canopy/unknown blockers, 3D frusta and boundaries, unique union/overlap counting, water exclusion, empty active sets, priority counting/ranking, max-two validation, three-camera reference, pair gaps/overlap, real data for both presets at both resolutions, heading changes, API responses, local assets, cache invalidation by inputs and fresh analysis with socket access blocked.
+The full placement and artifact suites pass with prepared real data. The expanded suite and production/browser checks are recorded in [`VERIFICATION.md`](VERIFICATION.md). One upstream Starlette/httpx deprecation warning remains. Tests cover flat terrain, a blocking ridge, curved-earth horizon, canopy/unknown blockers, 3D frusta and boundaries, unique union/overlap counting, water exclusion, empty active sets, priority counting/ranking, max-two validation, three-camera reference, pair gaps/overlap, real data for both presets at both resolutions, heading changes, API responses, local assets, cache invalidation by inputs and fresh analysis with socket access blocked.
 
 The server was actually started and both presets were called over HTTP at **500/600/700 m in both resolutions**. `scripts/benchmark.py --fresh` first performs uncached calculations with the same engine and then verifies their live API responses; it records compute and HTTP response times separately. Timings include metric aggregation, all pair/reference and sensitivity comparisons, and four warped PNG overlays. They exclude initial package install, data preparation and cold Numba compilation. The machine reports **macOS 27.0.1, arm64, 10 logical CPUs**, Python 3.12.10.
 
@@ -156,3 +156,5 @@ Full numerical results, including every scenario, all pairs, reference and sensi
 - No physical internet-disconnection test; runtime socket blocking and same-origin browser inspection were performed instead.
 - Browser state is in memory; refresh resets candidates and drawn priority polygons. Server results are capped at 256 analyses; Modal results are ephemeral and disappear on container recycle.
 - Python 3.11/3.13 and other operating systems were not run; verified runtime is this Mac on Python 3.12.
+
+Board status: the station has run on a real UNO Q using recorded clips, the MCU bridge, KY-026 and on-board status LED. This does not validate placement visibility or field detection range. Board inference performance for the demo, USB cameras, AP mode, external RGB LED and real LoRa radio remain unverified; see [BOARD_NOTES.md](../firmware/BOARD_NOTES.md) for ongoing bring-up work.

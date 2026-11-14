@@ -63,3 +63,14 @@ test('percent places the sign correctly in Turkish without fabricating missing v
  assert.equal(m.percent(null,'tr'),'—');
  assert.equal(m.percent(0,'tr'),'%0');
 });
+
+test('priority pairs rounded to zero have no best pair or total-forest overlap bar',()=>{
+ const pairs=[{pair:[0,1],canopy_smoke:{visible_forest_ha:770,priority_visible_ha:.1,overlap_forest_ha:500}},{pair:[0,2],canopy_smoke:{visible_forest_ha:2845,priority_visible_ha:.2,overlap_forest_ha:100}}];
+ assert.equal(m.bestPair(pairs,'canopy_smoke',true,120),null);
+ assert.deepEqual(m.pairBars(pairs,'canopy_smoke',true,120),[{visible:0,overlap:0},{visible:0,overlap:0}]);
+});
+
+test('signed display uses a mathematical minus, preserving locale formatting',()=>{
+ assert.equal(m.number(-70,'en'),'−70');
+ assert.equal(m.number(-70,'tr'),'−70');
+});
