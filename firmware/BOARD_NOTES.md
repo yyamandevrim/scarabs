@@ -82,7 +82,9 @@ Append this single entry with `crontab -e`, preserving other entries:
 
 The lock prevents duplicate instances. Manual startup is `~/acorn/start-station.sh`. Logs are in `~/acorn/station.log`. This is boot-time startup, not a crash-restarting supervisor. To undo only this addition, remove the marked cron line; the saved crontab can be restored with `crontab "$HOME/acorn/crontab.before-acorn"` only after checking no later unrelated entries would be lost. Keep the vendor's loader success flag intact; do not delete it as a generic reset step.
 
-**Power-cycle confirmation: pending explicit owner-approved test after this auto-start change.** No claim of automatic recovery is made yet.
+**Power-cycle confirmation: passed after the owner ran `sudo poweroff`, removed dongle power, waited a few seconds and reconnected power with both cameras in the same ports.** A changed kernel boot ID and reset uptime confirmed a new boot. Before starting anything manually, inspection found the station already running via cron, UVC parameter 128 active on both reprobed cameras, and the one-time loader service skipped (`ConditionResult=no`) because its genuine success flag existed. Both live JPEG endpoints returned HTTP 200, both analysis counters were already at 89, MCU protocol 1 was acknowledged, and fresh KY-026 telemetry was arriving. No reflash or manual station launch was needed.
+
+The station process started at **14.3 seconds of Linux kernel uptime**. The first direct authenticated HTTP observation was successful at **111.4 seconds of kernel uptime**. This is an observed upper bound at the first probe, not the exact time the server became ready, and it excludes any power-on delay before kernel time zero. The physical power-on instant was not timestamped and readiness was not polled continuously during boot, so exact power-to-panel latency remains unmeasured. The Mac's SSH forward must be connected/reconnected separately to view a loopback-bound panel after losing its SSH session; that does not start or repair anything on the board.
 
 ## Measurements — measured on the UNO Q
 
@@ -109,7 +111,7 @@ Baseline final 1/5/15-minute load averages: 8.88 / 5.85 / 4.07. Total Linux-visi
 |---|---|---|---|---|
 | input 640 | 17.90 / 19.75 ms | 2545.33 / 2571.81 ms | 2563.79 / 2591.55 ms | 28 / 54 |
 | input 320 | 5.53 / 7.06 ms | 665.11 / 680.96 ms | 671.10 / 687.01 ms | 21 / 54 |
-| input 192 | Pending | Pending | Pending | Pending |
+| input 192 | Not run standalone | See completed live run above | See completed live run above | Not measured |
 
 Exploratory input 256 with working 640×360 produced about 0.6 Hz per source and did not hold the target. The first 192 run was interrupted by an owner-initiated power removal; it is not counted as a completed steady run or a power fault. A smaller model input changes detections: already, 320 differed from 640 on the same smoke samples. Hitting 1 Hz does not establish equivalent sensitivity or field accuracy. Do not treat reduced-resolution speed as an accuracy validation.
 
@@ -163,3 +165,77 @@ For reproduction, after creating the two physical-path configuration, activate i
 - Working sketch setting: **`FLAME_DIGITAL_ACTIVE_HIGH=1`**. The owner confirmed changing sensor values and an actual trigger. Live MCU telemetry and heartbeat recovery were verified. This is a local IR response, not proof of a fire or validation of camera smoke detection.
 - IR source and measured distance: **to be filled in by the team**. No quantitative detection range is established.
 - Still unverified: live capture beyond the measured three-minute window and supply electrical headroom; access-point mode; external RGB LED wiring/polarity/PWM; LoRa radio hardware; unexpected power-loss data recovery; long-duration thermals; detection sensitivity/false positives at tuned input size. The matrix is unused by design.
+
+## Preview-quality experiment — rolled back
+
+The initial 640×480 YUYV trial returned truncated, green-padded images despite successful reads and matching dimensions. The user's visual report identified the failure; initial dimension-only validation was inadequate. Its apparent performance figures are INVALID. Both 640×480 YUYV sources also produced invalid pixels in the subsequent 30-fps probe; the new guard rejected them. Dual MJPG failed USB bandwidth admission at 1280×720 and 640×480. Mixed MJPG left + YUYV centre returned visually valid saved frames at 1024×768 and 1600×1200 on the left with the centre at 320×240, but the user reported reduced detection accuracy. The mixed mode was therefore rolled back too; throughput and intact images do not prove equivalent detection accuracy.
+
+**Active recovery selection:** both original 320×240 USB sources, original model input 192, confidence 0.35, requested 1 analysis/s/camera, JPEG quality 80 and evidence JPEG quality 75. No model, inference interval, driver, firmware or boot-service setting was changed. Native-size/quality controls remain available in code, but higher-resolution settings are not active. The frame guard rejects malformed arrays and the observed zero-filled-YUV green footer before publishing to preview, inference or evidence, clears latest/ring and reports a camera fault. It is a specific corruption-signature check, not a universal integrity guarantee. The existing shared-checkout identity fix was deployed so `Arduino UnoQ` is recognised correctly.
+
+Mac suite after the guard: **185 passed**. Board new picture/guard tests: **12 passed**. An earlier full board suite using its older integration tests had 156 passes, one skip and four failures: `test_removed_file_source_is_lost_live_and_recovers`, and `test_real_smoke_negative_pipeline_offline` for fog/cloud/glare. The file-recovery test passed on its isolated rerun; the three integration tests exceeded their fixed 16-second deadline while requesting eight input-640 analyses per source. No detection settings or test expectations were weakened to hide these failures. Only camera-quality hunks were deployed to board config/runtime; concurrent profile implementation was preserved in the shared checkout and not bundled into this deployment.
+
+The original mixed-mode two-minute resource run measured 46.0% machine CPU / 161.6% station CPU, 250.8 MiB mean RSS (259.9 peak), at least 1085.4 MiB MemAvailable, 43.5–49.8°C. Browser payloads averaged 401,391 / 34,945 bytes at 0.871 fps and analysis 0.991 Hz each. These describe the **rejected mixed mode**, not the restored deployment or an accuracy improvement. The baseline was 45.2% / 163.0% CPU, 184.0 MiB RSS, 42.0–49.2°C; browser 0.876 fps, 8344 / 28431 bytes, analysis 0.980 / 0.991 Hz. Scenes changed during the work, so byte counts are payload observations, not controlled quality scores. Diagnostic data remains outside the repository under the board's measurements directory.
+
+
+**Recovered deployment verification (after rollback):** both drivers report 320×240 YUYV at requested 30 fps; measured capture was 14.64 / 14.26 fps. The browser received correctly decoded 320×240 images at 0.875 fps each; counter-derived analysis was 0.983 / 0.996 Hz and last inference 269.3 / 262.8 ms. Mean payloads were 7645 / 8003 bytes (both views now show a wall, unlike the earlier scenes). A clean 60-second recovery resource run measured machine/station CPU **41.38% / 152.42%**, station RSS **173.8 MiB** (173.9 peak), MemAvailable ≥1157.0 MiB, and CPU temperature **41.3–47.6°C**. Both sources were connected and the panel identified Arduino UNO Q correctly through the existing SSH tunnel. Saved actual API frames were visually inspected from both sources: board and Mac temporary files `/tmp/acorn-recovered-left.jpg` and `/tmp/acorn-recovered-centre.jpg`. Recovery resource proof is `~/acorn/measurements/picture-quality/recovered-baseline.json` on the board. No further board mutations or quality tuning are pending in this task. Detection accuracy after rollback is not quantitatively validated by these wall views; throughput is healthy and the original model settings are restored.
+
+## 2026-11-14 live-camera input-size curve — measured on the UNO Q
+
+The owner requested input 640 for field sensitivity after the [Mac detection-quality study](../station/DETECTION_VS_INPUT_SIZE.md). **192 remains the fast demo setting, not the field sensitivity recommendation.** This run measures speed and resource use, not smoke-detection accuracy.
+
+All three tests used the same two physical live cameras, persistent paths above, negotiated **320×240 YUYV at 30 fps**, UVC quirk 128, the same ONNX model, CPUExecutionProvider, **2 ORT threads**, confidence **0.35**, and the unchanged on-board application snapshot. Only `input_size`, `analysis_hz` and `event_timeout` varied. The newly added repository field profile uses confidence 0.25; that threshold was **not** silently substituted into this controlled timing curve. On-board `detector.py` SHA-256: `96822a0a37057bd043ce44ec2557949f53b6ca7854afe984a816277ca5001317`; `capture.py`: `eca1a24a14e409d533090aedc4bc55878f16e42624d0752a0944b0587bf211b3`. No station source code was edited or updated on the board for these tests.
+
+Method: short capacity probes followed by each selected configuration held for **30 seconds warm-up plus approximately 300 seconds of sampled steady running** (at least 5 minutes at each configuration overall). The 640 and 416 sample windows were 299.99/300.00 s after excluding first-request overhead; 320 was 300.00 s. There were 31 status/resource snapshots per long run, about 10 s apart. Analysis timers below are means of sampled completed-analysis metrics from the live station; they are **not** a second standalone benchmark, and do not include camera capture/decode time. Rates use completed-counter differences over monotonic elapsed time. The earlier standalone project benchmarks remain separate in the previous table. No inference/benchmark process ran alongside a measured station.
+
+### Timing and sustained intervals
+
+Each timing cell is **left / centre** in milliseconds; rate/count cells use the same order. The counter window can start/end between analyses, so an occasional one-count difference is expected.
+
+| Input | Requested interval per camera | Measured rate per camera | Completed analyses | Preprocess mean | Inference mean | Total analysis mean | Event timeout |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 640 | 6 s | 0.167 / 0.167 Hz | 50 / 50 | 20.76 / 24.17 | 2719.54 / 2738.86 | 2740.66 / 2763.43 | 36 s |
+| 416 | 3 s | 0.333 / 0.333 Hz | 100 / 100 | 15.51 / 8.47 | 1170.39 / 1163.29 | 1186.25 / 1172.10 | 18 s |
+| 320 | 2 s | 0.500 / 0.497 Hz | 150 / 149 | 4.30 / 6.93 | 701.81 / 694.58 | 706.44 / 701.84 | 12 s |
+
+**640: 6 seconds per camera is the shortest validated interval on the tested 0.5-second grid.** A 60-second boundary run at 5.5 s failed: observed mean periods were 5.729/5.742 s and p95 5.840/5.885 s. At 6 s, the full long-run mean periods were 6.011/6.010 s, p95 6.020/6.018 s, with 50/50 completed analyses. A one-second saturation request reached only about 0.20/0.18 Hz. This is not a proof of an exact mathematical minimum between 5.5 and 6 seconds, or a guarantee under every scene/event workload; 6 seconds is the validated practical setting. The 416/320 intervals are validated steady choices, not boundary-search minima.
+
+A run was accepted only when both sources stayed connected without pipeline errors, sampled mean periods stayed within 2% of the requested interval, p95 within 5%, and counter rates met at least 93% of the scheduled rate (allowing integer-window phase). Event timeouts were `max(12, ceil(6 × interval))`, preserving the multi-analysis vote window at slower sampling; this does not shorten the separate sensor MCU debounce/heartbeat intervals.
+
+### Resources, load and thermals
+
+CPU machine is percent of the whole four-core machine; station CPU uses 100% per core. Memory is MiB. Free and available RAM are different quantities and are both reported.
+
+| Input | Station RSS mean (range) | MemAvailable mean (range) | MemFree mean (range) | CPU machine / station | Final load average 1/5/15 min | CPU thermal min–max | First / last minute CPU thermal mean |
+|---|---:|---:|---:|---:|---|---:|---:|
+| 640 | 306.3 (302.4–307.6) | 1014.2 (1009.3–1020.7) | 465.3 (460.0–472.8) | 57.6% / 209.9% | 2.64 / 2.31 / 1.42 | 46.4–52.9°C | 51.75 / 50.98°C |
+| 416 | 227.5 (224.7–228.1) | 1082.8 (1075.0–1084.6) | 532.7 (524.6–534.8) | 50.8% / 187.1% | 2.35 / 2.31 / 1.74 | 45.1–51.7°C | 50.02 / 48.52°C |
+| 320 | 203.8 (199.2–205.5) | 1101.2 (1091.7–1109.1) | 550.1 (540.6–558.4) | 49.2% / 178.3% | 2.06 / 2.29 / 1.96 | 47.6–50.7°C | 49.25 / 49.38°C |
+
+No kernel entries occurred in any of the three long-run windows: **no USB disconnect, reset, bandwidth, UVC, undervoltage or over-current errors**. Both sources stayed connected in every snapshot and their counters advanced. Absence of logged voltage errors is not an electrical measurement or proof of supply headroom.
+
+Temperature did not keep climbing: 640 cooled slightly between first/last minute, 416 cooled, and 320 was effectively flat. There is **no evidence of progressive thermal throttling in these windows**. Instantaneous CPU frequencies varied with DVFS (614.4–2016 MHz observed during 640); this is not alone proof of thermal throttling. The 640 first-to-last-minute sampled inference means increased about 4% left / 8% centre while CPU temperature decreased, so that variation cannot be assigned to heat from this evidence; the 6-second schedule still held throughout. Longer hot-ambient/event-encoding tests remain unverified.
+
+### Saved configurations and final state
+
+The board-local files are:
+
+| File under `~/acorn/station` | Input | Interval per camera | Timeout | Use |
+|---|---:|---:|---:|---|
+| `board.local.toml` and `board.demo192.local.toml` | 192 | 1 s | 12 s | **Active after measurement**, two live cameras |
+| `board.field640.local.toml` | 640 | 6 s | 36 s | Measured field-size configuration |
+| `board.curve416.local.toml` | 416 | 3 s | 18 s | Measured curve point |
+| `board.curve320.local.toml` | 320 | 2 s | 12 s | Measured curve point |
+
+To switch at an agreed interruption, stop the current station first; either run the CLI with the chosen file and `ACORN_PANEL_SECRET` set privately from the existing secret file, or copy the chosen file to `board.local.toml` and run `~/acorn/start-station.sh`. The cron launcher always reads `board.local.toml`, so copying to that file also selects the next boot's configuration. For example, **after stopping the running station**:
+
+```sh
+cp "$HOME/acorn/station/board.field640.local.toml" "$HOME/acorn/station/board.local.toml"
+"$HOME/acorn/start-station.sh"
+# To restore the demonstrated two-live fast mode, again stop station first:
+cp "$HOME/acorn/station/board.demo192.local.toml" "$HOME/acorn/station/board.local.toml"
+"$HOME/acorn/start-station.sh"
+```
+
+The measurement driver used separate `curve-*.local.toml` files, a private runtime secret, and the same exclusive station lock; it left the boot-time demo selection intact throughout and restored it in a `finally` step. Diagnostic driver script: `/tmp/acorn-profile-curve.py` on the board. Raw samples, summaries, probe logs and per-run kernel logs are retained in `~/acorn/measurements/curve`; these are outside the public repository. The active input 192, two live JPEG endpoints (HTTP 200), increasing analysis counters, MCU protocol 1, no bridge error and fresh sensor telemetry were rechecked after restoration.
+
+The repository field profile now follows the measured six-second interval and 36-second timeout. Its confidence threshold is 0.25, while this controlled timing curve used 0.35. The station README keeps exact field-profile performance explicitly pending; this curve does not validate the exact new profile.
