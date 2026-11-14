@@ -51,6 +51,9 @@ if rate_limits_enabled():
 async def policy(request,call_next):
     response=await call_next(request)
     response.headers['Content-Security-Policy']="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+    # The Overview's local meshopt decoder uses WebAssembly; map policy stays unchanged.
+    if request.url.path=='/':
+        response.headers['Content-Security-Policy']=response.headers['Content-Security-Policy'].replace("script-src 'self'","script-src 'self' 'wasm-unsafe-eval'")
     response.headers['X-Content-Type-Options']='nosniff'
     response.headers['Referrer-Policy']='same-origin'
     if request.url.path in ('/','/map','/api/brand') or request.url.path.startswith('/static/'):

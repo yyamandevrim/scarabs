@@ -25,7 +25,8 @@ def test_server_renders_config_identity_before_javascript():
             assert 'data-brand-logo src="'+brand['logo']+'"' in page
             assert brand['name'] in page
             assert client.get(brand['logo']).status_code==200
-            assert 'rel="icon"' not in page
+            assert 'rel="icon" href="/static/favicon.svg"' in page
+            assert client.get('/static/favicon.svg').status_code==200
             if path=='/':
                 assert 'data-brand-stacked src="'+brand['stacked_logo']+'"' in page
                 assert client.get(brand['stacked_logo']).headers['content-type']=='image/svg+xml'
