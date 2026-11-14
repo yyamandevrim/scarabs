@@ -1,13 +1,11 @@
-# ACORN — Aerial Canopy Observation and Reporting Node
-
-<p align="center">
+<h2 align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/brand/acorn-wordmark-white.svg">
     <img src="assets/brand/acorn-wordmark-black.svg" width="460" alt="ACORN">
   </picture>
   <br>
   Aerial Canopy Observation and Reporting Node
-</p>
+</h2>
 
 ACORN (Aerial Canopy Observation and Reporting Node) is a portable forest observation station built by team Scarabs for the Green European Renaissance challenge at Junction 2026 in Helsinki. It is designed to run wildfire smoke detection on-device on an Arduino UNO Q with cameras; a placement tool estimates forest visibility across the Helsinki capital region.
 
