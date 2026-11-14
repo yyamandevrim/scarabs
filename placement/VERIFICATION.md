@@ -1,5 +1,7 @@
 # Verification report — 360° launch map and Overview
 
+The Overview improvement round 2 is verified separately in [OVERVIEW_VERIFICATION.md](OVERVIEW_VERIFICATION.md), including three-engine rendering, media controls, measurements and review dispositions. The map findings below are retained.
+
 Verified 2026-11-14 on macOS, Python 3.12.10. **85 placement pytest tests pass**, zero failed/skipped. One upstream Starlette/httpx deprecation warning remains. The suite includes Node presentation and DOM request-sequencing checks. Playwright uses the locally cached Chromium 1255; its npm packages were installed in a temporary directory outside the repo.
 
 ## Current model
