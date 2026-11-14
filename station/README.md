@@ -29,7 +29,7 @@ The project has its own `.python-version`, `pyproject.toml`, `uv.lock`, and `.gi
 
 ## Cold start on UNO Q Linux
 
-These are instructions for the board's **ARM64 Debian Linux side**, not its microcontroller. The hardware installation and performance remain unverified.
+These are instructions for the board's **ARM64 Debian Linux side**, not its microcontroller. The station has been run on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, the KY-026 responding and the on-board status LED following station state. Validated board inference speed, USB cameras, access-point mode, the external RGB LED and real LoRa radio remain unverified for this demo. See [the dated board bring-up record](../firmware/BOARD_NOTES.md) for ongoing hardware work and measurements; this document does not turn Mac timings into board claims.
 
 ```sh
 sudo apt-get update
@@ -102,7 +102,7 @@ Clips play inline in the panel: an HTML `<video>` with native controls, the anno
 
 ### Optional LED hook
 
-The MCU status LED and local KY-026 now use the implemented RouterBridge client (`station/mcu_bridge.py`, `mcu_link.py`), with a tested in-process simulation. See the [panel API contract](#microcontroller-and-local-flame-sensor-api-for-the-panel-designer) and [hardware guide/LED table](../firmware/README.md#led-state-table). The sketch compiles for UNO Q; actual bridge, sensor and LED operation on the board remain unverified.
+The MCU status LED and local KY-026 now use the implemented RouterBridge client (`station/mcu_bridge.py`, `mcu_link.py`), with a tested in-process simulation. See the [panel API contract](#microcontroller-and-local-flame-sensor-api-for-the-panel-designer) and [hardware guide/LED table](../firmware/README.md#led-state-table). The sketch compiles for UNO Q; the real bridge, KY-026 response and on-board status LED were observed on the UNO Q with recorded clips; the external RGB LED remains unverified.
 
 The separate legacy `station/led.py` interface, `LedHook.set_alarm(enabled)`, is still available: no `led_path` means no-op; a configured Linux LED brightness file receives `1`/`0`, with missing/unwritable paths disabling this hook without stopping detection. It is a binary smoke-alarm hook, not the MCU's multi-state RGB driver. Leave it unset when using the MCU scheme, avoiding another writer to the same LED. Solar is omitted. LoRa communication uses the simulated transport described below; real radio hardware remains unverified.
 
@@ -137,7 +137,7 @@ The fog source page asserts the uploader's CC BY-SA 4.0 licence but also has a p
 
 ## Offline demo sequence
 
-1. Complete dependency and model/media downloads on reliable internet before the venue demo. Keep `left` and `centre` active, `right` inactive. Stop any previous server; if you want a clean panel, use [archive-events](#start-with-a-clean-event-list) below. If Wikimedia returns HTTP 429, wait a minute and rerun the footage fetcher; finished files are hash-checked and skipped.
+1. Complete dependency and model/media downloads on reliable internet before the venue demo. Keep `left` and `centre` active, `right` inactive. Stop any previous server; if you want a clean panel, use [archive-events](#start-with-a-clean-event-list) below. The footage fetcher retries HTTP 429/503 up to five attempts with exponential backoff (30/60/120/240 s), honours a longer Retry-After, and preserves verified finished files. If all attempts fail, retry later.
 2. Disconnect the station's internet uplink (Wi-Fi can remain on a local network if another device is viewing). Start with `uv run --offline --frozen forest-station --config config.toml serve` and open `http://127.0.0.1:8080`.
 3. Show the **two** active feeds and the right mounted/inactive slot. The smoke source starts at a visible plume; an event should open after roughly three analyses. Show “Duman şüphesi,” the highlighted snapshot, the local clip and measured analysis times. Say “measured on this Apple M5 Mac, not on the UNO Q” for the laptop demo; `/api/status.measured_on` identifies the running host. Label simulated MCU data as simulated.
 4. Choose **Doğrula** or **Reddet**. Restart the server and show that the decision remains. The repeating clip can produce another event after the first smoke disappears long enough to close; this is expected.
@@ -176,11 +176,11 @@ npm ci --ignore-scripts
 npm test
 ```
 
-The **24 panel tests** cover loading, recorded/live labels, pending counts, source highlighting, both decisions and correction, failed writes, focus preservation during polling, camera/analysis failure, server loss and recovery, different active pairs, clip playback/fallback, large queues, machine/confidence labels and separate local-flame/LED states.
+The panel regression suite covers loading, recorded/live labels, pending counts, source highlighting, both decisions and correction, failed writes, focus preservation during polling, camera/analysis failure, server loss and recovery, different active pairs, clip playback/fallback, large queues, machine/confidence labels and separate local-flame/LED states.
 
-Verification on **Apple M5, ARM64 Mac, macOS 27.0.1, Python 3.11.15**, CPUExecutionProvider only: **104 pytest cases passed: 101 unit/API and 3 real-video integration cases**, smoke paired separately with fog, cloud and glare. This includes WebM/VP8 encoding, AVI fallback, no-encoder failure and legacy AVI events; MCU simulation/protocol, fake-router reconnect/timeout, storage migration and flame-event separation; live file dropout/recovery, Turkish overlays, opening/peak/latest confidence, host identity and archive safety. It also covers three-of-five voting with misses and unrelated regions, configurable similarity, extension/expiry, latest-frame replacement, unaffected second camera, inactive slots, all active pairs, max-two validation, decisions, retention, preprocessing/RGB/NMS, wrong-model rejection, local assets and HTTP endpoints. Real-video tests skip explicitly when model/media are missing.
+Verification on **Apple M5, ARM64 Mac, macOS 27.0.1, Python 3.11.15**, CPUExecutionProvider only: the full Python suite passes, including three real-video integration cases, smoke paired separately with fog, cloud and glare. This includes WebM/VP8 encoding, AVI fallback, no-encoder failure and legacy AVI events; MCU simulation/protocol, fake-router reconnect/timeout, storage migration and flame-event separation; live file dropout/recovery, Turkish overlays, opening/peak/latest confidence, host identity and archive safety. It also covers three-of-five voting with misses and unrelated regions, configurable similarity, extension/expiry, latest-frame replacement, unaffected second camera, inactive slots, all active pairs, max-two validation, decisions, retention, preprocessing/RGB/NMS, wrong-model rejection, local assets and HTTP endpoints. Real-video tests skip explicitly when model/media are missing.
 
-The pure C++ firmware suite passes **150 checks** and its shared vectors are also tested against the Python simulation. Run it independently from `firmware/test/` with `c++ -std=c++17 -Wall -Wextra -I../acorn_mcu test_logic.cpp -o /tmp/acorn-test-logic` then `/tmp/acorn-test-logic vectors.txt`. The sketch also compiles with Arduino CLI 1.6.0, Zephyr core 1.1.0 and RouterBridge 0.4.4; it has never been flashed here.
+The pure C++ firmware suite passes **150 checks** and its shared vectors are also tested against the Python simulation. Run it independently from `firmware/test/` with `c++ -std=c++17 -Wall -Wextra -I../acorn_mcu test_logic.cpp -o /tmp/acorn-test-logic` then `/tmp/acorn-test-logic vectors.txt`. The sketch also compiles with Arduino CLI 1.6.0, Zephyr core 1.1.0 and RouterBridge 0.4.4; the sketch has since been flashed and exercised on the UNO Q, as recorded in [BOARD_NOTES.md](../firmware/BOARD_NOTES.md).
 
 The actual uvicorn server was also run on this Mac with smoke + fog for 98 analyses per camera. A smoke event was observed, evidence downloaded over HTTP and decoded, and a confirmation persisted. The browser loaded both active feeds, three slot cards, the event list and the inactive message with **zero external resource requests and zero console errors**. Measured analysis rates near the end were 1.00/s left and 0.99/s centre. Internet was not physically disabled on the host; the end-to-end tests explicitly forbid socket connections, and the browser audit checks same-origin-only requests.
 
@@ -209,7 +209,7 @@ At approximately 1 Hz across each complete downloaded video: smoke detected in *
 
 Smoke records have `alarm_confidence` (opening detection, matching snapshot/clip overlays), `peak_confidence` (highest recorded confidence) and `latest_confidence` (same as legacy `confidence`). All are model scores on `0..1`, not proof of fire. Label them **opening / peak / latest**, rather than presenting mismatched values as the same measurement. Old rows retain `null` for opening/peak values that were not recorded; do not infer an opening score from the latest one. Row box coordinates still track the latest detection; evidence retains the opening box.
 
-`/api/status.measured_on` contains `system`, `os_release`, `architecture`, `cpu_model`, `board_model`, `is_uno_q` and display `label`. Show the host next to measured inference figures. No hostname or username is included. UNO Q identification currently checks whether Linux's device-tree model contains “UNO Q”; that exact board string is unverified, so a failed match on a real board is not proof it is another machine. No Mac timings become board timings by connecting a board to the laptop.
+`/api/status.measured_on` contains `system`, `os_release`, `architecture`, `cpu_model`, `board_model`, `is_uno_q` and display `label`. Show the host next to measured inference figures. No hostname or username is included. UNO Q identification accepts the recorded device-tree spelling “Arduino UnoQ” as well as “Arduino UNO Q”; see the board bring-up record. No Mac timings become board timings by connecting a board to the laptop.
 
 ## Microcontroller and local flame sensor API for the panel designer
 
@@ -235,22 +235,30 @@ LED codes are `0 boot`, `1 normal`, `2 smoke_pending`, `3 degraded`, `4 flame_se
 For the hardware-free demo, `POST /api/mcu/simulate` accepts optional JSON booleans `flame` and `linux_silent`. It returns immediately with `{ok:true, simulated:true, flame:…, linux_silent:…}` (omitted inputs appear as null); poll for the debounced result. It returns **409** outside simulated mode. Examples while the demo server is running:
 
 ```sh
-curl -s http://127.0.0.1:8080/api/mcu
-curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"flame":true}'
-# Wait at least one second, then read the independent event list.
-curl -s 'http://127.0.0.1:8080/api/events?kind=flame_sensor'
-curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"flame":false}'
+# macOS zsh; use the same secret as the running station. Change only this URL if needed.
+ACORN_BASE_URL=http://127.0.0.1:8091
+read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo
+ACORN_COOKIE_JAR=$(mktemp); chmod 600 "$ACORN_COOKIE_JAR"
+uv run --offline --frozen python -c 'import json,os; print(json.dumps({"secret":os.environ["ACORN_PANEL_SECRET"]}))' | \
+  curl --fail-with-body -sS -c "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/auth/login" \
+    -H 'Content-Type: application/json' --data-binary @-
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/mcu"
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/mcu/simulate" -H 'Content-Type: application/json' -d '{"flame":true}'
+# Wait at least one second, then read the independent sensor event list.
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/events?kind=flame_sensor"
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/mcu/simulate" -H 'Content-Type: application/json' -d '{"flame":false}'
 # Trigger release takes about 1 s; red LED state holds another 3 s.
-curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"linux_silent":true}'
-# With no local trigger/hold, allow 5 s for linux_silent.
-curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"linux_silent":false}'
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/mcu/simulate" -H 'Content-Type: application/json' -d '{"linux_silent":true}'
+# Allow 5 s, then restore normal heartbeats.
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/mcu/simulate" -H 'Content-Type: application/json' -d '{"linux_silent":false}'
+rm "$ACORN_COOKIE_JAR"
 ```
 
 Simulation applies no signal to the board. Keep titles distinct: cameras **“Duman şüphesi”**, local sensor **“Alev sensörü tetiklendi”**. The KY-026 responds to nearby IR, including sunlight/other IR sources; its approximate metre-scale scope is not a guaranteed detection range. Never fuse these two event kinds into a claim of confirmed fire.
 
 ## Known issues and unverified work
 
-- No UNO Q or real USB cameras were available: ARM64 Debian installation, persistent-device mapping, physical unplug/replug, actual two-input bandwidth, measured board performance, memory/thermal limits and MCU/LED behaviour remain unverified. The Linux USB path and MCU router client are implemented; only simulation/fake-router tests and sketch compilation have run. See the firmware guide's hardware checklist before wiring or claiming a board result.
+- The station has been run on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, the KY-026 responding and the on-board status LED following station state. Validated board inference speed, USB cameras, access-point mode, the external RGB LED and real LoRa radio remain unverified for this demo. See [the dated board bring-up record](../firmware/BOARD_NOTES.md) for ongoing hardware work and measurements; this document does not turn Mac timings into board claims.
 - The Mac camera-loss check is a software simulation. V4L2 driver-specific blocking/hanging behaviour cannot be established here; a frame-age watchdog marks stale feeds disconnected, but a driver stuck forever inside `read()` may need process/driver recovery on real hardware.
 - No physical internet switch-off was performed. Runtime network independence is checked by denied-socket integration tests and the browser's local-only request audit. The initial downloads require internet.
 - WebM/VP8 encoding on the UNO Q itself, its per-event CPU time, and iOS Safari playback are unverified. Legacy or fallback AVI clips still need a separate player. Evidence can have shortened pre/post context at startup, loss or shutdown. No audio is saved.
@@ -314,3 +322,13 @@ These password arguments are passed to the local `nmcli` process; do this only o
 ### Collect evidence when in range
 
 The ranger can inspect the full panel directly. On a ground laptop that already received LoRa alerts, join the station AP, start ground with `--station-url http://10.42.0.1:8091` and `ACORN_STATION_SECRET` set to the station's panel secret, then use **Collect evidence over Wi-Fi** on the received alert. Ground checks the station ID and requests that alert's full original UUID via the protected API. It saves snapshot/clip locally under `ground/data/evidence/STATION_ID/EVENT_UUID/`. A later station outage or retention cleanup does not remove those copies. Enable the clearly marked Wi-Fi demo area to view them in ground; with the switch off, no imagery is shown. Collection works independently of that viewing switch and does not create radio alerts or station decisions.
+
+### Sustained demo scheduling (rehearsal 2 fix)
+
+Use the checked-in `demo-lora.toml`: recorded inputs, simulated transport, SF7/BW125/CR4/5, a requested four-second heartbeat and a strict 1% rolling-hour allowance. Every transmission is paced into a calculated 12-second slot; alerts pre-empt queued heartbeats, decisions then repeats follow, and a heartbeat replaces rather than queues another heartbeat. This is a sustainable demo setting, not a range claim. At SF10 the slot is 61 seconds; at SF12 it is 241 seconds. Full alerts cannot arrive every few seconds at those long-range settings within 1% duty.
+
+The ledger always refilled one hour after earlier transmissions. The former failure was spending that whole allowance in the first few minutes. Pacing and its next-allowed timestamp now persist too. Do not reset or delete a ledger: a pre-fix exhausted ledger must wait for the already-used airtime to expire; `/api/communication.calculated_next_tx_at` reports the earliest legal opportunity. `archive-events` archives imagery/decisions and intentionally preserves radio accounting. No “start one minute before going on” workaround is needed for the new sustainable configuration.
+
+Packet version 2 adds a CRC-protected calculated next-contact window to every message (37–42 bytes total). Ground still reads version-1 journals. It displays a calculated duty-cycle wait within that window, then stale/lost if the bounded deadline is missed; it cannot infer the cause of silence from unannounced legacy packets. Its configured stale threshold is a minimum: the effective threshold is at least the announced window plus five seconds. A ten-second threshold cannot override a physically required 241-second interval. Under overload, alerts queue and repeats/heartbeats yield; arbitrary alert rates or packet loss cannot be guaranteed.
+
+Three-hour clock-driven tests at SF7, SF10 and SF12 check every rolling hour, ongoing contact and restart persistence. The root [DEMO.md](../DEMO.md) is the single runbook. New arrivals in the station review queue wait while pointer or keyboard focus is inside it, with a new-record notice; they are applied after leaving the queue.
