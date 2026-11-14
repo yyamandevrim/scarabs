@@ -11,8 +11,7 @@ def test_overview_local_assets_and_plain_gltf_budget():
         bundle=client.get('/static/vendor/landing-3d.js')
         assert bundle.status_code==200 and len(gzip.compress(bundle.content))<200_000
         for asset in ('/static/hardware/acorn-poster.webp','/static/hardware/acorn-poster-phone.webp',
-                      '/static/demo/iphone-station-cameras.webp','/static/demo/iphone-station-evidence.webp',
-                      '/static/demo/evidence.webp','/static/demo/map-360-desktop.webp','/static/demo/map-360-phone.webp'):
+                      '/static/demo/event-frame.webp','/static/demo/event-clip.mp4','/static/demo/map-360-desktop.webp','/static/demo/map-360-phone.webp'):
             assert client.get(asset).status_code==200
         import json,struct
         size=struct.unpack_from('<I',model.content,12)[0]

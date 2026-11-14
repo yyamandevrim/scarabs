@@ -8,7 +8,7 @@ document.querySelectorAll('[data-part]').forEach(button=>{button.addEventListene
 $('fov-toggle').addEventListener('click',()=>{fov=!fov;$('fov-toggle').textContent=fov?'Hide fields of view':'Show fields of view';$('fov-toggle').setAttribute('aria-pressed',String(fov));viewer?.toggleFov(fov);});
 $('reset-model').addEventListener('click',()=>{fov=false;$('fov-toggle').setAttribute('aria-pressed','false');$('fov-toggle').textContent='Show fields of view';detail(null);viewer?.reset();});
 if(matchMedia('(pointer:coarse)').matches)$('drag-hint').textContent='Drag to turn · pinch to zoom';
-const fail=()=>{$('model-stage').classList.remove('ready');$('model-stage').classList.add('fallback');$('model-canvas').tabIndex=-1;$('model-fallback').hidden=false;};
+const fail=()=>{$('model-stage').classList.remove('ready');$('model-stage').classList.add('fallback');$('model-canvas').tabIndex=-1;$('model-fallback').hidden=false;$('part-detail').querySelector('h2').textContent='Module guide';$('part-detail').querySelector('p').textContent='Select a part to read about its role.';};
 requestAnimationFrame(()=>requestAnimationFrame(()=>{import('/static/vendor/landing-3d.js').then(m=>m.mountModel({selectPart})).then(api=>{viewer=api;for(const id of ['fov-toggle','reset-model'])$(id).disabled=false;}).catch(fail);}));
 let step=0,videoVisible=false;
 const video=$('phone-video');
@@ -17,7 +17,7 @@ function phone(){
  $('phone-camera-name').textContent=cameraNames[demo.camera];
  $('phone-title').textContent=['Camera view','Smoke suspicion','Review evidence'][step];
  $('phone-event-meta').textContent=eventTime()+' · '+Math.round(fixture.score*100)+'% model score';
- $('phone-capture').hidden=step===2;$('phone-image-action').hidden=step===2;video.hidden=step!==2;
+ $('phone-capture').hidden=step===2;$('phone-image-action').hidden=step===2;video.hidden=step!==2;document.querySelector('[data-video="phone-video"]').hidden=step!==2;
  $('phone-next').hidden=step===2;$('phone-next').textContent=step===0?'Open record':'Watch evidence';
  $('phone-decisions').hidden=step!==2||!!demo.decision;
  $('phone-record-state').textContent=demo.decision?'Decision saved':step===0?'Smoke suspicion':'Awaiting your decision';
@@ -36,7 +36,17 @@ $('phone-image-action').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key
 document.querySelectorAll('[data-decision]').forEach(button=>button.addEventListener('click',()=>{video.pause();demo.decide(button.dataset.decision);}));
 $('phone-replay').addEventListener('click',()=>{demo.decide(null);video.currentTime=0;phone();});
 demo.addEventListener('change',phone);
-new IntersectionObserver(([entry])=>{videoVisible=entry.isIntersecting;if(!videoVisible)video.pause();},{threshold:.2}).observe(video);
+new IntersectionObserver(([entry])=>{videoVisible=entry.isIntersecting;if(videoVisible&&step===2&&!demo.decision&&!document.hidden)video.play().catch(()=>{});else video.pause();},{threshold:.2}).observe(video);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)video.pause();});
 phone();
 fetch('/api/config').then(r=>r.json()).then(config=>{const list=$('sources');list.replaceChildren();for(const source of config.data?.sources||[]){const li=document.createElement('li'),name=document.createElement('span'),meta=document.createElement('span');name.textContent=source.name;meta.className='mono';meta.textContent=[source.licence,source.accessed].filter(Boolean).join(' · ');li.append(name,meta);list.append(li);}if(!list.children.length)list.textContent='Data sources unavailable';}).catch(()=>{$('sources').textContent='Data sources unavailable';});
+
+// Local controls avoid WebKit's CSP-blocked blob icons and keep one player per clip.
+for(const controls of document.querySelectorAll('[data-video]')){
+ const media=$(controls.dataset.video),play=controls.querySelector('.clip-play'),seek=controls.querySelector('.clip-seek'),time=controls.querySelector('.clip-time');
+ const refresh=()=>{play.textContent=media.paused?'Play':'Pause';play.setAttribute('aria-label',(media.paused?'Play':'Pause')+' evidence');seek.value=media.duration?media.currentTime/media.duration*100:0;time.textContent=Math.floor(media.currentTime/60)+':'+String(Math.floor(media.currentTime%60)).padStart(2,'0');};
+ play.addEventListener('click',()=>{if(media.paused)media.play().catch(()=>{});else media.pause();});
+ seek.addEventListener('input',()=>{if(Number.isFinite(media.duration))media.currentTime=Number(seek.value)/100*media.duration;});
+ for(const name of ['play','pause','timeupdate','loadedmetadata','ended'])media.addEventListener(name,refresh);
+ refresh();
+}

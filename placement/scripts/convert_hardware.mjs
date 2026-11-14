@@ -4,7 +4,6 @@ import path from 'node:path';
 import {Document, NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {dedup, weld, quantize} from '@gltf-transform/functions';
-import {MeshoptEncoder} from 'meshoptimizer';
 import {BufferGeometry, Float32BufferAttribute,Vector3,Ray,DoubleSide} from 'three';
 import {MeshBVH} from 'three-mesh-bvh';
 import {mergeVertices,toCreasedNormals} from 'three/addons/utils/BufferGeometryUtils.js';
@@ -58,8 +57,7 @@ for(const [name,parts]of Object.entries(groups)){
  if(shell.length)mesh.addPrimitive(primitive(shell,body));if(armSurfaces.length)mesh.addPrimitive(primitive(armSurfaces,arm));if(dark.length)mesh.addPrimitive(primitive(dark,face));
  scene.addChild(doc.createNode(name).setMesh(mesh));
 }
-await MeshoptEncoder.ready;
 await doc.transform(weld(),dedup(),quantize({quantizePosition:14,quantizeNormal:10,quantizeColor:8}));
-const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.encoder':MeshoptEncoder});
+const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const out=path.join(repo,'placement/static/hardware/acorn.glb');await io.write(out,doc);
 console.log(JSON.stringify({vertices:vertices.length,fragments:fragments.size,logicalParts:Object.keys(groups),bytes:fs.statSync(out).size}));

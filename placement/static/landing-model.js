@@ -87,10 +87,10 @@ export async function mountModel({selectPart}){
   const pod=podPositions[id];group.add(line([pod,new Vector3(normals[id].x*outer,.045,normals[id].z*outer)],activeLine));
   assembly.add(group);sectors[id]={group,fill,outline};group.visible=false;
  }
- const anchors={left:podPositions.left,centre:podPositions.centre,right:podPositions.right,eye:new Vector3(.0055,.075,0),housing:new Vector3(.048,-.025,.013)};
+ const anchors={left:podPositions.left,centre:podPositions.centre,right:podPositions.right,eye:new Vector3(.0055,.075,0),housing:new Vector3(.025,-.025,.0381)};
  const partFor=id=>['left','centre','right'].includes(id)?'camera_'+id:id==='eye'?'plate_top':'housing';
  function highlightPart(id,rotate=true){touch();selectedPart=id;for(const mesh of meshes)mesh.material=mesh.userData.part===partFor(id)&&!mesh.userData.optical&&mesh.userData.original!==face?highlight:mesh.userData.original;
-  if(rotate&&normals[id]){const target=Math.atan2(normals[id].x,normals[id].z)+.12;targetOrbit={yaw:yaw+((target-yaw+Math.PI*3)%(Math.PI*2)-Math.PI),pitch:showFov?.65:.35,distance:showFov?.8:.6};}
+  if(rotate&&normals[id]){const target=Math.atan2(normals[id].x,normals[id].z)+.12;targetOrbit={yaw:yaw+Math.atan2(Math.sin(target-yaw),Math.cos(target-yaw)),pitch:showFov?.65:.35,distance:showFov?.8:.6};}
   updateSectors();}
  function updateSectors(){for(const [id,s]of Object.entries(sectors)){s.group.visible=showFov;s.fill.material.opacity=selectedPart===id?1:.6;}request();}
  function updateLabels(){
@@ -98,7 +98,8 @@ export async function mountModel({selectPart}){
   const projected=[];
   for(const [id,anchor]of Object.entries(anchors)){
    const point=anchor.clone();assembly.localToWorld(point);
-   const facing=!normals[id]||normals[id].clone().applyQuaternion(assembly.quaternion).dot(camera.position.clone().sub(point).normalize())>0;
+   const surfaceNormal=normals[id]||(id==='eye'?new Vector3(0,1,0):new Vector3(0,0,1));
+   const facing=surfaceNormal.clone().applyQuaternion(assembly.quaternion).dot(camera.position.clone().sub(point).normalize())>0;
    const p=point.project(camera),label=stage.querySelector('[data-part="'+id+'"]'),path=stage.querySelector('[data-leader="'+id+'"]');label.classList.toggle('facing-away',!facing);path.style.opacity=facing?'.7':'0';
    projected.push({id,label,path,facing,x:(p.x*.5+.5)*rect.width,y:(-p.y*.5+.5)*rect.height});
   }
@@ -125,9 +126,9 @@ export async function mountModel({selectPart}){
   if(reduced.matches){settle=1;explode=explodeTarget;drift=false;velocityX=velocityY=0;}
   if(drift&&activeTime<5)yaw+=dt*.022;else drift=false;
   if(!pointers.size){yaw+=velocityX;pitch+=velocityY;velocityX*=.84;velocityY*=.84;}
-  if(targetOrbit){const t=reduced.matches?1:Math.min(1,dt*8);yaw+=(targetOrbit.yaw-yaw)*t;pitch+=(targetOrbit.pitch-pitch)*t;distance+=(targetOrbit.distance-distance)*t;if(Math.abs(targetOrbit.yaw-yaw)+Math.abs(targetOrbit.pitch-pitch)+Math.abs(targetOrbit.distance-distance)<.001){({yaw,pitch,distance}=targetOrbit);targetOrbit=null;}}
+  if(targetOrbit){const t=reduced.matches?1:1-Math.exp(-elapsed*12);yaw+=(targetOrbit.yaw-yaw)*t;pitch+=(targetOrbit.pitch-pitch)*t;distance+=(targetOrbit.distance-distance)*t;if(Math.abs(targetOrbit.yaw-yaw)+Math.abs(targetOrbit.pitch-pitch)+Math.abs(targetOrbit.distance-distance)<.001){({yaw,pitch,distance}=targetOrbit);targetOrbit=null;}}
   pitch=Math.max(-.6,Math.min(1.1,pitch));
-  settle=Math.min(1,settle+dt/ .8);const eased=1-Math.pow(1-settle,3);
+  settle=Math.min(1,settle+elapsed/ .8);const eased=1-Math.pow(1-settle,3);
   assembly.rotation.y=(1-eased)*-.18;assembly.position.y=(1-eased)*.018;
   if(Math.abs(explodeTarget-explode)<.001)explode=explodeTarget;else explode+=(explodeTarget-explode)*Math.min(1,dt*13);
   for(const [name,g]of Object.entries(parts))g.position.copy(offsets[name]).multiplyScalar(explode);
@@ -152,7 +153,7 @@ export async function mountModel({selectPart}){
  canvas.addEventListener('keydown',e=>{const keys={ArrowLeft:()=>yaw-=.12,ArrowRight:()=>yaw+=.12,ArrowUp:()=>pitch+=.08,ArrowDown:()=>pitch-=.08,'+':()=>distance=Math.max(.4,distance-.025),'=':()=>distance=Math.max(.4,distance-.025),'-':()=>distance=Math.min(.8,distance+.025)};if(keys[e.key]){e.preventDefault();touch();targetOrbit=null;keys[e.key]();request();}});
  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();lost=true;cancelAnimationFrame(frame);frame=0;stage.classList.remove('ready');document.querySelector('#model-fallback').hidden=false;});
  canvas.addEventListener('webglcontextrestored',()=>{lost=false;request();document.querySelector('#model-fallback').hidden=true;});
- const api={highlight:highlightPart,toggleFov(value){touch();showFov=value;targetOrbit={yaw,pitch:value?.65:defaults.pitch,distance:value?.8:defaults.distance};updateSectors();},explode(value){touch();explodeTarget=value?1:0;request();},reset(){touch();showFov=false;selectedPart=null;targetOrbit={...defaults};velocityX=velocityY=0;for(const mesh of meshes)mesh.material=mesh.userData.original;updateSectors();},get stats(){return {draws:totalDraws,visible,lost,interacted,cameraViews:['left','centre','right'],selectedPart,exploded:explode,geometries:renderer.info.memory.geometries,calls:renderer.info.render.calls};},dispose(){destroyed=true;cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();document.removeEventListener('visibilitychange',visibility);for(const g of geometries)g.dispose();for(const m of materials)m.dispose();roughnessMap.dispose();environment.dispose();renderer.dispose();}};
+ const api={highlight:highlightPart,toggleFov(value){touch();showFov=value;targetOrbit={yaw,pitch:value?.65:defaults.pitch,distance:value?.8:defaults.distance};updateSectors();},explode(value){touch();explodeTarget=value?1:0;request();},reset(){touch();showFov=false;selectedPart=null;targetOrbit={...defaults,yaw:yaw+Math.atan2(Math.sin(defaults.yaw-yaw),Math.cos(defaults.yaw-yaw))};velocityX=velocityY=0;for(const mesh of meshes)mesh.material=mesh.userData.original;updateSectors();},get stats(){return {draws:totalDraws,visible,lost,interacted,cameraViews:['left','centre','right'],selectedPart,exploded:explode,geometries:renderer.info.memory.geometries,calls:renderer.info.render.calls};},dispose(){destroyed=true;cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();document.removeEventListener('visibilitychange',visibility);for(const g of geometries)g.dispose();for(const m of materials)m.dispose();roughnessMap.dispose();environment.dispose();renderer.dispose();}};
  const pagehide=e=>{if(!e.persisted)api.dispose();};window.addEventListener('pagehide',pagehide);
  resize();updateSectors();window.acornModel=api;return api;
 }

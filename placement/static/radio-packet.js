@@ -13,7 +13,7 @@ export function encodeSmoke(camera,sequence=0){
 export function encodeStatus(sequence=0,timestamp=fixture.timestamp,uptime=100,pending=0){
  const f=fixture,bytes=new Uint8Array(40),v=new DataView(bytes.buffer);bytes[0]=0xac;bytes[1]=0x24;v.setUint16(2,f.station);v.setUint32(4,f.boot);v.setUint16(8,sequence);v.setUint32(10,timestamp);v.setUint16(14,f.remaining);v.setUint16(16,0x8000|f.contactAfter);
  // The existing codec's test fixture supplies the camera-state bitmasks. This UI does not claim a stream count.
- bytes[18]=3;bytes[19]=0;v.setUint16(20,pending);v.setUint32(22,uptime);bytes[26]=255;v.setUint16(27,0);[-12000,0,12000].forEach((yaw,i)=>v.setInt16(29+i*2,yaw));bytes.set([80,80,80],35);
+ bytes[18]=3;bytes[19]=0;v.setUint16(20,pending);v.setUint32(22,uptime);bytes[26]=255;v.setUint16(27,0);[-12000,0,12000].forEach((yaw,i)=>v.setInt16(29+i*2,yaw));bytes.set([120,120,120],35);
  let crc=0xffff;for(const value of bytes.slice(0,38)){crc^=value<<8;for(let i=0;i<8;i++)crc=crc&0x8000?(crc<<1)^0x1021:crc<<1;crc&=0xffff;}v.setUint16(38,crc);return bytes;
 }
 
