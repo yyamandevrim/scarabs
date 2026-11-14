@@ -20,7 +20,7 @@ The GPT and Opus map sections were read in full. This pass addresses their map f
 
 `map-polish-verification.json` records the 13 desktop/phone browser states, language/overflow checks, real preset metrics and preview asset sizes. Screenshots are under:
 
-`/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round2-map/`
+`local-scratch/overview/round2-map/`
 
 Desktop is 1440×900; phone is 393×852. The default, site B, 100 m height, Breakdown, More metrics, Data and scrolled phone comparison were inspected against the findings. English is forced despite old Turkish storage and URL parameters; no console errors, external requests or failed responses occurred.
 

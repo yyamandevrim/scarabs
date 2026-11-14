@@ -6,7 +6,7 @@
     "date": "2026-11-14",
     "model": "360\u00b0 three active 120\u00b0 sectors",
     "browser": "Chromium 1255 via Playwright",
-    "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/map",
+    "screenshots": "local-scratch/overview/map",
     "checks": [
       {
         "name": "desktop-default",

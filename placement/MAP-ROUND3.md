@@ -22,7 +22,7 @@ Supersedes round-two **UI** evidence in MAP-POLISH.md. Numeric audits and the v8
 - The browser suite starts an additional server on its own random port, kills that owned uvicorn process mid-request, then restarts it. The same open page resumes without a navigation. A response fixture changes preset names, default height and the data fingerprint after restart, proving config/preset refresh and rejection of stale figures. All numerical analyses still use the actual engine. Evidence records multiple config reads, one navigation and automatic recovery. Expected network console messages from this intentional outage are separated from ordinary errors.
 - Captures inspected for map context/coverage balance, label placement, touch controls, enabled finish contrast, priority outline/help removal, shared 30 m/detail updates, each tab, heights table and reconnection. Default figures remain **≈19,460 / ≈26,850 simulated ha**, both at 600 m and Quick · 120 m.
 
-Screenshots and raw checks: `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round3-map/`. Committed evidence: `map-round3-verification.json`.
+Screenshots and raw checks: `local-scratch/overview/round3-map/`. Committed evidence: `map-round3-verification.json`.
 
 Reproduce from the repo root: copy `placement/scripts/check_map.mjs` into a temporary directory with Playwright installed, then run `node TEMP/check_map.mjs BASE_URL CHROMIUM_BINARY OUTPUT_DIRECTORY`. Use the cached Chromium under `~/Library/Caches/ms-playwright`. The suite cleans up its own recovery server, leaving the supplied test URL and main port 18787 alone.
 

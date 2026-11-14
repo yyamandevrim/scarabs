@@ -241,7 +241,7 @@
     "refreshedPresets": true,
     "method": "Owned uvicorn process killed mid-request and restarted on its own random port. Response fixture changes config preset names/default height/data fingerprint after restart; analysis remains the actual local engine. Main port 18787 untouched."
   },
-  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round3-map",
+  "screenshots": "local-scratch/overview/round3-map",
   "previewAssets": [
     {
       "path": "static/demo/map-360-desktop.webp",

@@ -301,7 +301,7 @@
   ],
   "date": "2026-11-14",
   "scope": "Round-two map polish",
-  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round2-map",
+  "screenshots": "local-scratch/overview/round2-map",
   "previewAssets": {
     "desktop": {
       "file": "static/demo/map-360-desktop.webp",

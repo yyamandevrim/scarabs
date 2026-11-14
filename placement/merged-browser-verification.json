@@ -149,7 +149,7 @@
     "external": [],
     "failed": []
   },
-  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/merged",
+  "screenshots": "local-scratch/overview/merged",
   "previous_full_scroll_bytes": 1184230,
   "overview_suite": "scripts/check_overview.mjs, unchanged from main a950396; copied to external temporary npm toolchain",
   "initial_attempt": "WebGL recovery timed out once; identical assertions passed on two subsequent runs, including the final unmodified suite."
