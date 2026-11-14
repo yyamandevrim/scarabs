@@ -20,6 +20,8 @@ class CameraConfig:
     width: int = 1280
     height: int = 720
     loop: bool = True
+    capture_format: str = ""  # USB FOURCC: empty preserves the driver's default.
+    capture_fps: float = 0  # Zero preserves the driver's default.
 
 @dataclass
 class Config:
@@ -39,6 +41,9 @@ class Config:
     post_seconds: float = 4
     clip_fps: float = 5
     clip_width: int = 640
+    preview_width: int = 0  # Zero keeps native pixels; never upscale.
+    preview_jpeg_quality: int = 95
+    evidence_jpeg_quality: int = 95
     ort_threads: int = 2
     led_path: str | None = None
     mcu: McuConfig = field(default_factory=McuConfig)
@@ -51,6 +56,8 @@ class Config:
         if sum(c.active for c in self.cameras) > 2:
             raise ValueError("At most two camera slots may be active; the board has two usable inputs")
         for c in self.cameras:
+            if c.capture_format not in ("", "MJPG", "YUYV") or not 0 <= c.capture_fps <= 120:
+                raise ValueError(f"{c.name}: capture_format must be empty, MJPG or YUYV; capture_fps must be in [0, 120]")
             if not isinstance(c.active, bool):
                 raise ValueError(f"{c.name}: active must be true or false")
             if c.kind not in ("file", "usb") or not isinstance(c.source, str):
@@ -67,6 +74,8 @@ class Config:
             raise ValueError("Timeouts, retention, clip dimensions/rate and ort_threads must be positive")
         if min(self.pre_seconds, self.post_seconds) < 0:
             raise ValueError("Clip durations cannot be negative")
+        if self.preview_width < 0 or not all(isinstance(q, int) and 1 <= q <= 100 for q in (self.preview_jpeg_quality, self.evidence_jpeg_quality)):
+            raise ValueError("preview_width cannot be negative; JPEG qualities must be integers in [1, 100]")
 
 
 def load_config(path: str | Path) -> Config:

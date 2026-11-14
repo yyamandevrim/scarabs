@@ -70,13 +70,54 @@ width = 1280
 height = 720
 ```
 
-Use a real persistent path from `ls`, not the placeholder. `/dev/video0` and numeric indices are rejected. `by-path` binds a physical USB port and helps with identical cameras without serial numbers; `by-id` is also accepted when stable unique device IDs exist. Choose the capture endpoint, not a metadata endpoint. Physically label each camera/port and inspect its feed to verify that left/centre/right match the mounting. The application asks the driver for the configured resolution; hardware may negotiate another size, and the frame is resized to the configured working resolution.
+Use a real persistent path from `ls`, not the placeholder. `/dev/video0` and numeric indices are rejected. `by-path` binds a physical USB port and helps with identical cameras without serial numbers; `by-id` is also accepted when stable unique device IDs exist. Choose the capture endpoint, not a metadata endpoint. Physically label each camera/port and inspect its feed to verify that left/centre/right match the mounting. The application asks the driver for the configured resolution; hardware may negotiate another size. USB frames retain that actual size; file playback uses the configured working resolution.
 
 ```sh
 uv run --offline --frozen forest-station --config usb.local.toml serve --host 0.0.0.0
 ```
 
 Switching the active pair requires a config edit and restart. Yaw, tilt, horizontal/vertical FOV and resolution are mounting/configuration metadata, not measured calibration or geographic smoke coordinates. FOV defaults are placeholders to replace with the actual camera calibration.
+
+### Picture quality and USB negotiation
+
+The panel requests a new JPEG about once per second, independently of analysis.
+Preview uses native capture pixels by default (`preview_width = 0`) and JPEG quality
+95. A positive `preview_width` is an optional maximum; preview never upscales.
+The detector creates its own letterboxed `input_size` tensor from the raw frame;
+preview compression and evidence settings do not change model input or analysis cadence.
+
+For USB cameras, `width`/`height` request capture size, `capture_format = "MJPG"`
+requests camera-side JPEG compression (`"YUYV"` requests raw video), and
+`capture_fps = 5` requests a low capture rate to leave CPU time for analysis.
+The format/rate defaults are an empty string/zero, preserving driver defaults.
+USB frames retain their actual negotiated dimensions, without artificial enlargement
+or aspect-ratio changes. `/api/status` reports actual `capture_width`,
+`capture_height`, `capture_format`, and measured `capture_fps`; requested dimensions
+alone do not establish that the hardware accepted them. Test **both cameras together**
+before selecting a format: compressed MJPG does not guarantee USB bandwidth admission.
+The existing UVC quirk 128 specifically helps raw capture on the tested hub.
+Negotiation and successful reads alone do not prove usable pixels: the tested
+cameras returned truncated green-padded 640×480 YUYV images despite reporting that
+size. Inspect saved frames from **each** source before adopting a new mode.
+Capture rejects malformed arrays and the observed zero-filled-YUV green footer
+before publishing frames to preview, analysis or evidence. Rejection clears the
+latest frame/ring, reports a camera fault, and retries normally. This signature
+guard does not detect every possible kind of image corruption.
+
+Optional quality settings in `[station]`:
+
+```toml
+preview_width = 0
+preview_jpeg_quality = 95 # integer 1–100
+evidence_jpeg_quality = 95 # snapshots and compressed context-ring samples
+clip_width = 1280 # maximum; never enlarges a smaller source
+clip_fps = 2.0 # lower temporal rate can offset larger evidence frames
+```
+
+`clip_width`/`clip_fps` retain their general defaults of 640/5 unless overridden.
+WebM clips still use the existing lossy VP8 encoder; JPEG quality governs its source
+ring and snapshots, not VP8 bitrate. Larger rings and clips cost memory and encode
+time. The board notes record tested settings and limits separately from Mac tests.
 
 ## Detection and event behaviour
 

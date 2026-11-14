@@ -5,6 +5,24 @@ from pathlib import Path
 from threading import Event, Lock, Thread
 import time
 import cv2
+import numpy as np
+
+
+def validate_frame(image):
+    """Reject malformed frames and the observed zero-filled YUV corruption.
+
+    OpenCV can return success with a full-sized BGR array even when UVC supplied
+    too little YUYV data. Zero-filled Y/U/V becomes a flat (0, 154, 0) footer.
+    This signature check supplements shape validation; it is not a universal
+    image-integrity test. Run before publishing to analysis or evidence.
+    """
+    if image is None or image.ndim != 3 or image.shape[2] != 3 or min(image.shape[:2]) < 2 or image.dtype != np.uint8:
+        raise OSError("Invalid camera frame shape or pixel type")
+    footer = image[-max(2, image.shape[0]//4):, ::4]
+    green_padding = ((footer[:, :, 0] <= 3) & (footer[:, :, 2] <= 3)
+                     & (footer[:, :, 1] >= 145) & (footer[:, :, 1] <= 165))
+    if np.mean(green_padding) > .98:
+        raise OSError("Invalid/truncated camera frame: zero-filled YUV footer")
 
 @dataclass(frozen=True)
 class Frame:
@@ -42,6 +60,8 @@ class CaptureWorker:
         self.error = "Waiting for first frame"
         self.capture_fps = 0.0
         self.last_frame_at = None
+        self.capture_width = self.capture_height = 0
+        self.capture_format = None
         # No raw-frame queue. This ring is compressed and used only for event evidence.
         self.ring = deque(maxlen=max(2, int((config.pre_seconds+config.post_seconds+2)*config.clip_fps)+2))
         self.factory = factory or self._open
@@ -54,14 +74,19 @@ class CaptureWorker:
         if self.camera.kind == "usb":
             cap = cv2.VideoCapture(self.camera.source, cv2.CAP_V4L2)
             cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            if self.camera.capture_format:
+                cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.camera.capture_format))
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera.width)
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera.height)
+            if self.camera.capture_fps:
+                cap.set(cv2.CAP_PROP_FPS, self.camera.capture_fps)
             return cap
         return cv2.VideoCapture(self.camera.source)
 
     def status(self):
         with self.lock:
-            return {"connected": self.connected, "error": self.error, "capture_fps": self.capture_fps, "last_frame_at": self.last_frame_at}
+            return {"connected": self.connected, "error": self.error, "capture_fps": self.capture_fps, "last_frame_at": self.last_frame_at,
+                    "capture_width": self.capture_width, "capture_height": self.capture_height, "capture_format": self.capture_format}
 
     def evidence(self, start, end):
         with self.lock:
@@ -95,6 +120,8 @@ class CaptureWorker:
                     raise OSError("Cannot open source")
                 fps = cap.get(cv2.CAP_PROP_FPS)
                 fps = fps if 0 < fps <= 120 else 25
+                fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+                capture_format = ''.join(chr((fourcc >> (8*i)) & 255) for i in range(4)).rstrip('\x00')
                 next_frame = time.monotonic()
                 last_sample, previous = 0.0, None
                 next_check = time.monotonic()+self.watch_interval
@@ -115,18 +142,25 @@ class CaptureWorker:
                             ok, image = cap.read()
                         if not ok:
                             raise OSError("Source disconnected or end of unreadable clip")
+                    validate_frame(image)
                     now = time.time()
-                    image = cv2.resize(image, (self.camera.width, self.camera.height))
+                    # Preserve actual USB pixels: a driver's fallback must not be
+                    # enlarged to the requested size or distorted to another aspect ratio.
+                    if self.camera.kind == "file":
+                        image = cv2.resize(image, (self.camera.width, self.camera.height))
                     self.latest.put(image, now)
                     jpeg = None
                     if now-last_sample >= 1/self.config.clip_fps:
-                        small = cv2.resize(image, (self.config.clip_width, max(2, round(image.shape[0]*self.config.clip_width/image.shape[1]))))
-                        ok, encoded = cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, 75])
+                        width = min(self.config.clip_width, image.shape[1])
+                        small = image if width == image.shape[1] else cv2.resize(image, (width, max(2, round(image.shape[0]*width/image.shape[1]))))
+                        ok, encoded = cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, self.config.evidence_jpeg_quality])
                         if ok:
                             jpeg = encoded.tobytes()
                         last_sample = now
                     with self.lock:
                         self.connected, self.error, self.last_frame_at = True, None, now
+                        self.capture_height, self.capture_width = image.shape[:2]
+                        self.capture_format = capture_format
                         if previous is not None and now > previous:
                             instant = 1/(now-previous)
                             self.capture_fps = instant if not self.capture_fps else .9*self.capture_fps+.1*instant

@@ -95,15 +95,16 @@ class Station:
             return None
         detections = getattr(self, "detections", {}).get(name, [])
         image = annotate(frame.image, detections)
-        width = min(960, image.shape[1])
-        image = cv2.resize(image, (width, round(image.shape[0]*width/image.shape[1])))
-        ok, encoded = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        width = min(self.config.preview_width or image.shape[1], image.shape[1])
+        if width < image.shape[1]:
+            image = cv2.resize(image, (width, round(image.shape[0]*width/image.shape[1])))
+        ok, encoded = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, self.config.preview_jpeg_quality])
         return encoded.tobytes() if ok else None
 
     def _create_event(self, name, frame, detection, now):
         event_id = self.store.create(name, detection, now)
         filename = event_id+".jpg"
-        if cv2.imwrite(str(self.store.media/filename), annotate(frame.image, [detection])):
+        if cv2.imwrite(str(self.store.media/filename), annotate(frame.image, [detection]), [cv2.IMWRITE_JPEG_QUALITY, self.config.evidence_jpeg_quality]):
             self.store.set_media(event_id, snapshot=filename)
         else:
             self.store.set_media(event_id, error="Snapshot write failed")
