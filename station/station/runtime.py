@@ -23,7 +23,7 @@ class Station:
         self.detector = detector if detector is not None else SmokeDetector(config.model, config.input_size, config.confidence, config.nms_iou, config.ort_threads)
         self.store = EventStore(config.data_dir)
         self.workers = {c.name: CaptureWorker(c, config, factory=(lambda c=c: capture_factory(c)) if capture_factory else None) for c in config.cameras if c.active}
-        self.trackers = {name: EventTracker(config.similarity_iou, config.event_timeout) for name in self.workers}
+        self.trackers = {name: EventTracker(config.similarity_iou, config.event_timeout, config.alarm_gap_seconds) for name in self.workers}
         self.led = LedHook(config.led_path)
         self.mcu = McuBridge(self, config.mcu)
         self.data_lock = None
@@ -84,7 +84,7 @@ class Station:
                 item.update(state)
                 item.update(connected=connected, status="connected" if connected else "disconnected", status_text="bağlı" if connected else "bağlantı koptu")
             cameras.append(item)
-        return {"cameras": cameras, "target_analysis_hz":self.config.analysis_hz, "input_size":self.config.input_size, "confidence_threshold":self.config.confidence, "offline":True, "measured_on":machine_identity(), "mcu":self.mcu.status()}
+        return {"cameras": cameras, "analysis_profile":self.config.analysis_profile_status(), "target_analysis_hz":self.config.analysis_hz, "input_size":self.config.input_size, "confidence_threshold":self.config.confidence, "offline":True, "measured_on":machine_identity(), "mcu":self.mcu.status()}
 
     def jpeg(self, name):
         worker = self.workers.get(name)
@@ -171,7 +171,7 @@ class Station:
                 due[name] = started+1/self.config.analysis_hz
                 seen[name] = frame.sequence
                 try:
-                    if name in last_analysis and started-last_analysis[name] > max(self.config.stale_seconds, 2/self.config.analysis_hz):
+                    if name in last_analysis and started-last_analysis[name] > self.config.alarm_gap_seconds:
                         self.trackers[name].rule.reset()
                     detections, timings = self.detector.predict(frame.image)
                     self.detections[name] = detections

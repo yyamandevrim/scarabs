@@ -36,12 +36,17 @@ class OpenEvent:
 
 
 class EventTracker:
-    def __init__(self, similarity_iou: float, timeout: float):
+    def __init__(self, similarity_iou: float, timeout: float, history_gap: float | None = None):
         self.rule = AlarmRule(similarity_iou)
         self.timeout = timeout
+        self.history_gap = history_gap
+        self.last_analysis = None
         self.events: list[OpenEvent] = []
 
     def update(self, detections, now, create, extend, close):
+        if self.history_gap is not None and self.last_analysis is not None and now-self.last_analysis > self.history_gap:
+            self.rule.reset()
+        self.last_analysis = now
         for event in list(self.events):
             if now - event.last_seen > self.timeout:
                 close(event.id, now)

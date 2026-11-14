@@ -23,13 +23,13 @@ read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo
 uv run --offline --frozen forest-station --config config.toml serve --port 8080
 ```
 
-Without a configured secret all panel data/API access fails closed; see [Communication](#communication). Open **http://127.0.0.1:8080** and sign in. The two default sources are actual recorded wildfire and fog videos, played at their original frame rates and analysed at a target of once per second per active camera. The right slot stays mounted/inactive. Stop with Ctrl+C. Saved decisions survive restart. All config paths resolve relative to the TOML file, independent of the shell's working directory.
+Without a configured secret all panel data/API access fails closed; see [Communication](#communication). Open **http://127.0.0.1:8080** and sign in. The two default sources are actual recorded wildfire and fog videos, played at their original frame rates. The default **field** profile analyses each active camera at a target interval of six seconds. For a nearby-screen stage demo select `profile = "demo"` in the local configuration (or use `demo-lora.toml`). The right slot stays mounted/inactive. Stop with Ctrl+C. Saved decisions survive restart. All config paths resolve relative to the TOML file, independent of the shell's working directory.
 
 The project has its own `.python-version`, `pyproject.toml`, `uv.lock`, and `.gitignore`. `models/`, `media/`, `data/`, virtual environments, and local config overrides are excluded from git. Nothing needs to be fetched while serving. A cold clone must run the fetch scripts before the real-video tests; those tests explicitly skip if assets are absent, rather than substituting generated footage.
 
 ## Cold start on UNO Q Linux
 
-These are instructions for the board's **ARM64 Debian Linux side**, not its microcontroller. The station has been run on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, the KY-026 responding and the on-board status LED following station state. Validated board inference speed, USB cameras, access-point mode, the external RGB LED and real LoRa radio remain unverified for this demo. See [the dated board bring-up record](../firmware/BOARD_NOTES.md) for ongoing hardware work and measurements; this document does not turn Mac timings into board claims.
+These are instructions for the board's **ARM64 Debian Linux side**, not its microcontroller. The station has been run on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, the KY-026 responding and the on-board status LED following station state. Two live USB cameras at input 192 were measured on the board at about 278 ms inference and 0.990 analyses/s per camera; that is a throughput measurement, not a quality validation. Access-point mode, the external RGB LED and real LoRa radio remain unverified for this demo. See [the dated board bring-up record](../firmware/BOARD_NOTES.md) for ongoing hardware work and measurements; this document does not turn Mac timings into board claims.
 
 ```sh
 sudo apt-get update
@@ -119,12 +119,43 @@ WebM clips still use the existing lossy VP8 encoder; JPEG quality governs its so
 ring and snapshots, not VP8 bitrate. Larger rings and clips cost memory and encode
 time. The board notes record tested settings and limits separately from Mac tests.
 
+## Analysis profiles
+
+Profiles are selected in the station TOML and take effect on restart. The panel reports the active configuration; it has no profile-switch button or API. `config.toml` selects `field`; `demo-lora.toml` selects `demo`.
+
+| Profile | Model input | Confidence threshold | Target per camera | Event timeout default | Purpose |
+|---|---:|---:|---:|---:|---|
+| `field` (default) | 640 | 0.25 | 1/6 Hz · every 6 s | 36 s | Retain sensitivity to small, distant smoke, accepting slower analysis |
+| `demo` | 192 | 0.35 | 1 Hz · every 1 s | 12 s | Nearby smoke, such as a camera looking at a screen |
+
+The six-second field interval is within the **5–10 s** recommendation in [the input-size quality study](DETECTION_VS_INPUT_SIZE.md), option D, and now follows the validated six-second live-camera timing point in the board record. Its input-640 confidence sweep found 40/54 native smoke detections at 0.25 versus 24/54 at 0.35, with no negative detections at 0.25 on those samples. At input 192, 0.35 already had margin on the near plume, but the same smoke shrunk two to four times yielded no detections even at a 0.10 floor. Input 640 retained distant-proxy detections. No setting produced an alarm on the tested fog, cloud or glare clips. These observations support separate thresholds; they do not establish field accuracy or a false-alarm rate.
+
+**Limits:** one real smoke clip; distant smoke was a synthetic shrinking/compositing test. Quality was measured on an **Apple M5 Mac**, not the UNO Q. The [board record](../firmware/BOARD_NOTES.md) measured input 192 with two live 320×240 USB cameras at 279.32/276.53 ms mean sampled inference and 0.990 analyses/s each over 180.7 s. These are separate speed observations, not small-smoke validation. Profiles do not alter capture sources or frame sizes.
+
+**Board timing update, 2026-11-14:** the parallel board measurement now documents two live **320×240 YUYV** cameras at input 640 and confidence **0.35**, with 2719.54 / 2738.86 ms mean sampled inference and **0.167 / 0.167 analyses/s** over approximately 300 sampled seconds, after 30 seconds of warm-up. Six seconds per camera held the target; a 5.5-second boundary run did not. The default cadence and 36-second timeout follow that measured configuration. This is a timing result on that capture configuration, not a field sensitivity or smoke-quality validation. See [the full input-size curve and its limits](../firmware/BOARD_NOTES.md#2026-11-14-live-camera-input-size-curve--measured-on-the-uno-q).
+
+**Pending exact field-profile validation — input 640, confidence 0.25, final camera-quality settings:** mean inference **not measured yet**; sustained per-camera analysis rate **not measured yet**. Fill these entries with a dated run and negotiated camera formats/resolutions. The controlled timing curve used 0.35 and the earlier capture snapshot; do not present it as a measurement of the exact new profile or generalise it to larger camera frames.
+
+```toml
+[station]
+profile = "field" # or "demo"
+# Every profile value can be explicitly overridden:
+# input_size = 640
+# confidence = 0.25
+# analysis_hz = 0.16666666666666666
+# event_timeout = 36.0
+```
+
+The spatial **3-of-5 analyses** rule is unchanged. Without an explicit override, event timeout is `max(12, 6 / analysis_hz)` seconds, matching the board curve’s six-interval timeout and retaining an open event across the full five-analysis voting window. Votes reset after a gap longer than `max(stale_seconds, 2 / analysis_hz)`; camera loss and analysis errors still reset votes. Changing the interval changes the default timeout and vote-gap limit. An explicit `event_timeout` wins; keep it at least three intervals to avoid splitting an event across two missed analyses. Actual inference may run slower than the configured target; unusually long interruptions intentionally restart voting. Shorter explicit timeouts remain supported for tests and short clips.
+
+`GET /api/status` includes `analysis_profile` with name, effective input size, confidence, rate, interval, timeout, vote-gap limit and the 3-of-5 counts, alongside existing timing fields. Measured rates and milliseconds remain labelled with machine identity. LoRa v2 status packets stay unchanged: their fixed 40-byte layout has no profile field. Although eight bytes remain under the 48-byte ceiling, adding a field would break existing v2 length checks; the remote dashboard therefore makes no profile claim.
+
 ## Detection and event behaviour
 
 - Each active input has an independent capture thread, a single replaceable latest raw frame and no raw-frame queue. Files and USB inputs use the identical preprocessing, shared detector, alarm, evidence and storage path. File playback is paced in wall-clock time; live USB capture continuously drains frames.
-- One model instance uses only `CPUExecutionProvider` and processes active cameras in turn. Default target: **1 analysis/second/camera**, 640 × 640 letterboxed RGB float32 input, confidence ≥ 0.35, two ORT CPU threads, NMS IoU 0.45. Rate, input size, confidence and CPU threads are configurable. The official dynamic export also accepts 1024 input, its training image size; 640 is the demonstrated starting setting.
+- One model instance uses only `CPUExecutionProvider` and processes active cameras in turn. Default **field** target: **one analysis every six seconds/camera**, 640 × 640 letterboxed RGB float32 input, confidence ≥ 0.25, two ORT CPU threads, NMS IoU 0.45. Rate, input size, confidence and CPU threads are configurable. The official dynamic export also accepts 1024 input, its training image size; 640 is the demonstrated starting setting.
 - A candidate box must overlap a detection in at least **3 of the last 5 analyses on the same camera**. Overlap means normalized original-image box **IoU ≥ `similarity_iou`**, default 0.25, relative to the current candidate. Multiple boxes in one analysis count as one vote. Empty analyses count as misses. Three successes can open an event before the first five analyses are complete. Disconnection and long analysis gaps reset voting history.
-- Subsequent overlapping detections extend that open event, updating `last_seen`, box and confidence while preserving the operator decision. Unrelated regions can open separate events. An event closes after `event_timeout` seconds without a matching detection, default 12 seconds. Smoke returning after closure can create a new event. Old open events are closed on process restart.
+- Subsequent overlapping detections extend that open event, updating `last_seen`, box and confidence while preserving the operator decision. Unrelated regions can open separate events. An event closes after `event_timeout` seconds without a matching detection (field default 36 seconds; demo default 12 seconds). Smoke returning after closure can create a new event. Old open events are closed on process restart.
 - Capture failure clears the latest frame, marks the active slot disconnected, and retries after `retry_seconds`, default 2 seconds. Frames older than `stale_seconds` are not analysed or displayed. The other active capture worker and shared inference loop continue. Inactive slots never attempt to open their sources.
 - A bounded in-memory JPEG ring (default 640px wide, 5 fps) retains recent context; it is not written continuously. An event saves an annotated JPEG immediately and a short **WebM/VP8 clip**, normally up to 4 seconds before plus 4 seconds after opening, with the opening detection box drawn on every frame. Early-start events have less pre-roll; loss/shutdown can shorten post-roll. Clip sampling uses capture timestamps. The clip captures initial event context; extensions update the event row, not an indefinitely growing movie. See **Event clip format** below.
 - Event records live in `data/events.sqlite3` (SQLite WAL). Media lives in `data/events/`. Records include camera, opening/last-seen/closure timestamps, normalized `xyxy` box, confidence, media paths, operator decision and decision timestamp. Snapshot geometry corresponds to the opening detection; the row's box/confidence track the latest detection. Media failures appear in the event metadata. A single bounded encoder worker saves clips without blocking capture/inference; overload records an explicit missing-clip error.
@@ -299,7 +330,7 @@ Simulation applies no signal to the board. Keep titles distinct: cameras **“Du
 
 ## Known issues and unverified work
 
-- The station has been run on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, the KY-026 responding and the on-board status LED following station state. Validated board inference speed, USB cameras, access-point mode, the external RGB LED and real LoRa radio remain unverified for this demo. See [the dated board bring-up record](../firmware/BOARD_NOTES.md) for ongoing hardware work and measurements; this document does not turn Mac timings into board claims.
+- The station has been run on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, the KY-026 responding and the on-board status LED following station state. Two live USB cameras at input 192 were measured on the board at about 278 ms inference and 0.990 analyses/s per camera; that is a throughput measurement, not a quality validation. Access-point mode, the external RGB LED and real LoRa radio remain unverified for this demo. See [the dated board bring-up record](../firmware/BOARD_NOTES.md) for ongoing hardware work and measurements; this document does not turn Mac timings into board claims.
 - The Mac camera-loss check is a software simulation. V4L2 driver-specific blocking/hanging behaviour cannot be established here; a frame-age watchdog marks stale feeds disconnected, but a driver stuck forever inside `read()` may need process/driver recovery on real hardware.
 - No physical internet switch-off was performed. Runtime network independence is checked by denied-socket integration tests and the browser's local-only request audit. The initial downloads require internet.
 - WebM/VP8 encoding on the UNO Q itself, its per-event CPU time, and iOS Safari playback are unverified. Legacy or fallback AVI clips still need a separate player. Evidence can have shortened pre/post context at startup, loss or shutdown. No audio is saved.

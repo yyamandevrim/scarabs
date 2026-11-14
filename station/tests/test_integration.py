@@ -22,7 +22,7 @@ def test_real_smoke_negative_pipeline_offline(tmp_path,monkeypatch,negative):
         raise AssertionError('Network access forbidden during real pipeline test')
     monkeypatch.setattr(socket.socket,'connect',forbidden)
     monkeypatch.setattr(socket,'create_connection',forbidden)
-    config=replace(load_config(ROOT/'config.toml'),data_dir=tmp_path/'real-data',pre_seconds=2,post_seconds=2)
+    config=replace(load_config(ROOT/'config.toml'),data_dir=tmp_path/'real-data',analysis_hz=1,confidence=.35,event_timeout=12,pre_seconds=2,post_seconds=2)
     config=replace(config,cameras=[replace(c,source=str(ROOT/'media'/negative)) if c.name=='centre' else c for c in config.cameras])
     station=Station(config)
     with TestClient(create_app(station)) as client:

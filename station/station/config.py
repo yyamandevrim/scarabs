@@ -7,6 +7,12 @@ from .lora.bridge import LoraConfig
 
 SLOTS = ("left", "centre", "right")
 
+# Quality evidence: DETECTION_VS_INPUT_SIZE.md §§6, 8; speed: firmware/BOARD_NOTES.md.
+ANALYSIS_PROFILES = {
+    "field": {"input_size": 640, "analysis_hz": 1/6, "confidence": .25},
+    "demo": {"input_size": 192, "analysis_hz": 1.0, "confidence": .35},
+}
+
 @dataclass
 class CameraConfig:
     name: str
@@ -28,12 +34,13 @@ class Config:
     cameras: list[CameraConfig]
     model: Path
     data_dir: Path
-    analysis_hz: float = 1
-    input_size: int = 640
-    confidence: float = .35
+    profile: str = "field"
+    analysis_hz: float | None = None
+    input_size: int | None = None
+    confidence: float | None = None
     nms_iou: float = .45
     similarity_iou: float = .25
-    event_timeout: float = 12
+    event_timeout: float | None = None
     retry_seconds: float = 2
     stale_seconds: float = 3
     retention_days: float = 7
@@ -50,7 +57,33 @@ class Config:
     lora: LoraConfig = field(default_factory=LoraConfig)
     panel_secret: str | None = None
 
+    @property
+    def analysis_interval(self):
+        return 1 / self.analysis_hz
+
+    @property
+    def alarm_gap_seconds(self):
+        # Allow a missed analysis; a long interruption starts new votes.
+        return max(self.stale_seconds, 2 * self.analysis_interval)
+
+    def analysis_profile_status(self):
+        return {"name": self.profile, "input_size": self.input_size,
+                "confidence": self.confidence, "analysis_hz": self.analysis_hz,
+                "interval_seconds": self.analysis_interval,
+                "event_timeout_seconds": self.event_timeout,
+                "history_gap_seconds": self.alarm_gap_seconds,
+                "required_detections": 3, "window_analyses": 5}
+
     def __post_init__(self):
+        if self.profile not in ANALYSIS_PROFILES:
+            raise ValueError("profile must be field or demo")
+        for name, value in ANALYSIS_PROFILES[self.profile].items():
+            if getattr(self, name) is None:
+                setattr(self, name, value)
+        if self.analysis_hz <= 0:
+            raise ValueError("analysis_hz must be positive")
+        if self.event_timeout is None:
+            self.event_timeout = max(12, 6 * self.analysis_interval)
         if sorted(c.name for c in self.cameras) != sorted(SLOTS):
             raise ValueError("Configure exactly three named slots: left, centre, right")
         if sum(c.active for c in self.cameras) > 2:
