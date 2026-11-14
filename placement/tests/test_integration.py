@@ -29,6 +29,8 @@ def test_presets_water_and_accounting(preset_results):
     assert inland['metrics']['canopy_smoke']['water_share_pct']<20
     for r in preset_results:
         assert not r['range_clipped'] and r['unknown_forest_ha']==0
+        assert r['unknown_elevation_in_window'] is False
+        assert not any('unverified' in note for note in r['uncertainty'])
         for name,m in r['metrics'].items():
             assert m['visible_forest_ha']+m['blind_forest_ha']==pytest.approx(m['total_forest_ha'],abs=.01)
             assert 0<=m['overlap_forest_ha']<=m['visible_forest_ha']
@@ -112,3 +114,104 @@ def test_analysis_with_external_network_blocked(monkeypatch):
         r=analyze(preset,use_cache=False)
         assert r['metrics']['canopy_smoke']['visible_forest_ha']>0
     assert blocked==[]
+
+@pytest.mark.parametrize('mismatch',['missing_priority','different_priority','reference'])
+def test_compare_rejects_incompatible_inputs_before_analysis(monkeypatch,mismatch):
+    from forest_placement import api
+    a=PRESETS[1].model_dump();b=PRESETS[1].model_dump()
+    polygon=[[24.3,60.2],[24.8,60.2],[24.8,60.5],[24.3,60.5]]
+    a['priority']=polygon;b['priority']=polygon
+    if mismatch=='missing_priority':b['priority']=None
+    elif mismatch=='different_priority':b['priority']=[[24.4,60.2],[24.8,60.2],[24.8,60.5],[24.4,60.5]]
+    else:
+        b['reference']=True
+        for cam in b['cameras']:cam['active']=True
+    started=[]
+    def analysis(candidate):
+        started.append(candidate)
+        return {'metrics':{'canopy_smoke':{'priority_visible_ha':0,'visible_forest_ha':1}}}
+    monkeypatch.setattr(api,'run_analysis',analysis)
+    with TestClient(app) as client:
+        response=client.post('/api/compare',json={'candidates':[a,b]})
+    assert response.status_code==422,response.text
+    assert 'ranking' not in response.json()
+    assert ('priority' if mismatch!='reference' else 'mode') in response.json()['detail'].lower()
+    assert started==[]
+
+
+def test_compare_shared_geometry_different_pairs_and_exploration_rank_normally(monkeypatch):
+    from forest_placement import api
+    polygon=[[24.3,60.2],[24.8,60.2],[24.8,60.5],[24.3,60.5]]
+    inputs=[]
+    for i in range(3):
+        c=PRESETS[1].model_dump();c.update(name=str(i),heading=20+i*10,height=600+i*10,max_range=12000+i*100)
+        # Same polygon with reversed winding, shifted starting vertex and explicit closure.
+        c['priority']=[polygon,list(reversed(polygon)),polygon[2:]+polygon[:2]+[polygon[2]]][i]
+        for j,cam in enumerate(c['cameras']):cam['active']=j!=i
+        inputs.append(c)
+    scores=[(20,100),(10,1000),(20,200)]
+    def analysis(candidate):
+        priority,total=scores[int(candidate.name)]
+        return {'metrics':{'canopy_smoke':{'priority_visible_ha':priority,'visible_forest_ha':total}}}
+    monkeypatch.setattr(api,'run_analysis',analysis)
+    with TestClient(app) as client:
+        response=client.post('/api/compare',json={'candidates':inputs})
+    assert response.status_code==200,response.text
+    assert response.json()['ranking']==[2,0,1]
+
+@pytest.fixture
+def partial_grid(tmp_path,monkeypatch):
+    from forest_placement import engine
+    candidate=PRESETS[1].model_dump();candidate.update(height=30,heading=90,max_range=1000)
+    for i,cam in enumerate(candidate['cameras']):cam.update(yaw=0,tilt=0,hfov=80,vfov=160,active=i==1)
+    candidate=Candidate(**candidate)
+    x,y=TO_METRIC.transform(candidate.lon,candidate.lat)
+    shape=(1,10)
+    grid={k:np.zeros(shape,dtype=np.float32) for k in ('terrain','surface','water','forest')}
+    grid['forest'][:,3:]=1
+    grid.update(valid=np.ones(shape,dtype=bool),cell=np.array(120),bounds=np.array([x-60,y-60,x+1140,y+60]))
+    meta={'files':{'synthetic':'partial-grid'},'canopy_name':'Synthetic canopy','assumed_canopy_forest_pct':0,'buildings_included':False,'prepared_at':'synthetic'}
+    monkeypatch.setattr(engine,'CACHE',tmp_path)
+    monkeypatch.setattr(engine,'metadata',lambda:meta)
+    monkeypatch.setattr(engine,'load_grid',lambda resolution:grid)
+    return engine,candidate,grid,meta
+
+
+def test_unknown_intermediate_nonforest_remains_blind_with_uncertainty(partial_grid):
+    engine,candidate,grid,_=partial_grid
+    known=engine.analyze(candidate,use_cache=False)
+    assert known['metrics']['canopy_smoke']['visible_forest_ha']==8.64
+    assert known.get('unknown_elevation_in_window') is False
+    assert not any('unverified' in note for note in known['uncertainty'])
+    grid['valid'][0,2]=False
+    unknown=engine.analyze(candidate,use_cache=False)
+    for name in engine.SCENARIOS:
+        assert unknown['metrics'][name]['visible_forest_ha']==0
+        assert unknown['metrics'][name]['occluded_forest_ha']==8.64
+    assert unknown['unknown_forest_ha']==0  # Invalid target area, not affected-ray area.
+    assert unknown['unknown_elevation_in_window'] is True
+    assert any('unverified' in note and 'obstruction' in note for note in unknown['uncertainty'])
+
+
+def test_unknown_target_stays_blind_and_target_area_is_honest(partial_grid):
+    engine,candidate,grid,_=partial_grid
+    grid['valid'][0,8]=False
+    result=engine.analyze(candidate,use_cache=False)
+    assert result['unknown_forest_ha']==1.44
+    assert result['unknown_elevation_in_window'] is True
+    assert result['metrics']['canopy_smoke']['visible_forest_ha']==7.2
+    assert result['metrics']['canopy_smoke']['blind_forest_ha']==1.44
+
+
+def test_old_silent_uncertainty_cache_is_not_reused(partial_grid):
+    import hashlib
+    engine,candidate,grid,meta=partial_grid
+    grid['valid'][0,2]=False
+    old_key=hashlib.sha256(json.dumps(dict(input=candidate.model_dump(),data=meta['files'],algorithm='opaque-ray-half-cell-v6-map-palette'),sort_keys=True).encode()).hexdigest()[:24]
+    (engine.CACHE/(old_key+'.json')).write_text(json.dumps({'id':old_key,'unknown_forest_ha':0,'uncertainty':[]}))
+    result=engine.analyze(candidate)
+    assert result['id']!=old_key and result['cached'] is False
+    assert result['unknown_elevation_in_window'] is True
+    cached=engine.analyze(candidate)
+    assert cached['cached'] is True and cached['unknown_elevation_in_window'] is True
+    assert cached['uncertainty']==result['uncertainty']

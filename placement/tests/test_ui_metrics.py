@@ -92,3 +92,7 @@ def test_rate_limits_are_public_by_default_and_explicitly_overridable():
 
 def test_browser_map_display_contract():
     subprocess.run(['node', '--test', str(ROOT / 'tests/ui_map_display.cjs')], check=True, cwd=ROOT)
+
+
+def test_browser_request_contract():
+    subprocess.run(['node', '--test', str(ROOT / 'tests/ui_requests.cjs')], check=True, cwd=ROOT)

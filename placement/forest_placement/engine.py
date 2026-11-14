@@ -21,7 +21,7 @@ PREP=Path(os.environ.get('PLACEMENT_PREPARED', ROOT/'data/prepared'))
 CACHE=Path(os.environ.get('PLACEMENT_CACHE', ROOT/'data/results'))
 TO_METRIC=Transformer.from_crs(4326,3067,always_xy=True)
 TO_LONLAT=Transformer.from_crs(3067,4326,always_xy=True)
-ALGORITHM='opaque-ray-half-cell-v6-map-palette'
+ALGORITHM='opaque-ray-half-cell-v7-unknown-elevation-warning'
 SCENARIOS=('bare_ground','bare_smoke','canopy_ground','canopy_smoke')
 
 @lru_cache(maxsize=2)
@@ -102,6 +102,9 @@ def analyze(candidate:Candidate,use_cache=True):
         sensitivity.append(dict(drift=delta,heading=(candidate.heading+delta)%360,**values))
     clipped=bool(min(x-bounds[0],bounds[2]-x,y-bounds[1],bounds[3]-y)<candidate.max_range)
     unknown=round(float(np.sum(data['forest']*eligible*~data['valid'])*cell*cell/10000),3)
+    # Conservative provenance, not an affected-ray mask or hectare estimate. Include
+    # the entire sampled window: boundary rays can cross cells centred outside range.
+    unknown_elevation=bool(np.any(~data['valid']))
     notes=[f"NLS 10 m (2019 arşivi), Syke CORINE 2024 (20 m). {meta['canopy_name']}.",
            f"Eksik orman taç verisi: %{meta['assumed_canopy_forest_pct']}; bu hücrelerde 20 m kapalı taç varsayımı.",
            'Taç örtüsü >0 olan hücreler opak kabul edilir. Ortalama boy, tekil ağaç tepesi değildir; saydamlık modellenmez.',
@@ -111,12 +114,13 @@ def analyze(candidate:Candidate,use_cache=True):
            'Hedef, taç yüzeyinin üzerinde seçilen yükseklikte tek bir geometrik noktadır; duman yayılım modeli değildir.']
     if clipped:notes.append('Menzil veri sınırını aşıyor; alanlar yalnız hazırlanan bölgenin içindedir.')
     if unknown:notes.append(f'Yükselti verisi eksik {unknown} ha orman kör alana dahil edildi; görüşü doğrulanamadı.')
+    if unknown_elevation:notes.append('Unknown elevation in the analysis window: crossing sightlines remain unverified and blind. In-view blind area may include these rays as well as physical obstruction; affected area has not been quantified.')
     result=dict(id=key,input=candidate.model_dump(),resolution_m=cell,observer_elevation_m=round(observer_z,2),
         active_cameras=active,mode='üç kamera, referans' if candidate.reference else 'iki girişli modül',
         metrics=results,pair_comparison=pairs,reference=dict(label='üç kamera, referans',metrics={name:metrics(i,[0,1,2])[0] for i,name in enumerate(SCENARIOS)}),
         heading_sensitivity=sensitivity,images=images,
         sectors=[dict(active=c.active,label=['Sol','Merkez','Sağ'][i]+('' if c.active else ' · bağlı değil'),points=sector(candidate,c,x,y)) for i,c in enumerate(candidate.cameras)],
-        uncertainty=notes,range_clipped=clipped,unknown_forest_ha=unknown,
+        uncertainty=notes,range_clipped=clipped,unknown_forest_ha=unknown,unknown_elevation_in_window=unknown_elevation,
         field_checks=dict(road_access='sahada doğrulanacak',shadow='sahada doğrulanacak',site_constraints='sahada doğrulanacak'),
         computed_seconds=round(time.perf_counter()-started,4),cached=False,data_prepared_at=meta['prepared_at'],algorithm=ALGORITHM)
     # Bounded generated cache: 256 analyses, including their four images.

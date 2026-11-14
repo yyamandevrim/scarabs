@@ -74,3 +74,15 @@ test('signed display uses a mathematical minus, preserving locale formatting',()
  assert.equal(m.number(-70,'en'),'−70');
  assert.equal(m.number(-70,'tr'),'−70');
 });
+
+test('equal positive priority selects higher total forest and full ties retain input order',()=>{
+ const pairs=[{pair:[0,1],canopy_smoke:{priority_visible_ha:10.24,visible_forest_ha:9964.64}},{pair:[1,2],canopy_smoke:{priority_visible_ha:10.24,visible_forest_ha:10682.24}},{pair:[0,2],canopy_smoke:{priority_visible_ha:10.24,visible_forest_ha:10682.24}}];
+ assert.equal(m.bestPair(pairs,'canopy_smoke',true,120),pairs[1]);
+ assert.equal(m.bestPair(pairs,'canopy_smoke',true,40),pairs[1]);
+ assert.deepEqual(pairs.map(p=>p.pair),[[0,1],[1,2],[0,2]]);
+ assert.equal(m.bestPair([{canopy_smoke:{visible_forest_ha:1000}},{canopy_smoke:{priority_visible_ha:null,visible_forest_ha:2000}}],'canopy_smoke',true),null);
+});
+test('ranking uses computed priority before total even within one displayed rounding bucket',()=>{
+ const pairs=[{canopy_smoke:{priority_visible_ha:10.1,visible_forest_ha:2000}},{canopy_smoke:{priority_visible_ha:10.2,visible_forest_ha:1000}}];
+ assert.equal(m.bestPair(pairs,'canopy_smoke',true,120),pairs[1]);
+});

@@ -5,8 +5,8 @@ const tr=(en,turkish)=>lang()==='tr'?turkish:en;
 function localized(el,en,turkish){el.setAttribute('data-localized','');el.textContent=tr(en,turkish);return el;}
 const fmt=(value,digits=0)=>M.number(value,lang(),digits);
 const area=(value,resolution)=>M.headline(value,resolution,lang());
-let candidates=[],results=[null,null],selected=0,map=null,layers=null,overlay=null,priorityLayer=null,drawing=false,drawPoints=[],priority=null,timer=null,busy=false,pending=new Set();
-let scenario='canopy_smoke',dataInfo=null,dirty=new Set([0,1]),lastError='',ready=false;
+let candidates=[],results=[null,null],selected=0,map=null,layers=null,overlay=null,priorityLayer=null,drawing=false,drawPoints=[],priority=null,timer=null,busy=false,pending=new Set(),scheduled=new Set();
+let scenario='canopy_smoke',dataInfo=null,dirty=new Set([0,1]),requestErrors=new Map(),lastError='',ready=false;
 const cameraNames=['Left','Centre','Right'],cameraNamesTr=['Sol','Merkez','Sağ'],letters='AB';
 const camName=i=>tr(cameraNames[i],cameraNamesTr[i]);
 const pairName=p=>p.pair.map((i,k)=>k?camName(i).toLocaleLowerCase(lang()==='tr'?'tr':'en'):camName(i)).join(' + ');
@@ -22,8 +22,12 @@ function status(text,error=false){$('status').textContent=text;$('status').class
 function banner(title,text,retry){$('banner').hidden=!title;$('banner-title').textContent=title||'';$('banner-text').textContent=text||'';$('retry').hidden=!retry;}
 function state(text,error=false,turkish){const e=$('result-state');if(turkish)localized(e,text,turkish);else{e.removeAttribute('data-localized');e.textContent=text;}e.classList.toggle('error',error);}
 function setBusy(value){for(const id of ['result-summary','details-results'])$(id).setAttribute('aria-busy',String(value));$('analyze').disabled=value;$('analyze').setAttribute('aria-busy',String(value));}
-function markStale(indices=[selected]){indices.forEach(i=>dirty.add(i));lastError='';document.body.classList.add('stale');if(indices.some(i=>results[i]))state('Updating · results are for previous settings.');}
-function later(delay=600){markStale();clearTimeout(timer);timer=setTimeout(()=>run(false),delay);}
+function markStale(indices=[selected]){indices.forEach(i=>{dirty.add(i);requestErrors.delete(i);});lastError=[...requestErrors.values()].at(-1)||'';document.body.classList.add('stale');if(indices.some(i=>results[i]))state('Updating · results are for previous settings.');}
+function later(delay=600,indices=[selected]){markStale(indices);clearTimeout(timer);
+ // Validate while the controls still belong to the edited site. An invalid edit
+ // must not cancel valid work already scheduled for the other site.
+ const valid=validateControls();if(!valid){scheduled.delete(selected);pending.delete(selected);lastError='Check the highlighted settings.';status(lastError,true);renderSummary();}
+ indices.filter(i=>i!==selected||valid).forEach(i=>scheduled.add(i));if(scheduled.size)timer=setTimeout(()=>run(false,[]),delay);}
 
 // --- Controls ----------------------------------------------------------------
 function readControls(){if(!candidates.length)return;const c=candidates[selected];c.lat=+$('lat').value;c.lon=+$('lon').value;c.height=+$('height').value;c.heading=+$('heading').value;c.resolution=$('resolution').value;c.max_range=+$('max-range').value*1000;c.smoke_height=+$('smoke-height').value;$('heading-value').textContent=c.heading+'°';}
@@ -99,7 +103,10 @@ function renderPairs(){
   localized($('pair-gain'),result.input.reference?'Three-camera reference is active; pair gains use two cameras.':same(best)?'The current pair is best for this site.':`+${fmt(gain)} ha over the current pair.`,result.input.reference?'Üç kamera referansı etkin; çift kazançları iki kamerayı kullanır.':same(best)?'Bu konum için en iyi çift şu anda etkin.':`Mevcut çifte göre +${fmt(gain)} ha.`);
  }
 }
-function renderSensitivity(){const result=results[selected];C.sensitivityChart($('sensitivity'),{points:result?.heading_sensitivity||[],format:v=>area(v,result?.resolution_m),tick:v=>fmt(v),axis:tr('Visible forest by module heading','Modül yönüne göre görünür orman'),current:0});}
+function renderSensitivity(){const result=results[selected];
+ localized($('sensitivity-title'),'Smoke targets with canopy · heading drift ±20°','Taç engelleri dahil duman hedefleri · yön kayması ±20°');
+ localized($('sensitivity-context'),'Fixed smoke-target scenario with canopy obstructions, regardless of the selected scenario.','Seçilen senaryodan bağımsız olarak taç engelleri dahil sabit duman hedefi senaryosu.');
+ C.sensitivityChart($('sensitivity'),{points:result?.heading_sensitivity||[],format:v=>area(v,result?.resolution_m),tick:v=>fmt(v),axis:tr('Visible forest · smoke targets with canopy obstructions · ha by module heading','Görünür orman · taç engelleri dahil duman hedefleri · modül yönüne göre ha'),current:0});}
 
 // --- Table and notes -----------------------------------------------------------
 function appendRow(body,label,unit,values,cls=''){const row=el('tr',cls);[label,unit,...values].forEach((v,i)=>{const td=el(i===0?'th':'td','',v);if(i===0)td.scope='row';if(i===1)td.className='unit';if(v==='—')td.title='Not computed';row.append(td)});body.append(row);}
@@ -111,7 +118,7 @@ function renderTable(){
  appendRow(body,'Blind total','ha',split.map(s=>fmt(s.total)),'band');appendRow(body,'Outside FOV','ha',split.map(s=>fmt(s.outside)),'sub');appendRow(body,'Occluded in FOV','ha',split.map(s=>fmt(s.occluded)),'sub');
  appendRow(body,'Overlap ≥2 cams','ha',values('overlap_forest_ha'),'band');appendRow(body,'Water in view','ha',values('water_view_ha'));appendRow(body,'Water share','%',metrics.map(m=>fmt(M.share(m))));appendRow(body,'Visible priority forest','ha',other(r=>M.priorityValue(r,scenario)));
  appendRow(body,'Bare terrain · ground','ha',other(r=>r?.metrics?.bare_ground?.visible_forest_ha),'band');appendRow(body,'Canopy · ground','ha',other(r=>r?.metrics?.canopy_ground?.visible_forest_ha));appendRow(body,'Three-camera reference','ha',other(r=>r?.reference?.metrics?.[scenario]?.visible_forest_ha));
- $('uncertainty').replaceChildren();if(dataInfo){['Positive canopy cover is treated as opaque. Mean stand height is not a measured maximum crown height.','Smoke target is a fixed point above the obstruction surface, not a smoke-dispersion model.','Curvature included; refraction, haze, wind and optical detection are not modelled.',dataInfo.buildings_included?'Building heights included':'No building heights','Sectors show horizontal direction; cells use the full 3D field of view. North = EPSG:3067 grid north.'].forEach(note=>addText($('uncertainty'),'p',note));results.forEach((r,i)=>{if(r?.range_clipped)addText($('uncertainty'),'p',siteName(candidates[i])+': Areas are clipped to the prepared region when the range circle crosses its boundary.');if(r?.unknown_forest_ha)addText($('uncertainty'),'p',siteName(candidates[i])+`: ${fmt(r.unknown_forest_ha)} ha: Unknown-data forest is included in the blind total; it is not proven terrain/canopy obstruction.`)});}
+ $('uncertainty').replaceChildren();if(dataInfo){['Positive canopy cover is treated as opaque. Mean stand height is not a measured maximum crown height.','Smoke target is a fixed point above the obstruction surface, not a smoke-dispersion model.','Curvature included; refraction, haze, wind and optical detection are not modelled.',dataInfo.buildings_included?'Building heights included':'No building heights','Sectors show horizontal direction; cells use the full 3D field of view. North = EPSG:3067 grid north.'].forEach(note=>addText($('uncertainty'),'p',note));results.forEach((r,i)=>{if(r?.range_clipped)addText($('uncertainty'),'p',siteName(candidates[i])+': Areas are clipped to the prepared region when the range circle crosses its boundary.');if(r?.unknown_forest_ha)addText($('uncertainty'),'p',siteName(candidates[i])+`: ${fmt(r.unknown_forest_ha)} ha: Unknown-data forest is included in the blind total; it is not proven terrain/canopy obstruction.`);if(r?.unknown_elevation_in_window)localized(addText($('uncertainty'),'p'),siteName(candidates[i])+': Unknown elevation in the analysis window: crossing sightlines remain unverified and blind. In-view blind area may include these rays as well as physical obstruction; affected area has not been quantified.',siteName(candidates[i])+': Hesap penceresinde eksik yükselti verisi var: bu hücrelerden geçen görüş ışınları doğrulanmamış ve kör kabul edilir. Görüş içindeki kör alan, fiziksel engellerin yanı sıra bu ışınları da içerebilir; etkilenen alan ölçülmedi.')});}
 }
 
 // --- Map -----------------------------------------------------------------------
@@ -152,14 +159,18 @@ async function post(snapshot){
   return data;
  }
 }
-async function run(both=true){clearTimeout(timer);if(!map){init();return;}readControls();if(!validateControls()){lastError='Check the highlighted settings.';status(lastError,true);renderSummary();return;}
- const indices=both?[0,1]:[selected];markStale(indices);if(busy){indices.forEach(i=>pending.add(i));return;}await calculate(indices);}
+async function run(both=true,requested=null){if(!map){init();return;}
+ // Debounced edits already belong to their stored candidates, even after a site switch.
+ if(requested===null){readControls();if(!validateControls()){lastError='Check the highlighted settings.';status(lastError,true);renderSummary();return;}requested=both?[0,1]:[selected];}
+ clearTimeout(timer);const indices=[...new Set([...scheduled,...requested])];scheduled.clear();markStale(indices);if(busy){indices.forEach(i=>pending.add(i));return;}await calculate(indices);}
 async function calculate(indices){busy=true;setBusy(true);status('Tracing sightlines…');renderSummary();
  const snapshots=indices.map(i=>({...structuredClone(candidates[i]),priority:structuredClone(priority)}));
- try{for(const [k,snapshot] of snapshots.entries()){const i=indices[k],data=await post(snapshot);
-   results[i]=data;if(JSON.stringify({...candidates[i],priority})===JSON.stringify(snapshot))dirty.delete(i);
-   render();}
-  lastError='';banner();render();status('');
+ try{for(const [k,snapshot] of snapshots.entries()){const i=indices[k];try{const data=await post(snapshot);
+    results[i]=data;if(JSON.stringify({...candidates[i],priority})===JSON.stringify(snapshot)){dirty.delete(i);requestErrors.delete(i);}
+    render();
+   }catch(e){requestErrors.set(i,e instanceof TypeError?'Could not reach the server. Retry shortly.':e.message);}}
+  lastError=[...requestErrors.values()].at(-1)||'';if(lastError){status(lastError,true);banner(lastError,results.some(Boolean)?'Results are for previous settings.':'',true);renderSummary();}
+  else{banner();render();status('');}
  }catch(e){lastError=e instanceof TypeError?'Could not reach the server. Retry shortly.':e.message;status(lastError,true);banner(lastError,results.some(Boolean)?'Results are for previous settings.':'',true);renderSummary();}
  finally{busy=false;setBusy(false);if(pending.size){const next=[...pending];pending.clear();calculate(next);}}
 }
@@ -205,7 +216,7 @@ $('heading').addEventListener('change',()=>{readControls();later(600)});
 $('analyze').addEventListener('click',()=>run(true));$('retry').addEventListener('click',()=>run(true));
 $('scenario').addEventListener('change',()=>{scenario=$('scenario').value;render()});
 // Reference mode applies to both sites so the verdict always compares like with like.
-$('reference').addEventListener('change',()=>{readControls();const on=$('reference').checked;candidates.forEach(c=>{c.reference=on;c.cameras.forEach((cam,i)=>cam.active=on||i<2)});cameraControls();markStale([0,1]);clearTimeout(timer);timer=setTimeout(()=>run(true),300)});
+$('reference').addEventListener('change',()=>{readControls();const on=$('reference').checked;candidates.forEach(c=>{c.reference=on;c.cameras.forEach((cam,i)=>cam.active=on||i<2)});cameraControls();later(300,[0,1])});
 $('draw').addEventListener('click',toggleDraw);$('finish').addEventListener('click',finishDraw);$('clear-priority').addEventListener('click',()=>{priority=null;updatePriority();stopDrawing();run(true)});
 document.addEventListener('keydown',e=>{if(drawing&&e.key==='Enter'){finishDraw();return;}if(drawing&&e.key==='Escape'){stopDrawing();return;}
  if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest?.('input,select,textarea'))return;

@@ -46,6 +46,19 @@ def test_real_height_sensitivity_and_split():
 def test_hard_caps(update):
     with pytest.raises(ValidationError):Candidate(**{**PRESETS[0].model_dump(),**update})
 
+@pytest.mark.parametrize('endpoint',['/api/analyze','/api/compare'])
+@pytest.mark.parametrize('value',[float('nan'),float('inf'),float('-inf')])
+def test_nonfinite_json_input_returns_validation_error_without_computing(monkeypatch,endpoint,value):
+    candidate={**PRESETS[0].model_dump(),'lat':value}
+    payload=candidate if endpoint=='/api/analyze' else {'candidates':[PRESETS[0].model_dump(),candidate]}
+    def forbidden(*args):raise AssertionError('Invalid input reached compute or lock')
+    monkeypatch.setattr(api,'acquire',forbidden)
+    monkeypatch.setattr(api,'run_analysis',forbidden)
+    with TestClient(api.app,raise_server_exceptions=False) as client:
+        response=client.post(endpoint,content=json.dumps(payload),headers={'Content-Type':'application/json'})
+    assert response.status_code==422,response.text
+    assert response.json()['detail']
+
 def limited_app(**kwargs):
     app=FastAPI()
     @app.post('/api/analyze')

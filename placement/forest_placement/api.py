@@ -1,12 +1,15 @@
 """Identical offline/public ASGI app. Public compute has bounded inputs and budgets."""
 import json
+import math
 import hashlib
 import os
 import re
 import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from html import escape
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict
@@ -22,6 +25,14 @@ async def lifespan(app):
     yield
 
 app=FastAPI(title='Forest observation placement simulation',docs_url=None,redoc_url=None,lifespan=lifespan)
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request,exc):
+    # The JSON decoder accepts NaN/Infinity, but validation errors must still be
+    # serializable as strict JSON after the finite-input model rejects them.
+    detail=jsonable_encoder(exc.errors(),custom_encoder={float:lambda value:value if math.isfinite(value) else str(value)})
+    return JSONResponse(status_code=422,content={'detail':detail})
+
 app.mount('/static',StaticFiles(directory=ROOT/'static'),name='static')
 CACHE.mkdir(parents=True,exist_ok=True)
 lock=threading.BoundedSemaphore(1)
@@ -110,6 +121,15 @@ class Comparison(BaseModel):
 
 @app.post('/api/compare')
 def compare(request:Comparison):
+    from shapely.geometry import Polygon
+    first=request.candidates[0]
+    target=Polygon(first.priority) if first.priority is not None else None
+    for candidate in request.candidates[1:]:
+        if candidate.reference!=first.reference:
+            raise HTTPException(422,'Comparison requires the same camera mode (connected cameras or reference).')
+        if ((candidate.priority is None)!=(target is None) or
+            (target is not None and not target.equals(Polygon(candidate.priority)))):
+            raise HTTPException(422,'Comparison requires the same priority area for every candidate, or none for all.')
     acquire()
     try:
         results=[run_analysis(c) for c in request.candidates]
