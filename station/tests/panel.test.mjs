@@ -376,3 +376,28 @@ test('pending total has one visible home and older records disclose without hidi
   assert.equal(p.$('[data-event-id="ordered-59"]').open, true);
   assert.equal(p.$('[data-event-id="ordered-59"]').hidden, false);
 });
+
+test('new arrivals cannot move a decision target while pointer is in the queue', async () => {
+  const old = event();
+  const p = await panel([old]);
+  const target=p.$('[data-event-id="'+old.id+'"]');
+  p.$('#event-panel').dispatchEvent(new p.window.Event('pointerenter'));
+  p.state.events.unshift(event({id:'new-arrival',opened_at:old.opened_at+55}));
+  await p.refresh();
+  assert.equal(p.$('#events').firstElementChild,target);
+  const video=target.querySelector('video');let pauses=0;Object.defineProperty(video,'paused',{value:false,configurable:true});video.pause=()=>{pauses++;};
+  target.querySelector('button.reject').click();await flush();
+  assert.match(p.state.posts[0].url,new RegExp(old.id));
+  assert.equal(pauses,1);
+});
+
+test('keyboard focus defers new cards, then leaving applies arrivals with a notice', async()=>{
+  const old=event();const p=await panel([old]);
+  const target=p.$('[data-event-id="'+old.id+'"]');target.querySelector('button.reject').focus();
+  p.state.events.unshift(event({id:'keyboard-arrival',opened_at:old.opened_at+55}));await p.refresh();
+  assert.equal(p.$('#events').firstElementChild,target);
+  assert.equal(p.$('#queue-arrivals').hidden,false);
+  p.$('#pending-summary').focus();await flush();
+  assert.equal(p.$('#events').firstElementChild.dataset.eventId,'keyboard-arrival');
+  assert.equal(p.$('#queue-arrivals').hidden,true);
+});

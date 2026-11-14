@@ -20,7 +20,7 @@ const text = (tag, value, className) => {
   return element;
 };
 const num = (value, digits = 1) => Number.isFinite(value)
-  ? value.toLocaleString('tr-TR', {minimumFractionDigits: digits, maximumFractionDigits: digits}) : '—';
+  ? value.toLocaleString('tr-TR', {minimumFractionDigits: digits, maximumFractionDigits: digits}).replace('-', '−') : '—';
 const time = value => value ? new Date(value * 1000).toLocaleTimeString('tr-TR') : '—';
 const dateTime = value => new Date(value * 1000).toLocaleString('tr-TR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
 async function json(url, options = {}) {
@@ -268,14 +268,14 @@ function renderActions(item, event) {
       item.actions.firstChild.textContent = 'Kararı değiştir';
       const cancel = text('button', 'Vazgeç', 'cancel');
       cancel.type = 'button';
-      cancel.onclick = () => { editing.delete(event.id); renderEvents(currentEvents); item.actions.querySelector('button')?.focus(); };
+      cancel.onclick = () => { editing.delete(event.id); renderEvents(currentEvents, true); item.actions.querySelector('button')?.focus(); };
       item.actions.append(cancel);
     }
   } else {
     const change = text('button', 'Değiştir', 'change');
     change.type = 'button';
     change.setAttribute('aria-label', `${labels[event.camera]} kamera kararını değiştir`);
-    change.onclick = () => { editing.add(event.id); renderEvents(currentEvents); item.actions.querySelector('button')?.focus(); };
+    change.onclick = () => { editing.add(event.id); renderEvents(currentEvents, true); item.actions.querySelector('button')?.focus(); };
     item.actions.append(change);
   }
   const message = text('p', '', 'inline-status');
@@ -283,7 +283,26 @@ function renderActions(item, event) {
   if (item.savedUntil > Date.now()) message.textContent = 'Bu cihazda kaydedildi.';
   item.actions.append(message);
 }
-function renderEvents(events) {
+let queuePointerInside = false;
+let queuedEvents = null;
+const queuePanel = $('#event-panel');
+function queueIsEngaged() { return queuePointerInside || queuePanel.contains(document.activeElement); }
+function flushQueue() {
+  if (queuedEvents && online && !queueIsEngaged()) { const events=queuedEvents;queuedEvents=null;renderEvents(events); }
+}
+queuePanel.addEventListener('pointerenter', () => { queuePointerInside=true; });
+queuePanel.addEventListener('pointerleave', () => { queuePointerInside=false;flushQueue(); });
+queuePanel.addEventListener('focusout', () => { queueMicrotask(flushQueue); });
+function renderEvents(events, deliberate=false) {
+  if (!deliberate && eventElements.size && queueIsEngaged()) {
+    queuedEvents=events;
+    const arrivals=events.filter(event=>event.decision==='pending'&&!eventElements.has(event.id)).length;
+    $('#queue-arrivals').hidden=!arrivals;
+    $('#queue-arrivals').textContent=`${arrivals} yeni kayıt · listeden ayrıldığınızda gösterilecek`;
+    return;
+  }
+  queuedEvents=null;
+  $('#queue-arrivals').hidden=true;
   const pending = events.filter(event => event.decision === 'pending').sort((a,b)=>b.opened_at-a.opened_at);
   const history = events.filter(event => event.decision !== 'pending');
   $('#event-count').textContent = `${pending.length} karar bekliyor`;
@@ -338,13 +357,13 @@ function jumpToPending(oldest) {
   if (!event) return;
   const item = eventElements.get(event.id);
   item.row.open = true;
-  renderEvents(currentEvents);
+  renderEvents(currentEvents, true);
   item.row.scrollIntoView?.({block:'nearest'});
   item.row.querySelector('summary').focus({preventScroll:true});
 }
 $('#queue-newest').onclick = () => jumpToPending(false);
 $('#queue-oldest').onclick = () => jumpToPending(true);
-$('#older-toggle').onclick = () => {showOlderPending=!showOlderPending;renderEvents(currentEvents);};
+$('#older-toggle').onclick = () => {showOlderPending=!showOlderPending;renderEvents(currentEvents, true);};
 async function decide(id, decision) {
   const item = eventElements.get(id);
   if (!item || item.saving || !online) return;
@@ -358,11 +377,14 @@ async function decide(id, decision) {
     decisionRevision++;
     editing.delete(id);
     item.row.open = true;
+    const nextPending=currentEvents.find(event=>event.id!==id&&event.decision==='pending');
+    if(nextPending&&eventElements.has(nextPending.id)&&!queueIsEngaged())eventElements.get(nextPending.id).row.open=true;
     item.savedUntil = Date.now() + 4000;
     // A successful write is authoritative even if the next polling request fails.
     currentEvents = currentEvents.map(event => event.id === id ? {...event, decision, decided_at: Date.now() / 1000} : event);
     if (online) {
-      renderEvents(currentEvents);
+      if(queueIsEngaged()){if(!item.video.paused)item.video.pause?.();item.event=currentEvents.find(event=>event.id===id);renderActions(item,item.event);queuedEvents=currentEvents;}
+      else renderEvents(currentEvents, true);
       $('#history').open = true;
       item.actions.querySelector('button')?.focus({preventScroll: true});
     }
