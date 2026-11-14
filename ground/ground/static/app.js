@@ -2,6 +2,7 @@
 let language = localStorage.getItem('acorn-ground-language') || 'en';
 let current = null, selectedStation = null, selectedEvent = null, demo = false, updating = false;
 let evidenceKey = '', alertSignature = '', feedNames = [], wifiRefreshing = false;
+let modeRevision = 0, mediaRevision = 0, modePending = false;
 const P=GroundPresentation;
 const $ = id => document.getElementById(id);
 const strings = {
@@ -113,11 +114,51 @@ function draw(){
  ctx.font='13px "IBM Plex Sans"';ctx.fillStyle='#e3e9ee';ctx.fillText(s?`${t('station')} ${s.id}`:'ACORN',cx,cy+48);
 
 }
-async function setDemo(enabled){await api('/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});demo=enabled;$('demo').hidden=!demo;$('workspace').classList.toggle('with-wifi',demo);draw();if(!demo){$('live-feeds').replaceChildren();$('evidence').replaceChildren();feedNames=[];evidenceKey='';}else await wifi();}
-$('demo-toggle').onchange=async e=>{try{await setDemo(e.target.checked);}catch{e.target.checked=demo;$('station-state').textContent=t('serverLost');}};
-async function evidence(){if(!demo||!selectedEvent)return;const sid=selectedStation,eid=selectedEvent;const key=`${sid}/${eid}/${language}`;if(evidenceKey===key)return;const saved=await api(`/api/evidence/${sid}/${eid}`);if(!demo||sid!==selectedStation||eid!==selectedEvent)return;evidenceKey=key;const area=$('evidence');area.replaceChildren(node('p',`${t('evidenceFor')}: ${time(alerts().find(a=>a.event_id===eid)?.timestamp||0)} · ${eid.slice(0,8)}`),node('p',saved.files.length?t('saved'):t('noEvidence')));const identity=node('details',undefined,'alert-details');identity.append(node('summary',t('packetDetails')),node('p',eid,'event-id'));area.append(identity);const media=node('div',undefined,'media');for(const file of [...saved.files].sort((a,b)=>Number(b.endsWith('.webm'))-Number(a.endsWith('.webm')))){const figure=node('figure');const url=`/api/evidence/${sid}/${eid}/${file}`;figure.append(node('figcaption',t(file.endsWith('.jpg')?'snapshot':'clip')));if(file.endsWith('.jpg')){const img=node('img');img.src=url;img.alt=t('snapshot');figure.append(img);}else if(file.endsWith('.webm')){const video=node('video');video.controls=true;video.preload='metadata';video.src=url;figure.append(video);}const a=node('a',t('download'));a.href=url;a.download=file;if(!file.endsWith('.jpg'))figure.append(a);if(file.endsWith('.jpg')){const disclosure=node('details');disclosure.append(node('summary',t('snapshot')),figure);media.append(disclosure);}else media.append(figure);}area.append(media);}
-async function updateWifi(){if(!demo)return;if(!document.querySelector('.wifi-feeds').open){await evidence();return;}try{const data=await api('/api/demo/status');if(!demo)return;const names=data.cameras.filter(c=>c.active).map(c=>c.name);if(names.join()!==feedNames.join()){$('live-feeds').replaceChildren();feedNames=names;for(const name of names){const figure=node('figure');figure.append(node('figcaption',`${t('station')} ${data.wifi_station_id} · ${t(name)} · Wi-Fi${data.cameras.find(c=>c.name===name).kind==='file'?' · '+t('recorded'):''}`));const img=node('img');img.id=`live-${name}`;img.alt=`${t(name)} · Wi-Fi`;figure.append(img);$('live-feeds').append(figure);}}for(const name of names)$(`live-${name}`).src=`/api/demo/cameras/${name}.jpg?t=${Date.now()}`;if($('wifi-message').textContent===t('wifiError'))$('wifi-message').textContent='';}catch{if(demo){$('wifi-message').textContent=t('wifiError');$('live-feeds').replaceChildren();feedNames=[];}}if(demo)await evidence();}
-async function wifi(){if(!demo||wifiRefreshing)return;wifiRefreshing=true;try{await updateWifi();}finally{wifiRefreshing=false;}}
-async function refresh(){if(updating)return;updating=true;try{current=await api('/api/state');render();void wifi().catch(()=>{});}catch{$('station-state').textContent=t('serverLost');$('station-state').className='lost';}finally{updating=false;}}
+function applyDemo(enabled){
+ if(demo!==enabled)mediaRevision++;
+ demo=enabled;$('demo-toggle').checked=demo;$('demo').hidden=!demo;
+ $('workspace').classList.toggle('with-wifi',demo);draw();
+ if(!demo){$('live-feeds').replaceChildren();$('evidence').replaceChildren();feedNames=[];evidenceKey='';}
+}
+async function setDemo(enabled){
+ const revision=++modeRevision;modePending=true;applyDemo(false);
+ try{
+  const result=await api('/api/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});
+  if(revision!==modeRevision)return;
+  applyDemo(result.enabled===true);
+ }catch(error){if(revision===modeRevision)applyDemo(false);throw error;}
+ finally{if(revision===modeRevision){modePending=false;modeRevision++;}}
+ if(demo)await wifi();
+}
+$('demo-toggle').onchange=async e=>{try{await setDemo(e.target.checked);}catch{$('station-state').textContent=t('serverLost');}};
+async function evidence(){if(!demo||!selectedEvent)return;const sid=selectedStation,eid=selectedEvent,revision=mediaRevision;const key=`${sid}/${eid}/${language}`;if(evidenceKey===key)return;const saved=await api(`/api/evidence/${sid}/${eid}`);if(!demo||revision!==mediaRevision||sid!==selectedStation||eid!==selectedEvent)return;evidenceKey=key;const area=$('evidence');area.replaceChildren(node('p',`${t('evidenceFor')}: ${time(alerts().find(a=>a.event_id===eid)?.timestamp||0)} · ${eid.slice(0,8)}`),node('p',saved.files.length?t('saved'):t('noEvidence')));const identity=node('details',undefined,'alert-details');identity.append(node('summary',t('packetDetails')),node('p',eid,'event-id'));area.append(identity);const media=node('div',undefined,'media');for(const file of [...saved.files].sort((a,b)=>Number(b.endsWith('.webm'))-Number(a.endsWith('.webm')))){const figure=node('figure');const url=`/api/evidence/${sid}/${eid}/${file}`;figure.append(node('figcaption',t(file.endsWith('.jpg')?'snapshot':'clip')));if(file.endsWith('.jpg')){const img=node('img');img.src=url;img.alt=t('snapshot');figure.append(img);}else if(file.endsWith('.webm')){const video=node('video');video.controls=true;video.preload='metadata';video.src=url;figure.append(video);}const a=node('a',t('download'));a.href=url;a.download=file;if(!file.endsWith('.jpg'))figure.append(a);if(file.endsWith('.jpg')){const disclosure=node('details');disclosure.append(node('summary',t('snapshot')),figure);media.append(disclosure);}else media.append(figure);}area.append(media);}
+async function updateWifi(){if(!demo)return;const revision=mediaRevision;if(!document.querySelector('.wifi-feeds').open){await evidence();return;}try{const data=await api('/api/demo/status');if(!demo||revision!==mediaRevision)return;const names=data.cameras.filter(c=>c.active).map(c=>c.name);if(names.join()!==feedNames.join()){$('live-feeds').replaceChildren();feedNames=names;for(const name of names){const figure=node('figure');figure.append(node('figcaption',`${t('station')} ${data.wifi_station_id} · ${t(name)} · Wi-Fi${data.cameras.find(c=>c.name===name).kind==='file'?' · '+t('recorded'):''}`));const img=node('img');img.id=`live-${name}`;img.alt=`${t(name)} · Wi-Fi`;figure.append(img);$('live-feeds').append(figure);}}for(const name of names)$(`live-${name}`).src=`/api/demo/cameras/${name}.jpg?t=${Date.now()}`;if($('wifi-message').textContent===t('wifiError'))$('wifi-message').textContent='';}catch{if(demo&&revision===mediaRevision){$('wifi-message').textContent=t('wifiError');applyDemo(false);}return;}if(demo&&revision===mediaRevision)await evidence();}
+async function wifi(){
+ if(!demo||wifiRefreshing)return;
+ const revision=mediaRevision;wifiRefreshing=true;
+ try{await updateWifi();}
+ catch{if(revision===mediaRevision){$('wifi-message').textContent=t('wifiError');applyDemo(false);}}
+ finally{wifiRefreshing=false;}
+}
+async function refresh(){
+ if(updating)return;
+ updating=true;const revision=modeRevision;
+ try{
+  const [state,mode]=await Promise.all([
+   api('/api/state'),
+   api('/api/demo').then(mode=>{
+    // A pre-POST poll cannot overwrite the result of that newer mutation.
+    // Apply off immediately, even if the independent packet-state read is slow.
+    if(revision===modeRevision&&!modePending&&mode.enabled!==true)applyDemo(false);
+    return mode;
+   })
+  ]);
+  current=state;render();
+  if(revision===modeRevision&&!modePending){applyDemo(mode.enabled===true);void wifi();}
+ }catch{
+  if(revision===modeRevision&&!modePending)applyDemo(false);
+  $('station-state').textContent=t('serverLost');$('station-state').className='lost';
+ }finally{updating=false;}
+}
 document.querySelector('.wifi-feeds').addEventListener('toggle',()=>{if(demo)wifi();});
-window.addEventListener('resize',draw);translated();api('/api/demo').then(x=>{demo=x.enabled;$('demo-toggle').checked=demo;$('demo').hidden=!demo;$('workspace').classList.toggle('with-wifi',demo);draw();}).finally(refresh);setInterval(refresh,1500);
+window.addEventListener('resize',draw);translated();void refresh();setInterval(refresh,1500);

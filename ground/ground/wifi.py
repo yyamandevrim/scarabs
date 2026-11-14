@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 import re
+from tempfile import TemporaryDirectory
+from threading import Lock
 from urllib.parse import urlsplit
 import httpx
 
@@ -15,6 +17,8 @@ class Wifi:
         self.root = Path(root)/'evidence'
         self.root.mkdir(parents=True, exist_ok=True)
         self.enabled = False
+        # Fixed stripes bound bookkeeping even after many distinct event UUIDs.
+        self.collection_locks = [Lock() for _ in range(32)]
 
     def get(self, path):
         r = self.client.get(path)
@@ -44,30 +48,43 @@ class Wifi:
     def collect(self, station, event):
         if not re.fullmatch('[0-9a-f]{32}', event):
             raise ValueError('Invalid event identifier')
+        with self.collection_locks[hash((station, event)) % len(self.collection_locks)]:
+            return self._collect(station, event)
+
+    def _collect(self, station, event):
         self.identity(station)
         metadata = self.get(f'/api/events/{event}').json()
         if metadata['id'] != event:
             raise ValueError('Wi-Fi evidence UUID does not match alert')
         target = self.root/str(station)/event
         target.mkdir(parents=True, exist_ok=True)
-        saved = []
-        for field, suffixes in (('snapshot', ('jpg',)), ('clip', ('webm', 'avi'))):
-            filename = metadata.get(field)
-            if not filename:
-                continue  # clip may still be encoding; retry the explicit collection later
-            if filename not in [event+'.'+ext for ext in suffixes]:
-                raise ValueError('Unexpected evidence filename')
-            response = self.get('/events/'+filename)
-            if len(response.content) > 64*1024*1024:
-                raise ValueError('Evidence exceeds 64 MiB limit')
-            temporary = target/(filename+'.part')
-            temporary.write_bytes(response.content)
-            temporary.replace(target/filename)
-            saved.append(filename)
-        manifest = dict(station=station, event_id=event, files=saved, via='Wi-Fi; not delivered over LoRa')
-        temporary = target/'manifest.tmp'
-        temporary.write_text(json.dumps(manifest))
-        temporary.replace(target/'manifest.json')
+        saved = list((self.saved(station, event) or {}).get('files', []))
+        # Stage all missing files before publishing. Existing offline evidence is
+        # immutable: a later partial/unready response must never erase it.
+        with TemporaryDirectory(prefix='.collect-', dir=target) as staging:
+            staged = []
+            for field, suffixes in (('snapshot', ('jpg',)), ('clip', ('webm', 'avi'))):
+                filename = metadata.get(field)
+                if not filename:
+                    continue  # retry explicitly when the clip has finished
+                if filename not in [event+'.'+ext for ext in suffixes]:
+                    raise ValueError('Unexpected evidence filename')
+                if filename in saved and (target/filename).is_file():
+                    continue
+                response = self.get('/events/'+filename)
+                if len(response.content) > 64*1024*1024:
+                    raise ValueError('Evidence exceeds 64 MiB limit')
+                temporary = Path(staging)/(filename+'.part')
+                temporary.write_bytes(response.content)
+                staged.append((temporary, filename))
+            for temporary, filename in staged:
+                temporary.replace(target/filename)
+                if filename not in saved:
+                    saved.append(filename)
+            manifest = dict(station=station, event_id=event, files=saved, via='Wi-Fi; not delivered over LoRa')
+            temporary = Path(staging)/'manifest.tmp'
+            temporary.write_text(json.dumps(manifest))
+            temporary.replace(target/'manifest.json')
         return manifest
 
     def saved(self, station, event):

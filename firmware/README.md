@@ -171,19 +171,32 @@ reconnect_seconds = 2.0
 
 `off` disables the bridge; `simulated` is the hardware-free demo; `router` requires the real sketch and daemon. First inspect the service/socket with commands from the [Arduino Router guide](https://github.com/arduino/docs-content/blob/main/content/hardware/uno/boards/uno-q/tutorials/linux/routerbridge-multilanguage/content.md):
 
-```sh
+```bash
 systemctl status arduino-router
 ls -l /var/run/arduino-router.sock
+# Bash: load the private panel secret before starting the server.
+read -rs -p 'Station secret: ' ACORN_PANEL_SECRET; export ACORN_PANEL_SECRET; echo
 uv run --offline --frozen forest-station --config usb.local.toml serve --port 8080
 ```
 
-In another terminal:
+### Authenticated API checks
 
-```sh
-curl -s http://127.0.0.1:8080/api/mcu
-curl -s http://127.0.0.1:8080/api/status
-curl -s 'http://127.0.0.1:8080/api/events?kind=flame_sensor'
+In another **Bash** terminal in `station/`, load the same secret as the running server and log in. On macOS zsh, replace the `read` line with `read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo`, as in the [station authentication guide](../station/README.md#communication). Keep secrets in the environment, never in command arguments or committed files; disable shell tracing before entering them.
+
+```bash
+ACORN_BASE_URL=http://127.0.0.1:8080
+read -rs -p 'Station secret: ' ACORN_PANEL_SECRET; export ACORN_PANEL_SECRET; echo
+ACORN_COOKIE_JAR=$(mktemp); chmod 600 "$ACORN_COOKIE_JAR"
+trap 'rm -f "$ACORN_COOKIE_JAR"' EXIT
+uv run --offline --frozen python -c 'import json,os; print(json.dumps({"secret":os.environ["ACORN_PANEL_SECRET"]}))' | \
+  curl --fail-with-body -sS -c "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/auth/login" \
+    -H 'Content-Type: application/json' --data-binary @-
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/mcu"
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/status"
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/events?kind=flame_sensor"
 ```
+
+The jar is a private session credential. Remove it with `rm -f "$ACORN_COOKIE_JAR"` when finished. **Every station restart invalidates sessions:** repeat login before further checks. HTTP 401 means login again; 503 means configure the server's panel secret before startup; 429 means wait five minutes after failed logins. `--fail-with-body` makes HTTP errors fail the command. These checks read telemetry; they do not simulate sensor input.
 
 Require `mode: "router"`, `simulated: false`, `link.router_connected: true`, `link.registered: true`, `link.mcu_protocol: 1`, and `flame_sensor.connected: true`. Socket connectivity alone does not prove MCU readings. `connected` means **recent telemetry**, not electrical detection of a plugged-in KY-026: a disconnected sensor can float and still report data. Inspect wiring and signal response separately. The [panel API contract](../station/README.md#microcontroller-and-local-flame-sensor-api-for-the-panel-designer) explains requested versus reported LED state and event separation.
 
@@ -250,12 +263,15 @@ File disappearance is checked every 0.5 s; allow the panel poll and retry time (
 
 The KY-026 responds to infrared at the **module's location**. Treat it as short-range, on the order of a metre or less, **not a documented/validated guaranteed range**. Joy-IT's page provides neither a distance rating nor a wavelength/angle specification. Sunlight and other IR sources can trigger it, while shielding, direction, lighting and threshold affect response. It is not a smoke, heat or gas sensor, not remote wildfire detection, and not confirmation of a camera's suspected smoke event. A TV remote test demonstrates an IR response, not detection of a real fire. Do not claim a calibrated detection range from it.
 
-**No-flame indoor demonstration:** first use the station's explicitly labeled simulation, which is repeatable and does not exercise hardware. With a `simulated` local config, start the station and run:
+**SIMULATION ONLY — no-flame indoor demonstration:** use a local config with `[mcu] mode = "simulated"` (the [demo runbook](../DEMO.md) provides one). Load `ACORN_PANEL_SECRET` before starting that server as above, then repeat the [authenticated API login](#authenticated-api-checks) in your API terminal, using its actual port in `ACORN_BASE_URL`. Keep that terminal and private cookie jar for these commands:
 
-```sh
-curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"flame":true}'
-# Wait at least one second and inspect /api/mcu and /api/events?kind=flame_sensor.
-curl -s -X POST http://127.0.0.1:8080/api/mcu/simulate -H 'Content-Type: application/json' -d '{"flame":false}'
+```bash
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/mcu/simulate" -H 'Content-Type: application/json' -d '{"flame":true}'
+# Wait at least one second, then inspect the simulated reading and separate events.
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/mcu"
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/events?kind=flame_sensor"
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/mcu/simulate" -H 'Content-Type: application/json' -d '{"flame":false}'
+rm -f "$ACORN_COOKIE_JAR"
 ```
 
 Say **“simulated sensor input”**. This does not drive the real MCU LED. Switch the config back to `router`, restart and verify `simulated: false` before any hardware claim. The simulate endpoint returns 409 outside simulated mode. A potentiometer sweep can safely exercise the comparator in ambient light without claiming an optical test.

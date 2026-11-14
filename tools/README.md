@@ -46,11 +46,29 @@ The committed manifest is the trust anchor: the restore script never substitutes
 
 The existing station default expects the excluded fog clip. A **smoke + cloud recorded-clip demo config** is provided in this directory so bucket-only restores work without editing the station:
 
-```sh
+```bash
 cd station
 uv sync --locked --python 3.11
+# Bash: choose a private station panel secret before starting the demo.
+read -rs -p 'Station secret: ' ACORN_PANEL_SECRET; export ACORN_PANEL_SECRET; echo
 uv run --offline --frozen forest-station --config ../tools/station-bucket-demo.toml serve --port 8080
 ```
+
+The panel and all data APIs require authentication. Without the server secret, data routes return 503. Open the local panel and sign in, or use this block in a second **Bash** terminal in `station/`, loading the same secret. On macOS zsh use `read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo` instead of the Bash `read` line. Disable shell tracing before entering secrets.
+
+```bash
+ACORN_BASE_URL=http://127.0.0.1:8080
+read -rs -p 'Station secret: ' ACORN_PANEL_SECRET; export ACORN_PANEL_SECRET; echo
+ACORN_COOKIE_JAR=$(mktemp); chmod 600 "$ACORN_COOKIE_JAR"
+trap 'rm -f "$ACORN_COOKIE_JAR"' EXIT
+uv run --offline --frozen python -c 'import json,os; print(json.dumps({"secret":os.environ["ACORN_PANEL_SECRET"]}))' | \
+  curl --fail-with-body -sS -c "$ACORN_COOKIE_JAR" -X POST "$ACORN_BASE_URL/api/auth/login" \
+    -H 'Content-Type: application/json' --data-binary @-
+curl --fail-with-body -sS -b "$ACORN_COOKIE_JAR" "$ACORN_BASE_URL/api/status"
+rm -f "$ACORN_COOKIE_JAR"
+```
+
+The secret stays in the environment and reaches login via stdin; never put it in a command argument or repository file. Keep the private cookie jar only for the checks you need. **Server restart invalidates it:** log in again after every restart (401); repeated failed logins may require a five-minute wait (429). HTTP errors fail the curl command. See [station authentication](../station/README.md#communication) and the [demo runbook](../DEMO.md) for the same flow. This is a recorded-clip/local simulation demo; it does not validate hardware, real LoRa or AP setup.
 
 No station feed is linked or proxied by the placement website. This alternative config retains two active inputs and all alarm defaults.
 

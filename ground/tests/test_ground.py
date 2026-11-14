@@ -212,3 +212,126 @@ def test_announced_slow_heartbeat_is_not_mislabelled_as_duty_refusal(tmp_path):
         r.ingest(encode(replace(packet(),contact_after=300)),100)
         assert r.snapshot(130)['stations'][0]['state']=='scheduled'
     finally:r.close()
+
+@pytest.mark.parametrize('start_sequence', [0, 65535])
+def test_equal_second_decision_correction_survives_reorder_wrap_and_reload(tmp_path, start_sequence):
+    from station.lora.sender import Sender
+    from station.lora.radio import DutyBudget
+    from station.lora.protocol import decode
+    class Link:
+        def __init__(self): self.raw = []
+        def send(self, raw, airtime): self.raw.append(raw)
+    link = Link()
+    sender = Sender(link, Radio(7), DutyBudget(.01), repeats=2, repeat_interval=1)
+    sender.sequence = start_sequence
+    original = replace(packet(Kind.DECISION), timestamp=1000)
+    corrected = replace(original, data=original.data | {'decision': 2})
+    sender.enqueue(original, 1000.1)
+    sender.tick(1000.1)
+    sender.enqueue(corrected, 1000.9)
+    sender.tick(1000.1 + sender.slot_seconds)
+    # Real Sender cancels queued old repeats; every later emitted repeat must
+    # carry the correction, even though physical sequence numbers keep advancing.
+    for i in (2, 3): sender.tick(1000.1 + i * sender.slot_seconds)
+    assert [decode(raw).data['decision'] for raw in link.raw] == [1, 2, 2, 2]
+    assert [decode(raw).sequence for raw in link.raw[:2]] == [start_sequence, (start_sequence + 1) & 65535]
+    r = Receiver(tmp_path, Radio(7))
+    try:
+        r.ingest(encode(replace(packet(Kind.FLAME, seq=(start_sequence-1) & 65535), timestamp=990)), 990)
+        r.ingest(link.raw[1], 1013)
+        r.ingest(link.raw[0], 1014)
+        assert r.snapshot()['alerts'][0]['decision'] == 'rejected'
+    finally: r.close()
+    r = Receiver(tmp_path, Radio(7))
+    try: assert r.snapshot()['alerts'][0]['decision'] == 'rejected'
+    finally: r.close()
+
+
+def test_equal_second_decisions_respect_current_boot_and_newer_timestamps(tmp_path):
+    r = Receiver(tmp_path, Radio())
+    def ingest(boot, seq, decision, timestamp=1000):
+        r.ingest(encode(replace(packet(Kind.DECISION, boot=boot, seq=seq, decision=decision), timestamp=timestamp)))
+    try:
+        r.ingest(encode(packet(Kind.FLAME, boot=1, seq=100)))
+        ingest(1, 101, 1)
+        ingest(2, 0, 2)  # current boot wins a tie over the retired boot
+        ingest(1, 102, 1)  # late, previously unseen old-boot datagram
+        assert r.snapshot()['alerts'][0]['decision'] == 'rejected'
+        r.close()
+        r = Receiver(tmp_path, Radio())
+        assert r.snapshot()['alerts'][0]['decision'] == 'rejected'
+        ingest(2, 1, 1, 1001)  # strictly newer timestamps still win
+        ingest(2, 2, 2, 999)  # higher physical sequence cannot override time
+        assert r.snapshot()['alerts'][0]['decision'] == 'confirmed'
+    finally: r.close()
+    r = Receiver(tmp_path, Radio())
+    try: assert r.snapshot()['alerts'][0]['decision'] == 'confirmed'
+    finally: r.close()
+
+
+def test_concurrent_same_event_collection_publishes_readable_offline_evidence(tmp_path, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier, Event, Lock
+    start = Barrier(2)
+    both_writing = Event()
+    count_lock = Lock()
+    writes = 0
+    real_replace = Path.replace
+    def replace_together(path, target):
+        nonlocal writes
+        if path.name == EVENT+'.jpg.part':
+            with count_lock:
+                writes += 1
+                if writes == 2: both_writing.set()
+            # Allows the original shared-temp implementation to collide, while
+            # a serialized collector can finish and release its lock normally.
+            both_writing.wait(.2)
+        return real_replace(path, target)
+    monkeypatch.setattr(Path, 'replace', replace_together)
+    def handle(req):
+        if req.url.path == '/api/communication': return httpx.Response(200, json={'station_id': 1})
+        if req.url.path == f'/api/events/{EVENT}': return httpx.Response(200, json={'id': EVENT, 'snapshot': EVENT+'.jpg', 'clip': EVENT+'.webm'})
+        return httpx.Response(200, content=b'offline fixture')
+    with httpx.Client(base_url='http://station.test', transport=httpx.MockTransport(handle)) as client:
+        w = Wifi('http://station.test', None, tmp_path, client)
+        def collect():
+            start.wait(timeout=2)
+            try: return w.collect(1, EVENT)
+            except Exception as exc: return exc
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [pool.submit(collect) for _ in range(2)]
+            results = [f.result(timeout=3) for f in futures]
+        assert all(isinstance(result, dict) for result in results), results
+    # No station access remains available; both files and the committed manifest
+    # must be complete and readable after the concurrent requests finish.
+    assert w.saved(1, EVENT)['files'] == [EVENT+'.jpg', EVENT+'.webm']
+    for name in w.saved(1, EVENT)['files']:
+        assert (w.root/'1'/EVENT/name).read_bytes() == b'offline fixture'
+    assert sorted(p.name for p in (w.root/'1'/EVENT).iterdir()) == [EVENT+'.jpg', EVENT+'.webm', 'manifest.json']
+
+
+def test_collection_failure_cleans_temps_preserves_good_evidence_and_retries(tmp_path):
+    mode = ['initial']
+    def handle(req):
+        if req.url.path == '/api/communication': return httpx.Response(200, json={'station_id': 1})
+        if req.url.path == f'/api/events/{EVENT}':
+            data = {'id': EVENT}
+            if mode[0] != 'empty': data['snapshot'] = EVENT+'.jpg'
+            if mode[0] in ('failure', 'retry'): data['clip'] = EVENT+'.webm'
+            return httpx.Response(200, json=data)
+        if req.url.path.endswith('.webm') and mode[0] == 'failure': return httpx.Response(503)
+        return httpx.Response(200, content=b'original' if mode[0] == 'initial' else b'later')
+    with httpx.Client(base_url='http://station.test', transport=httpx.MockTransport(handle)) as client:
+        w = Wifi('http://station.test', None, tmp_path, client)
+        assert w.collect(1, EVENT)['files'] == [EVENT+'.jpg']
+        mode[0] = 'failure'
+        with pytest.raises(httpx.HTTPStatusError): w.collect(1, EVENT)
+        assert w.saved(1, EVENT)['files'] == [EVENT+'.jpg']
+        assert (w.root/'1'/EVENT/(EVENT+'.jpg')).read_bytes() == b'original'
+        assert sorted(p.name for p in (w.root/'1'/EVENT).iterdir()) == [EVENT+'.jpg', 'manifest.json']
+        mode[0] = 'retry'
+        assert w.collect(1, EVENT)['files'] == [EVENT+'.jpg', EVENT+'.webm']
+        mode[0] = 'empty'
+        assert w.collect(1, EVENT)['files'] == [EVENT+'.jpg', EVENT+'.webm']
+        assert (w.root/'1'/EVENT/(EVENT+'.jpg')).read_bytes() == b'original'
+        assert (w.root/'1'/EVENT/(EVENT+'.webm')).read_bytes() == b'later'

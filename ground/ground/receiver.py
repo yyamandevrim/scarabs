@@ -101,8 +101,16 @@ class Receiver:
         elif p.kind == Kind.DECISION:
             key = (p.station, d['event_id'])
             previous = self.decisions.get(key)
-            if previous is None or p.timestamp >= previous['timestamp']:
-                self.decisions[key] = dict(timestamp=p.timestamp, decision='confirmed' if d['decision'] == 1 else 'rejected')
+            # Timestamp remains the semantic clock. Break same-second ties only
+            # within the current boot, using the tracker's unwrapped order.
+            # Sender cancels queued old decision repeats when a correction is
+            # enqueued; a physical sequence is not a general revision number.
+            absolute = tracker.high + (p.sequence-(tracker.high & 65535)+32768) % 65536-32768
+            tied_newer = previous is not None and p.timestamp == previous['timestamp'] and p.boot == s['boot'] and (
+                p.boot != previous['boot'] or absolute > previous['sequence'])
+            if previous is None or p.timestamp > previous['timestamp'] or tied_newer:
+                self.decisions[key] = dict(timestamp=p.timestamp, boot=p.boot, sequence=absolute,
+                                           decision='confirmed' if d['decision'] == 1 else 'rejected')
                 if key in self.alerts:
                     self.alerts[key]['decision'] = self.decisions[key]['decision']
         return True
