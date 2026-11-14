@@ -163,7 +163,7 @@ function renderStatus(status) {
     .map(camera => {
       const tile = text('article', '', 'camera inactive');
       tile.append(text('h3', `${labels[camera.name]} · ${num(camera.yaw, 0)}°`),
-        text('p', 'mounted, inactive'), text('span', 'Third camera · two active inputs', 'inactive-note'));
+        text('p', 'mounted, inactive'), text('span', `${status.cameras.filter(c => c.active).length} of 2 inputs active · inactive slot`, 'inactive-note'));
       return tile;
     }));
   $('#geometry').replaceChildren(...status.cameras.map(camera => text('p',
@@ -177,6 +177,11 @@ function renderStatus(status) {
   $('#profile-parameters').textContent = profile
     ? `Model ${profile.input_size}px · confidence threshold ${parameter(profile.confidence * 100)}% · target ${parameter(profile.interval_seconds)} s/camera · event timeout ${parameter(profile.event_timeout_seconds)} s`
     : '';
+  if (profile) $('#profile-parameters').textContent += profile.detector_view === 'center_crop'
+    ? ' · Center square only; outer strips of the preview are not analysed.'
+    : profile.detector_view === 'centre_zoom'
+      ? ' · Center zoom: two small center crops only; outer strips of the preview are not analysed.'
+      : ' · Full camera frame.';
   renderModule(status.mcu);
   renderRadio(status.lora);
   $('#measured-on').textContent = status.measured_on?.label || 'Measurement device unavailable';

@@ -48,6 +48,8 @@ CURL_CA={'CURL_CA_BUNDLE':CA_BUNDLE} if CA_BUNDLE else {}
 # timestamps so its bytes match the manifest; the run's own clock times are kept
 # separately in preparation-run.json, never discarded.
 RELEASE=dict(prepared_at='2026-11-13T19:54:06.478715+00:00',accessed='2026-11-13',
+             # Published metadata stays byte-identical across UI translations.
+             canopy_name='Luke MS-NFI 2023 sayısal ortalama ağaç boyu + taç örtüsü; eksik orman hücrelerinde 20 m varsayımı',
              files={'detailed.npz':'98d64016333bcc86e7ab98b50c712648d1dfdf37839b0fb472b2649a30b8bac8',
                     'coarse.npz':'42643b6899ef4313227fd79bcce71f61ecdb39a96c13619cf64765a17116f9ed'})
 
@@ -57,6 +59,8 @@ def write_metadata(metadata):
     run['reproduced_release']=metadata['files']==RELEASE['files']
     if run['reproduced_release']:
         metadata['prepared_at']=RELEASE['prepared_at']
+        if 'canopy_name' in metadata:
+            metadata['canopy_name']=RELEASE['canopy_name']
         for item in metadata['sources']:item['accessed']=RELEASE['accessed']
     (PREP/'metadata.json').write_text(json.dumps(metadata,indent=2))
     (PREP/'preparation-run.json').write_text(json.dumps(run,indent=2))

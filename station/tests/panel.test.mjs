@@ -606,3 +606,35 @@ test('LoRa radio line stays hidden when disabled and never shows an unread real 
   assert.match(p.$('#lora-link').textContent, /EU_868 · 869\.4-869\.65 MHz · delivery not confirmed/);
   assert.equal(p.$('#lora-link').className, '');
 });
+
+test('center-crop analysis discloses the narrower view beside the full camera preview', async () => {
+  const p = await panel();
+  p.state.status.analysis_profile = {name:'demo',input_size:192,confidence:.35,interval_seconds:1,event_timeout_seconds:12,detector_view:'center_crop'};
+  await p.refresh();
+  assert.match(p.$('#profile-parameters').textContent, /Center square only.*outer strips.*not analy[sz]ed/i);
+  p.state.status.analysis_profile.detector_view = 'full';
+  await p.refresh();
+  assert.match(p.$('#profile-parameters').textContent, /Full camera frame/);
+  assert.doesNotMatch(p.$('#profile-parameters').textContent, /outer strips/);
+});
+
+test('one live camera does not claim two active inputs on its inactive slots', async () => {
+  const p = await panel();
+  p.state.status.cameras[0].kind = 'usb';
+  p.state.status.cameras[1].active = false;
+  p.state.status.cameras[1].connected = false;
+  await p.refresh();
+  assert.equal(p.window.document.querySelectorAll('#inactive-cameras .camera').length, 2);
+  for (const note of p.window.document.querySelectorAll('#inactive-cameras .inactive-note')) {
+    assert.match(note.textContent, /1 of 2 inputs active/);
+    assert.doesNotMatch(note.textContent, /Third camera|two active inputs/);
+  }
+});
+
+test('centre zoom is not described as analysing the full camera frame', async () => {
+  const p = await panel();
+  p.state.status.analysis_profile = {name:'demo',input_size:192,confidence:.35,interval_seconds:1,event_timeout_seconds:12,detector_view:'centre_zoom'};
+  await p.refresh();
+  assert.match(p.$('#profile-parameters').textContent, /Center zoom.*two.*crops.*outer strips.*not analysed/i);
+  assert.doesNotMatch(p.$('#profile-parameters').textContent, /Full camera frame/);
+});

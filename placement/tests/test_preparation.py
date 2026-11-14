@@ -28,7 +28,8 @@ def test_identical_release_metadata_is_reproducible_while_run_times_survive(tmp_
     module, write = preparation(tmp_path)
     release = module['RELEASE']
     template = {'prepared_at': '2026-11-14T01:00:00+00:00', 'files': copy.deepcopy(release['files']),
-                'sources': [{'name': 'source', 'accessed': '2026-11-14'}]}
+                'sources': [{'name': 'source', 'accessed': '2026-11-14'}],
+                'canopy_name': 'English description of the published canopy'}
     write(copy.deepcopy(template))
     first = (tmp_path / 'metadata.json').read_bytes()
     published = json.loads(first)
@@ -38,6 +39,7 @@ def test_identical_release_metadata_is_reproducible_while_run_times_survive(tmp_
     assert run['prepared_at'] == template['prepared_at']
     assert run['accessed'] == ['2026-11-14']
     assert run['reproduced_release'] is True
+    template['canopy_name'] = 'Updated UI translation of the same canopy'
     template['prepared_at'] = '2026-11-15T02:00:00+00:00'
     template['sources'][0]['accessed'] = '2026-11-15'
     write(copy.deepcopy(template))

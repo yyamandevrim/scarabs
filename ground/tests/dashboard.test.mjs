@@ -162,3 +162,16 @@ test('a real radio that is not ready marks the transport label as failed',async(
  p.state.link={transport:'meshtastic',state:'ready',ready:true};await p.poll();
  assert.equal(p.$('#transport-label').classList.contains('lost'),false);
 });
+
+
+test('new alert packets do not make old camera status appear current', async () => {
+ const p = await dashboard();
+ p.state.stations[0].age = 0;
+ p.state.stations[0].status = {timestamp:1700000000,active:3,lost:3,heading_cd:0,yaw:[-7000,0,7000],hfov:[80,80,80],uptime:0};
+ await p.poll();
+ assert.match(p.$('#camera-status').dataset.label, /last status packet/);
+ assert.match(p.$('#camera-status').dataset.label, /(14|15) Nov, \d{2}:\d{2}:\d{2}/);
+ assert.match(p.$('#camera-status').textContent, /Left · lost/);
+ p.$('#language').click();await flush();
+ assert.match(p.$('#camera-status').dataset.label, /son durum paketi/);
+});
