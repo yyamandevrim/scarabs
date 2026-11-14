@@ -254,7 +254,8 @@ function eventRow(event) {
 }
 function sourceLabel(event) {
   const camera = currentStatus?.cameras.find(candidate => candidate.name === event.camera);
-  return (event.source_kind || camera?.kind) === 'usb' ? 'Camera recording' : (event.source_kind || camera?.kind) === 'file' ? 'Recorded demo' : 'Event recording';
+  const kind = event.source_kind || camera?.kind;
+  return ['usb', 'avfoundation'].includes(kind) ? 'Camera recording' : kind === 'file' ? 'Recorded demo' : 'Event recording';
 }
 function renderClip(item, event) {
   const clipUrl = event.clip ? `/events/${event.clip}` : null;

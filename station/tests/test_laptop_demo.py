@@ -12,6 +12,6 @@ def test_laptop_demo_uses_portable_recordings_without_a_simulated_mcu():
     assert {Path(c.source).name for c in active} == {'smoke.ogv', 'cloud.webm'}
     assert all(Path(c.source).is_relative_to(root / 'media') for c in config.cameras)
     assert config.lora.enabled and config.lora.transport == 'simulated'
-    assert (config.lora.peer_host, config.lora.peer_port) == ('127.0.0.1', 19901)
+    assert (config.lora.peer_host, config.lora.peer_port) == ('127.0.0.1', 49173)
     assert config.lora.sf == 7 and config.lora.duty_fraction == .01
     assert config.data_dir == root / 'data/laptop'

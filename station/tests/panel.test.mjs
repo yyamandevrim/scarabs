@@ -638,3 +638,11 @@ test('centre zoom is not described as analysing the full camera frame', async ()
   assert.match(p.$('#profile-parameters').textContent, /Center zoom.*two.*crops.*outer strips.*not analysed/i);
   assert.doesNotMatch(p.$('#profile-parameters').textContent, /Full camera frame/);
 });
+
+test('AVFoundation source is labelled live and its evidence is a camera recording', async () => {
+  const p = await clipPanel(webm);
+  p.state.status.cameras[0].kind = 'avfoundation';
+  await p.refresh();
+  assert.match(p.$('.source-label').textContent, /Live camera/);
+  assert.equal(p.$('.clip-label').textContent, 'Camera recording · event clip');
+});

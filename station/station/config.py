@@ -1,6 +1,8 @@
 """Single-file configuration, resolved relative to the config file."""
 from dataclasses import dataclass, field
 from pathlib import Path
+import re
+import sys
 import tomllib
 from .mcu_protocol import McuConfig
 from .lora.bridge import LoraConfig
@@ -96,10 +98,17 @@ class Config:
                 raise ValueError(f"{c.name}: capture_format must be empty, MJPG or YUYV; capture_fps must be in [0, 120]")
             if not isinstance(c.active, bool):
                 raise ValueError(f"{c.name}: active must be true or false")
-            if c.kind not in ("file", "usb") or not isinstance(c.source, str):
-                raise ValueError(f"{c.name}: source must be a string; kind must be file or usb")
+            if c.kind not in ("file", "usb", "avfoundation") or not isinstance(c.source, str):
+                raise ValueError(f"{c.name}: source must be a string; kind must be file, usb or avfoundation")
             if c.kind == "usb" and not c.source.startswith(("/dev/v4l/by-path/", "/dev/v4l/by-id/")):
                 raise ValueError(f"{c.name}: USB source must use /dev/v4l/by-path/ or /dev/v4l/by-id/, never an index")
+            if c.kind == "avfoundation":
+                if sys.platform != "darwin":
+                    raise ValueError(f"{c.name}: AVFoundation cameras require macOS")
+                if not re.fullmatch(r"0|[1-9][0-9]{0,9}", c.source) or int(c.source) > 2147483647:
+                    raise ValueError(f"{c.name}: AVFoundation source must be a nonnegative integer camera index")
+                if c.capture_format:
+                    raise ValueError(f"{c.name}: AVFoundation capture_format must be empty; FOURCC selection is Linux USB only")
             if c.width <= 0 or c.height <= 0 or not 0 < c.hfov <= 180 or not 0 < c.vfov <= 180:
                 raise ValueError(f"{c.name}: invalid resolution or FOV")
         if self.analysis_hz <= 0 or self.input_size < 32 or self.input_size % 32:

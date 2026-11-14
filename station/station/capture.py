@@ -3,6 +3,7 @@ from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Event, Lock, Thread
+import sys
 import time
 import cv2
 import numpy as np
@@ -67,10 +68,19 @@ class CaptureWorker:
         self.factory = factory or self._open
         # A source path that vanishes while running (file removed/renamed, USB
         # by-path/by-id link gone on unplug) is reported as lost within this interval.
-        self.watched = Path(camera.source) if factory is None else None
+        self.watched = Path(camera.source) if factory is None and camera.kind != "avfoundation" else None
         self.watch_interval = .5
 
     def _open(self):
+        if self.camera.kind == "avfoundation":
+            if sys.platform != "darwin":
+                raise OSError("AVFoundation cameras require macOS")
+            cap = cv2.VideoCapture(int(self.camera.source), cv2.CAP_AVFOUNDATION)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera.width)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera.height)
+            if self.camera.capture_fps:
+                cap.set(cv2.CAP_PROP_FPS, self.camera.capture_fps)
+            return cap
         if self.camera.kind == "usb":
             cap = cv2.VideoCapture(self.camera.source, cv2.CAP_V4L2)
             cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
