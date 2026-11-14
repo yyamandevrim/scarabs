@@ -205,3 +205,7 @@ def test_archive_cli_requires_typed_confirmation(tmp_path):
     ok = subprocess.run(cmd, input="ARCHIVE\n", capture_output=True, text=True, cwd=ROOT)
     assert ok.returncode == 0, ok.stderr
     assert '"archived"' in ok.stdout and not (tmp_path / "d" / "events.sqlite3").exists()
+
+def test_team_board_device_tree_spelling_is_recognised():
+    actual=machine.describe('Linux','aarch64','test','QRB2210','Arduino UnoQ')
+    assert actual['is_uno_q'] and not actual['label'].endswith('UNO Q değil')

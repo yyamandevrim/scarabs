@@ -34,9 +34,9 @@ def _board_model():
 
 
 def describe(system, machine, release, cpu, board):
-    # Matched on the Linux device-tree model string. The exact UNO Q string has not
-    # been read from a real board; "UNO Q" is expected to appear in it.
-    is_uno_q = bool(board and "uno q" in board.lower())
+    # BOARD_NOTES.md records the actual device-tree spelling "Arduino UnoQ".
+    normalised = "".join(ch for ch in (board or "").casefold() if ch.isalnum())
+    is_uno_q = bool(board and ("uno q" in board.casefold() or normalised.startswith("arduinounoq")))
     os_name = {"Darwin": "macOS", "Linux": "Linux"}.get(system, system)
     if system == "Darwin":
         release = platform.mac_ver()[0] or release

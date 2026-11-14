@@ -80,7 +80,7 @@ def main():
             word="DELETE" if args.delete else "ARCHIVE"
             if not args.yes:
                 print(f"{config.data_dir}: {summary['events']} events, {summary['media_files']} evidence files.")
-                print("Permanently delete them?" if args.delete else "Move them to data/archive/ (kept, not shown in the panel)?")
+                print("Permanently delete them?" if args.delete else f"Move them to {config.data_dir / 'archive'}/ (kept, not shown in the panel)?")
                 try:
                     answer=input(f"Type {word} to continue: ")
                 except EOFError:
