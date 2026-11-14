@@ -75,11 +75,13 @@ def replay(records, threshold, timeout, history_gap):
 class InputRecorder:
     """Observe the actual tensor handed to ORT, without duplicating preprocessing."""
     def __init__(self, session):
-        self.session, self.tensor = session, None
+        self.session, self.tensor, self.output = session, None, None
 
     def run(self, outputs, inputs):
         self.tensor = next(iter(inputs.values()))
-        return self.session.run(outputs, inputs)
+        result = self.session.run(outputs, inputs)
+        self.output = result[0]
+        return result
 
 
 def diagnose(manifest, model, output, sizes, thresholds, threads=2,
@@ -126,13 +128,20 @@ def diagnose(manifest, model, output, sizes, thresholds, threads=2,
             for sample_id, sample, image in samples:
                 started = time.perf_counter()
                 detections, timings = detector.predict(image)
+                raw = np.squeeze(recorder.output, axis=0)
+                raw = raw.T if raw.shape[0] == 5 else raw
+                top = raw[np.argsort(raw[:, 4])[-5:][::-1]]
                 row = {'time': sample['time'], 'label': sample['label'],
                        'sample_id': sample_id, 'detections': detections, 'timings': timings,
+                       'model_output': {'shape': list(recorder.output.shape),
+                                        'max_score': float(top[0, 4]),
+                                        'top_xywh_score': top.tolist()},
                        'wall_ms': (time.perf_counter()-started)*1000}
                 records.append(row)
                 if save_inputs:
                     stem = output / f'input-{sample_id:04d}-{size}'
                     np.save(stem.with_suffix('.npy'), recorder.tensor)
+                    np.save(output / f'output-{sample_id:04d}-{size}.npy', recorder.output)
                     rgb = np.rint(recorder.tensor[0].transpose(1, 2, 0)*255).astype(np.uint8)
                     cv2.imwrite(str(stem.with_suffix('.png')), rgb[:, :, ::-1])
             report['runs'].append({'input_size': size, 'series': name,
@@ -153,7 +162,7 @@ def main():
     parser.add_argument('--threads', type=int, default=2)
     parser.add_argument('--timeout', type=float, default=12)
     parser.add_argument('--history-gap', type=float, default=3)
-    parser.add_argument('--save-inputs', action='store_true', help='Save exact ORT float tensors and letterbox PNGs')
+    parser.add_argument('--save-inputs', action='store_true', help='Save exact ORT input/output tensors and letterbox PNGs')
     args = parser.parse_args()
     report = diagnose(args.manifest, args.model, args.output, args.sizes, args.thresholds,
                       args.threads, args.timeout, args.history_gap, args.save_inputs)

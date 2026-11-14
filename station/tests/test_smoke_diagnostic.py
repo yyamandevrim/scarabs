@@ -68,8 +68,17 @@ def test_saved_input_is_the_real_rgb_letterbox_tensor(tmp_path):
         {'image': 'held.png', 'time': 0, 'label': 'unknown',
          'provenance': 'Synthetic solid colour; preprocessing mechanics only'}]}]}))
     output = tmp_path / 'proof'
-    load_script().diagnose(manifest, model, output, [192], [.35], save_inputs=True)
+    report = load_script().diagnose(manifest, model, output, [192], [.35], save_inputs=True)
     tensor = np.load(output / 'input-0000-192.npy')
+    raw = np.load(output / 'output-0000-192.npy')
+    from station.detector import SmokeDetector
+    detector = SmokeDetector(model, 192, .35)
+    expected = detector.session.run(None, {detector.input.name: tensor})[0]
+    assert np.array_equal(raw, expected)
+    summary = report['runs'][0]['raw'][0]['model_output']
+    assert summary['shape'] == list(raw.shape)
+    assert summary['max_score'] == float(raw[0, 4].max())
+    assert summary['top_xywh_score'][0][4] == summary['max_score']
     assert tensor.shape == (1, 3, 192, 192)
     assert tensor.dtype == np.float32
     assert tensor[0, :, 24, 0] == pytest.approx([200/255, 1/255, 40/255])
