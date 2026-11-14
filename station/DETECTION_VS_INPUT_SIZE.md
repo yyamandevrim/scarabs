@@ -1,6 +1,6 @@
 # Detection quality vs model input size
 
-Measured 2026-11-14 to help choose `input_size`, `confidence` and `analysis_hz` for the UNO Q. This is a measurement report only. No application code or default configuration was changed.
+Measured 2026-11-14 to help choose `input_size`, `confidence` and `analysis_hz` for the UNO Q. The initial study was a measurement report only. The dated screen-demo follow-up in section 12 also records subsequent deployment diagnostics; analysis defaults were unchanged.
 
 **Read this first.** The evidence is **one real smoke clip and three real negative clips**. The smoke clip shows a **large, nearby plume** that fills about half the frame. It contains no small, distant smoke, which is exactly the case input shrinking is expected to hurt. That case was tested only with a **synthetic proxy** (section 5). Every number here is indicative, not a benchmark.
 
@@ -14,7 +14,7 @@ Labels used throughout:
 
 - The exported model (`models/smoke.onnx`, Pyronear YOLOv11s) has a **dynamic input shape**: `images [batch, 3, height, width]`. A smaller `input_size` therefore really runs the network at that resolution. Nothing is cropped or padded back up to 640. `SmokeDetector` rejects a mismatch only for fixed-shape exports.
 - Path per analysis, as in `station/capture.py`, `station/detector.py` and `station/alarm.py`:
-  1. The capture worker resizes every frame to the camera's configured `width × height` with `cv2.resize`. Aspect ratio is **not** preserved: a 16:9 source configured as 320×240 is squashed.
+  1. File playback is resized to configured `width × height` with `cv2.resize`; a 16:9 file configured as 320×240 is squashed. The current live USB path preserves the actual negotiated camera pixels. The study below simulated working sizes explicitly; it did not capture a screen.
   2. `SmokeDetector.predict` letterboxes that frame into an `input_size × input_size` square (grey 114 padding), converts BGR→RGB, scales to float32 /255, runs ORT, filters by confidence and applies NMS at IoU 0.45.
   3. `EventTracker` / `AlarmRule` opens an event when a detection overlaps (IoU ≥ 0.25) a detection in at least 3 of the last 5 analyses. Events close after 12 s without a matching detection.
 - In a 1280×720 frame at input 192, the frame is scaled by 0.15, so a plume 200 px wide reaches the network as about 30 px. At 640 the same plume is 100 px.
@@ -205,3 +205,33 @@ A compromise between C and D is 416 at threshold 0.25, every 3 s (cadence measur
 - Detection numbers are Mac ORT results. The board's ARM build gave slightly different counts at 640 and 320. Detection on the board at sizes other than 640 and 320 is unmeasured.
 - Board live-camera timings and resources were measured at 192, 320, 416 and 640. Other sizes remain estimates. The exact field profile at confidence 0.25, longer hot-ambient operation and event-encoding load remain unmeasured; the controlled curve used 0.35.
 - Slow-rate results use a single sampling phase. Different phases could shift first-alarm times by a few analyses.
+
+
+## 12. Screen-demo diagnosis, 2026-11-14
+
+**[Mac, measured]** The failed demo cannot be attributed to model input size alone. The Guardian's [Victoria/Buchan video](https://www.theguardian.com/australia-news/video/2020/jan/02/australia-fires-aerial-footage-wildfire-bushfire-victoria) (YouTube `NmyWqgBBhzY`) was identified from the owner's description and the visible “Buchan, Victoria” caption. Its exact URL still awaits owner confirmation. The initial camera evidence also contains Fire and Rescue NSW footage and later Sky News imagery; do not treat those mixed captures as a synchronized recording of one source file.
+
+Using the production `SmokeDetector.predict`, CPUExecutionProvider, two ORT threads, all 85 one-second samples of the direct 1280×720 Guardian file were replayed at inputs 192, 320, 416 and 640. Collection floor 0.10; confidence sweep 0.10/0.20/0.25/0.35/0.45; production NMS 0.45 and spatial 3-of-5/IoU 0.25. No suspicion opened at 0.35 at **any** input, either native or resized to the board's 320×240 working size. Input 640's peak raw score was only **0.085 native / 0.077 at 320×240**. A larger input therefore does not repair this particular footage's model mismatch.
+
+| Input | Direct Guardian: detections / 85, native / 320×240 | Direct project smoke: detections / 54, native / 320×240 | Project smoke first suspicion, native / 320×240 |
+|---|---|---|---|
+| 192 | 0 / 3 | 40 / 45 | 2 s / 3 s |
+| 320 | 2 / 1 | 17 / 7 | 4 s / none |
+| 416 | 1 / 0 | 3 / 2 | none / none |
+| 640 | 0 / 0 | 24 / 17 | 2 s / 2 s |
+
+At 0.35, all three full negative files remained free of suspicions at all four inputs and both working sizes (fog 46, cloud 34, glare 42 samples each). These are selected clips, not a false-alarm-rate estimate. Some lower-threshold Guardian replays open events; that is not justification to lower the deployed threshold. It remains **0.35**.
+
+**[UNO Q capture, Mac inference]** A temporary wrapper saved **40 lossless PNGs per camera immediately before `CaptureWorker.latest.put`**, timestamp and pixel hash included, plus a separate exact PNG of each analysed frame and the raw top-five anchor outputs before confidence filtering. On the 40 publication samples per camera, input 192 peaked at **0.209 left / 0.161 centre**, with **0/40 detections at 0.35 on each**. At input 320, left had 4/40 detections and a replayed suspicion; 416 had only two left detections; 640 had none at 0.35. Those scores are on a mixture of paused browser footage, full-screen footage and hands crossing the view. The first 30 samples mostly show a small player inside the desktop, rather than a frame-filling plume. This is evidence against choosing input size from a single picture, not a latency comparison.
+
+**[UNO Q and Mac, same pixels]** The first **40 exact analysed PNGs per camera** were replayed at input 192 on the Mac. Absolute raw maximum-score difference: **0.003002 maximum, 0.000205 mean**. Production capture/detector/runtime/alarm files on both hosts had matching SHA-256 hashes. The shared model path letterboxes BGR frames, converts to RGB CHW float32 /255 and uses the same NMS/tracker for file and USB. No live-only colour/normalisation defect was found. The alarm never receives a candidate below confidence, so no alarm-rule relaxation is justified.
+
+**[UNO Q, measured]** Direct board file replay at input 192, 0.35, 320×240 and one sample per video second found **46/54 smoke detections**, first suspicion at **video t=3 s**, opening confidence **0.37051**. Fog **0/46**, cloud **0/34**, glare **0/42**: zero detections and zero suspicions. This was an offline replay while the live station remained running; it is neither physical screen validation nor a throughput measurement.
+
+**Capture-integrity finding [UNO Q].** Displaced rectangular image blocks are present in lossless centre samples `centre-raw-1794641358.896942.png` and `centre-raw-1794641359.935038.png`, not just the preview JPEGs. The existing green-footer guard accepts these arrays. It detects the previously observed zero-filled YUV footer, **not arbitrary block displacement**. Do not call the live path corruption-free. An explicit 320×240 YUYV, 5-fps capture request was subsequently negotiated by both drivers to reduce USB load; its final validation is recorded in the board notes.
+
+Reproduction evidence is private: the supplied `detection-frames/` folder now contains `lossless/smoke-live-20261114/`, manifests, hashes, timestamped PNGs and board traces. Mac replay reports and source frames are retained under `/tmp/acorn-*-20261114/`. `scripts/diagnose_smoke.py --save-inputs` now also saves exact raw ORT output tensors and reports uncensored maximum/top-five scores; production decisions remain unchanged. Temporary live instrumentation is removed before the final normal launch. No camera image or credential is committed.
+
+**[UNO Q, capture-only trial]** With 5-fps requests accepted by both drivers, a 207.20-second stationary-screen window measured 267.89 / 266.65 ms mean inference, 274.23 / 269.78 ms total analysis and 1.00927 / 1.00936 s mean per-camera intervals. RSS mean 175.97 MiB, CPU thermal zones 45.1–48.2°C. These are instrumented baseline timings, **not live smoke success or hall-negative validation**.
+
+**Final status:** physical camera positioning/readiness did not arrive during this investigation; the views remained the unrelated stationary screen. The 5-fps trial was not adopted without moving-scene validation. The original capture configuration and normal station launcher were restored, temporary live instrumentation stopped, and dated trial/rollback files retained. The procedure is documented, but **live project-clip latency, camera isolation and hall/ordinary-video negatives remain unverified**. Do not present the direct-file result or the timing trial as a live demonstration success.
