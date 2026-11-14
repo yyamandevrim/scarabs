@@ -1,0 +1,1138 @@
+{
+  "version": 1,
+  "brand_file": "placement/brand.json",
+  "palette_source": "pitch/VIDEO_SCRIPT.md — Picture and type (brand.json contains identity, no colour tokens)",
+  "palette": {
+    "background": "#090e13",
+    "panel": "#0f161d",
+    "text": "#e3e9ee",
+    "secondary": "#a7b4bf",
+    "blue": "#8fc3e3",
+    "amber": "#f2a93b"
+  },
+  "font": "placement/static/fonts/ibm-plex-sans-latin-400-normal.woff2",
+  "font_ext": "placement/static/fonts/ibm-plex-sans-latin-ext-400-normal.woff2",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "shots": [
+    {
+      "id": "01",
+      "duration": 7,
+      "source_type": "GENERATED",
+      "description": "Quiet forest at dawn; no smoke or fire",
+      "on_screen_text": [
+        "Before someone notices"
+      ],
+      "caption": [
+        "Illustration"
+      ],
+      "subtitle": "The first minutes of a forest fire can pass without anyone noticing.",
+      "edits": [
+        {
+          "duration": 7,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-01-forest-dawn.mp4",
+              "in_seconds": 0,
+              "out_seconds": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "02",
+      "duration": 6,
+      "source_type": "GENERATED",
+      "description": "Slow canopy move",
+      "on_screen_text": [],
+      "caption": [
+        "Illustration"
+      ],
+      "subtitle": "We want to make those minutes count.",
+      "edits": [
+        {
+          "duration": 6,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-02-canopy.mp4",
+              "in_seconds": 0,
+              "out_seconds": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "duration": 6,
+      "source_type": "GENERATED",
+      "description": "Remote empty ridge",
+      "on_screen_text": [
+        "Observation without an internet uplink — the goal"
+      ],
+      "caption": [
+        "Illustration"
+      ],
+      "subtitle": "But who can keep watch where there is no internet connection?",
+      "edits": [
+        {
+          "duration": 6,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-03-remote-ridge.mp4",
+              "in_seconds": 0,
+              "out_seconds": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "duration": 6,
+      "source_type": "GENERATED",
+      "description": "Inert generic station concept; not deployed",
+      "on_screen_text": [
+        "Cost not established"
+      ],
+      "caption": [
+        "Illustration · Station concept · not deployed"
+      ],
+      "subtitle": "Our goal is a station more people could afford to put there.",
+      "edits": [
+        {
+          "duration": 6,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-04-station-concept.mp4",
+              "in_seconds": 0,
+              "out_seconds": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "05",
+      "duration": 5,
+      "source_type": "MOCKUP",
+      "description": "Station phone and feed overview",
+      "on_screen_text": [
+        "ACORN",
+        "Aerial Canopy Observation and Reporting Node"
+      ],
+      "caption": [
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "This is ACORN, built by team Scarabs.",
+      "edits": [
+        {
+          "duration": 5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 5,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            },
+            {
+              "file": "pitch/captures/mockups/clips/shot-05-06-station-wide-fit-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 5,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                336,
+                58,
+                144,
+                45
+              ]
+            }
+          ]
+        }
+      ],
+      "translation": "Duman şüphesi = smoke suspicion"
+    },
+    {
+      "id": "06",
+      "duration": 6,
+      "source_type": "MOCKUP",
+      "description": "Two recorded feeds and inactive third input",
+      "on_screen_text": [
+        "Two active inputs · third mounted, inactive"
+      ],
+      "caption": [
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "The station runs smoke analysis locally. Here, the demo runs on a laptop.",
+      "edits": [
+        {
+          "duration": 6,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-05-06-station-wide-fit-mockup.mp4",
+              "in_seconds": 6,
+              "out_seconds": 12,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                336,
+                58,
+                144,
+                45
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "07",
+      "duration": 7,
+      "source_type": "MOCKUP",
+      "description": "Nearby ranger reviews a smoke suspicion",
+      "on_screen_text": [
+        "Smoke suspicion · needs human review"
+      ],
+      "caption": [
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "A nearby ranger can review a smoke suspicion on the local panel.",
+      "edits": [
+        {
+          "duration": 7,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 7,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            }
+          ]
+        }
+      ],
+      "note": "Held fallback · new arrival not captured",
+      "translation": "Duman şüphesi = smoke suspicion\nDoğrula = confirm suspicion · Reddet = reject"
+    },
+    {
+      "id": "08",
+      "duration": 7,
+      "source_type": "MOCKUP",
+      "description": "Same suspicion on Station and Ground; Wi-Fi off",
+      "on_screen_text": [
+        "LoRa transport simulated · no imagery"
+      ],
+      "caption": [
+        "Laptop demo · recorded footage",
+        "Edited wait · not a latency measurement"
+      ],
+      "subtitle": "That suspicion also reaches the remote desk. Today, LoRa transport is simulated.",
+      "edits": [
+        {
+          "duration": 7,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 7,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            },
+            {
+              "file": "pitch/captures/mockups/clips/shot-08-17-ground-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 7,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ],
+      "note": "Held fallback · new arrival not captured",
+      "translation": "Duman şüphesi = smoke suspicion"
+    },
+    {
+      "id": "09",
+      "duration": 5,
+      "source_type": "MOCKUP",
+      "description": "Saved local evidence plays",
+      "on_screen_text": [
+        "Full evidence · local panel"
+      ],
+      "caption": [
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "The ranger opens the saved evidence.",
+      "edits": [
+        {
+          "duration": 5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-09-station-phone-mockup.mp4",
+              "in_seconds": 1,
+              "out_seconds": 6,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            }
+          ]
+        }
+      ],
+      "translation": "Duman şüphesi = smoke suspicion\nDoğrula = confirm suspicion · Reddet = reject"
+    },
+    {
+      "id": "10",
+      "duration": 8,
+      "source_type": "MOCKUP",
+      "description": "Human decision annotation on phone and desk",
+      "on_screen_text": [
+        "Confirm suspicion / Reject · human annotation"
+      ],
+      "caption": [
+        "LoRa transport simulated · edited wait",
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "A person confirms or rejects the suspicion. That decision is an annotation, not confirmation of fire.",
+      "edits": [
+        {
+          "duration": 3,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
+              "in_seconds": 3,
+              "out_seconds": 6,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            },
+            {
+              "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
+              "in_seconds": 3,
+              "out_seconds": 6,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
+              "in_seconds": 12,
+              "out_seconds": 17,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            },
+            {
+              "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
+              "in_seconds": 12,
+              "out_seconds": 17,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ],
+      "note": "Recorded decision correction · not a first decision",
+      "translation": "Duman şüphesi = smoke suspicion\nDoğrula = confirm suspicion · Reddet = reject\nDeğiştir = change"
+    },
+    {
+      "id": "11",
+      "duration": 6,
+      "source_type": "MOCKUP",
+      "description": "Packet identity and calculated link details",
+      "on_screen_text": [
+        "42-byte smoke alert · packet v2"
+      ],
+      "caption": [
+        "LoRa transport simulated",
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "A smoke alert is forty-two bytes. Images stay off that link.",
+      "edits": [
+        {
+          "duration": 6,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-11-ground-details-mockup.mp4",
+              "in_seconds": 7,
+              "out_seconds": 13,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": null
+            }
+          ]
+        }
+      ],
+      "note": "42 B = smoke-alert schema · captured last packet = 40 B"
+    },
+    {
+      "id": "12",
+      "duration": 7,
+      "source_type": "MOCKUP",
+      "description": "Separate Wi-Fi evidence on, then off",
+      "on_screen_text": [
+        "Wi-Fi evidence demo · separate from LoRa"
+      ],
+      "caption": [
+        "LoRa transport simulated",
+        "Laptop demo · recorded footage"
+      ],
+      "subtitle": "Full evidence uses a separate, close-range Wi-Fi connection.",
+      "edits": [
+        {
+          "duration": 1,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-12-ground-wifi-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 1,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 4,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-12-ground-wifi-mockup.mp4",
+              "in_seconds": 8,
+              "out_seconds": 12,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 2,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-12-ground-wifi-mockup.mp4",
+              "in_seconds": 22,
+              "out_seconds": 24,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ],
+      "note": "Edited sequence"
+    },
+    {
+      "id": "13",
+      "duration": 5,
+      "source_type": "GENERATED",
+      "description": "Ridge obscures the forest behind it",
+      "on_screen_text": [],
+      "caption": [
+        "Illustration"
+      ],
+      "subtitle": "And where you put a station matters.",
+      "edits": [
+        {
+          "duration": 5,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-13-occluding-ridge.mp4",
+              "in_seconds": 0,
+              "out_seconds": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "duration": 7,
+      "source_type": "MOCKUP",
+      "description": "Placement Compare: Finnish terrain and forest data",
+      "on_screen_text": [
+        "Simulated geometric visibility · not detection range"
+      ],
+      "caption": [],
+      "subtitle": "Our map estimates visible forest using real Finnish terrain and forest data.",
+      "edits": [
+        {
+          "duration": 7,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-14-19-placement-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 7,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "15",
+      "duration": 8,
+      "source_type": "MOCKUP",
+      "description": "Completed heading and camera-pair comparisons",
+      "on_screen_text": [
+        "Planning estimate · edited sequence"
+      ],
+      "caption": [
+        "Simulated geometric visibility"
+      ],
+      "subtitle": "Change the heading. Compare camera pairs. See what the terrain hides.",
+      "edits": [
+        {
+          "duration": 1.5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
+              "in_seconds": 1,
+              "out_seconds": 2.5,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 1.5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
+              "in_seconds": 9,
+              "out_seconds": 10.5,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 1.5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
+              "in_seconds": 15,
+              "out_seconds": 16.5,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 2,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
+              "in_seconds": 21,
+              "out_seconds": 23,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        },
+        {
+          "duration": 1.5,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-15-placement-changes-mockup.mp4",
+              "in_seconds": 28,
+              "out_seconds": 29.5,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "16",
+      "duration": 4,
+      "source_type": "GENERATED",
+      "description": "Opening forest, unchanged",
+      "on_screen_text": [],
+      "caption": [
+        "Illustration"
+      ],
+      "subtitle": "Earlier notice is the aim.",
+      "edits": [
+        {
+          "duration": 4,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-16-forest-reprise.mp4",
+              "in_seconds": 0,
+              "out_seconds": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "17",
+      "duration": 4,
+      "source_type": "MOCKUP",
+      "description": "Held phone/desk recap with unverified limits",
+      "on_screen_text": [
+        "Unverified: board detection quality · real radio · AP · external RGB LED"
+      ],
+      "caption": [
+        "LoRa transport simulated",
+        "Laptop demo · recorded footage · recap"
+      ],
+      "subtitle": "Board detection quality and real radio still need testing.",
+      "edits": [
+        {
+          "duration": 4,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-05-07-08-17-station-phone-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 4,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": [
+                762,
+                120,
+                118,
+                42
+              ]
+            },
+            {
+              "file": "pitch/captures/mockups/clips/shot-08-17-ground-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 4,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ],
+      "translation": "Duman şüphesi = smoke suspicion"
+    },
+    {
+      "id": "18",
+      "duration": 4,
+      "source_type": "MOCKUP",
+      "description": "Separate simulated IR sensor and logical LED",
+      "on_screen_text": [
+        "Simulated sensor + logical LED",
+        "Does not confirm camera smoke"
+      ],
+      "caption": [
+        "Laptop demo"
+      ],
+      "subtitle": "The short-range infrared sensor is separate from camera smoke.",
+      "edits": [
+        {
+          "duration": 4,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-18-sensor-phone-mockup.mp4",
+              "in_seconds": 5.3,
+              "out_seconds": 9.3,
+              "crop": [
+                704,
+                36,
+                512,
+                1008
+              ],
+              "wordmark_rect": null
+            }
+          ]
+        }
+      ],
+      "note": "Separate short-range IR sensor · simulated local state"
+    },
+    {
+      "id": "19",
+      "duration": 3,
+      "source_type": "MOCKUP",
+      "description": "Held Placement map; proposed field work",
+      "on_screen_text": [
+        "Proposed work: supervised trial · radio · power · cost"
+      ],
+      "caption": [
+        "Simulated geometric visibility"
+      ],
+      "subtitle": "Next comes field testing.",
+      "edits": [
+        {
+          "duration": 3,
+          "sources": [
+            {
+              "file": "pitch/captures/mockups/clips/shot-14-19-placement-mockup.mp4",
+              "in_seconds": 0,
+              "out_seconds": 3,
+              "crop": [
+                280,
+                16,
+                1360,
+                804
+              ],
+              "wordmark_rect": [
+                337,
+                59,
+                107,
+                37
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "20",
+      "duration": 3,
+      "source_type": "REAL",
+      "description": "Genuine assembly photograph: board, hub, two cameras, sensor",
+      "on_screen_text": [
+        "ACORN · Scarabs",
+        "Junction 2026 · Helsinki"
+      ],
+      "caption": [
+        "Actual prototype · still photograph"
+      ],
+      "subtitle": "This is the prototype we built.",
+      "edits": [
+        {
+          "duration": 3,
+          "sources": [
+            {
+              "file": "pitch/edit/media/shot-20-prototype.jpg",
+              "in_seconds": 0,
+              "out_seconds": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cuts": {
+    "master": {
+      "output": "acorn-master-roughcut.mp4",
+      "expected_duration": 114,
+      "audio": {
+        "voice_over": null,
+        "music": null,
+        "voice_gain": 1.0,
+        "music_gain": 0.16
+      },
+      "timeline": [
+        {
+          "shot": "01",
+          "duration": 7
+        },
+        {
+          "shot": "02",
+          "duration": 6
+        },
+        {
+          "shot": "03",
+          "duration": 6
+        },
+        {
+          "shot": "04",
+          "duration": 6
+        },
+        {
+          "shot": "05",
+          "duration": 5
+        },
+        {
+          "shot": "06",
+          "duration": 6
+        },
+        {
+          "shot": "07",
+          "duration": 7
+        },
+        {
+          "shot": "08",
+          "duration": 7
+        },
+        {
+          "shot": "09",
+          "duration": 5
+        },
+        {
+          "shot": "10",
+          "duration": 8
+        },
+        {
+          "shot": "11",
+          "duration": 6
+        },
+        {
+          "shot": "12",
+          "duration": 7
+        },
+        {
+          "shot": "13",
+          "duration": 5
+        },
+        {
+          "shot": "14",
+          "duration": 7
+        },
+        {
+          "shot": "15",
+          "duration": 8
+        },
+        {
+          "shot": "16",
+          "duration": 4
+        },
+        {
+          "shot": "17",
+          "duration": 4
+        },
+        {
+          "shot": "18",
+          "duration": 4
+        },
+        {
+          "shot": "19",
+          "duration": 3
+        },
+        {
+          "shot": "20",
+          "duration": 3
+        }
+      ]
+    },
+    "30s": {
+      "output": "acorn-30s-roughcut.mp4",
+      "expected_duration": 30,
+      "audio": {
+        "voice_over": null,
+        "music": null,
+        "voice_gain": 1.0,
+        "music_gain": 0.16
+      },
+      "timeline": [
+        {
+          "shot": "01",
+          "duration": 4,
+          "subtitle": "Who is watching before smoke is noticed?"
+        },
+        {
+          "shot": "06",
+          "duration": 4,
+          "subtitle": "ACORN analyses smoke locally. This demo runs on a laptop."
+        },
+        {
+          "shot": "08",
+          "duration": 5,
+          "subtitle": "A suspicion reaches the desk. LoRa transport is simulated."
+        },
+        {
+          "shot": "10",
+          "duration": 5,
+          "subtitle": "A person reviews it and makes the call.",
+          "edits": [
+            {
+              "duration": 2,
+              "sources": [
+                {
+                  "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
+                  "in_seconds": 4.5,
+                  "out_seconds": 6.5,
+                  "crop": [
+                    704,
+                    36,
+                    512,
+                    1008
+                  ],
+                  "wordmark_rect": [
+                    762,
+                    120,
+                    118,
+                    42
+                  ]
+                },
+                {
+                  "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
+                  "in_seconds": 4.5,
+                  "out_seconds": 6.5,
+                  "crop": [
+                    280,
+                    16,
+                    1360,
+                    804
+                  ],
+                  "wordmark_rect": [
+                    337,
+                    59,
+                    107,
+                    37
+                  ]
+                }
+              ]
+            },
+            {
+              "duration": 3,
+              "sources": [
+                {
+                  "file": "pitch/captures/mockups/clips/shot-10-station-phone-mockup.mp4",
+                  "in_seconds": 12.5,
+                  "out_seconds": 15.5,
+                  "crop": [
+                    704,
+                    36,
+                    512,
+                    1008
+                  ],
+                  "wordmark_rect": [
+                    762,
+                    120,
+                    118,
+                    42
+                  ]
+                },
+                {
+                  "file": "pitch/captures/mockups/clips/shot-10-ground-mockup.mp4",
+                  "in_seconds": 12.5,
+                  "out_seconds": 15.5,
+                  "crop": [
+                    280,
+                    16,
+                    1360,
+                    804
+                  ],
+                  "wordmark_rect": [
+                    337,
+                    59,
+                    107,
+                    37
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "shot": "14",
+          "duration": 5,
+          "subtitle": "The map estimates where to place it."
+        },
+        {
+          "shot": "04",
+          "duration": 4,
+          "subtitle": "More affordable forest observation is our goal."
+        },
+        {
+          "shot": "20",
+          "duration": 3,
+          "subtitle": "This is the prototype we built."
+        }
+      ]
+    }
+  }
+}

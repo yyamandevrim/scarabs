@@ -55,3 +55,7 @@ artifacts/
 # Local Screeny handoff: recordings, frame checks and private capture logs
 pitch/captures/*
 !pitch/captures/README.md
+
+# Local film renders, review frames, derived fonts, and replacement media
+pitch/edit/out/
+pitch/edit/media/
