@@ -1,9 +1,13 @@
 # ACORN launch point map
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.png">
-  <img src="../assets/brand/acorn-wordmark-black.png" width="144" height="50" alt="ACORN">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.svg">
+    <img src="../assets/brand/acorn-wordmark-black.svg" width="400" alt="ACORN">
+  </picture>
+  <br>
+  Aerial Canopy Observation and Reporting Node
+</p>
 
 **ACORN — Aerial Canopy Observation and Reporting Node.** This is the English-first project website and offline geometric visibility simulator (Turkish toggle) for ACORN, built by team Scarabs for the Green European Renaissance challenge at Junction 2026, Helsinki. All implementation and generated data live in `placement/`; this app does not depend on `station/`.
 
@@ -13,7 +17,7 @@ Coverage is **simulated geometric visibility**, not optical smoke-detection rang
 
 ## Public website and artifact handoff
 
-The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The header uses Yaman’s supplied compact white wordmark (`logo`), and the landing hero uses the complete stacked variant (`stacked_logo`). Both are bundled under `static/brand/` for offline and deployed use. See [asset provenance and usage](../assets/brand/README.md). **Scarabs is the team**, not the product.
+The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The header uses Yaman’s original vector wordmark (`logo`); the landing hero uses the complete stacked vector lockup (`stacked_logo`). Both are bundled under `static/brand/` for offline and deployed use. See [asset provenance and usage](../assets/brand/README.md). **Scarabs is the team**, not the product.
 
 See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the exact Modal token → one-time data load → deploy commands, public API limits, storage/JIT decisions and account-free checks. See [`../tools/README.md`](../tools/README.md) for the checksum-pinned IronShard dry-run/upload/restore workflow and redistribution notices. **No deployment or upload was performed.**
 

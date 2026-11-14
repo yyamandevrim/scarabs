@@ -22,7 +22,7 @@ At desktop width, two larger complete feed frames stack beside their measurement
 
 ## Verification
 
-Desktop and phone screenshots must cover loaded, partial, loading and failure states. Inspect contrast, clipping, queue accumulation and media fallback. Run placement Python tests, station Python tests and station JS panel tests; inspect browser diagnostics for external requests and console errors. Font provenance is recorded in static/fonts/README.md. Brand names remain sourced from brand.json and station/identity.py. Use the supplied compact white ACORN wordmark in application headers and the complete stacked white logo at native size in the landing hero and station sign-in. Canonical artwork and extraction limitations are documented in assets/brand/README.md at the repository root.
+Desktop and phone screenshots must cover loaded, partial, loading and failure states. Inspect contrast, clipping, queue accumulation and media fallback. Run placement Python tests, station Python tests and station JS panel tests; inspect browser diagnostics for external requests and console errors. Font provenance is recorded in static/fonts/README.md. Brand names remain sourced from brand.json and station/identity.py. Use the supplied white ACORN wordmark at 120 px wide in desktop headers and 104 px on phones. Landing uses the complete stacked vector lockup at up to 460 px; sign-in uses it at up to 360 px. Both shrink proportionally on phones. Canonical artwork and vector extraction details are documented in assets/brand/README.md at the repository root.
 
 ## Shared product shell and Ground
 

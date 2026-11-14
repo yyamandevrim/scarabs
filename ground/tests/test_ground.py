@@ -141,8 +141,8 @@ def test_no_external_assets_and_demo_label(ground):
     html=c.get('/').text
     assert 'id="demo" hidden' in html and 'Demo only: shown over Wi-Fi, not available over LoRa' in html
     assert 'LoRa link (simulated transport)' in html
-    logo=c.get('/static/brand/acorn-wordmark-white.png')
-    assert logo.status_code==200 and logo.headers['content-type']=='image/png'
+    logo=c.get('/static/brand/acorn-wordmark-white.svg')
+    assert logo.status_code==200 and logo.headers['content-type']=='image/svg+xml'
     for path in ('/static/app.js','/static/style.css'):
         content=c.get(path).text
         assert 'https://' not in content and 'http://' not in content

@@ -1,13 +1,17 @@
 # ACORN — Aerial Canopy Observation and Reporting Node
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.png">
-  <img src="../assets/brand/acorn-wordmark-black.png" width="144" height="50" alt="ACORN">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.svg">
+    <img src="../assets/brand/acorn-wordmark-black.svg" width="400" alt="ACORN">
+  </picture>
+  <br>
+  Aerial Canopy Observation and Reporting Node
+</p>
 
 Offline smoke-suspicion prototype for the Green European Renaissance challenge at Junction 2026 in Helsinki. Python 3.11+, `uv`, OpenCV headless, ONNX Runtime CPU, FastAPI, plain local HTML/CSS/JS, and SQLite. No PyTorch, GPU, Jetson, cloud inference, CDN, external fonts, or solar implementation. Communication now includes a compact LoRa packet layer with a simulated transport; no real radio has been tested.
 
-The panel's English product name is defined once in `station/identity.py`. It supplies the accessible product name and page title, including alarm and connection-loss states. The panel uses Yaman’s supplied compact white wordmark; ranger sign-in uses the complete stacked logo. Both are bundled locally. See [asset provenance and usage](../assets/brand/README.md).
+The panel's English product name is defined once in `station/identity.py`. It supplies the accessible product name and page title, including alarm and connection-loss states. The panel uses Yaman’s supplied original vector wordmark in the header and the complete stacked vector lockup on ranger sign-in. Both are bundled locally. See [asset provenance and usage](../assets/brand/README.md).
 
 **The two-input requirement is applied.** Three cameras remain physically mounted: `left` −70°, `centre` 0°, `right` +70°. Each slot has an `active` flag. Any pair can be selected; the default is **left + centre**. Three active slots are rejected with `At most two camera slots may be active; the board has two usable inputs`. Only active slots create capture workers or receive inference. The inactive slot reads **“takılı, bağlı değil”**; a failed active source reads **“bağlantı koptu”**.
 

@@ -63,12 +63,12 @@ def test_api_and_locally_served_assets(config):
             assert 'lang="tr"' in response.text
             assert f'<title>{identity.NAME}</title>' in response.text
             assert f'aria-label="{identity.NAME}"' in response.text
-            assert 'src="/static/brand/acorn-wordmark-white.png"' in response.text
+            assert 'src="/static/brand/acorn-wordmark-white.svg"' in response.text
             assert 'rel="icon"' not in response.text
             assert "default-src 'self'" in response.headers['content-security-policy']
             for variant in ('wordmark', 'stacked'):
-                asset=client.get(f'/static/brand/acorn-{variant}-white.png')
-                assert asset.status_code==200 and asset.headers['content-type']=='image/png'
+                asset=client.get(f'/static/brand/acorn-{variant}-white.svg')
+                assert asset.status_code==200 and asset.headers['content-type']=='image/svg+xml'
             for asset in ('/static/app.js','/static/style.css'):
                 r=client.get(asset);assert r.status_code==200
                 assert not re.search(r'https?://|@import|fonts.googleapis|cdn\.',r.text)

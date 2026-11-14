@@ -5,10 +5,10 @@
     "en": "Tethered-balloon cameras above the forest canopy, with every smoke suspicion reviewed by an operator.",
     "tr": "Orman örtüsünün üzerinde bağlı balon kameraları; her duman şüphesini bir operatör değerlendirir."
   },
-  "logo": "/static/brand/acorn-wordmark-white.png",
+  "logo": "/static/brand/acorn-wordmark-white.svg",
   "placeholder": false,
   "team": "Scarabs",
   "event": "Junction 2026, Helsinki",
   "challenge": "Green European Renaissance",
-  "stacked_logo": "/static/brand/acorn-stacked-white.png"
+  "stacked_logo": "/static/brand/acorn-stacked-white.svg"
 }

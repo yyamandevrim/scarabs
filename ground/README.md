@@ -1,9 +1,13 @@
 # ACORN ground receiver
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.png">
-  <img src="../assets/brand/acorn-wordmark-black.png" width="144" height="50" alt="ACORN">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.svg">
+    <img src="../assets/brand/acorn-wordmark-black.svg" width="400" alt="ACORN">
+  </picture>
+  <br>
+  Aerial Canopy Observation and Reporting Node
+</p>
 
 The original remote dashboard is **LoRa-only**. It is a separate FastAPI process on the operator laptop. Its operational state is decoded only from packet bytes received by **LoRa link (simulated transport)**. It neither reads the station database nor calls its API during normal viewing. The compass shows approximate directions from a configured heading, yaw and FOV; no fire location or distance is measured.
 
