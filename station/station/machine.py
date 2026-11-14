@@ -40,9 +40,9 @@ def describe(system, machine, release, cpu, board):
     os_name = {"Darwin": "macOS", "Linux": "Linux"}.get(system, system)
     if system == "Darwin":
         release = platform.mac_ver()[0] or release
-    what = board or cpu or machine or "bilinmeyen makine"
-    label = f"Ölçüm bu cihazda: {what} · {os_name} {release} · {machine}"
-    label += " · Arduino UNO Q" if is_uno_q else " · UNO Q değil"
+    what = board or cpu or machine or "unknown machine"
+    label = f"Measured on this device: {what} · {os_name} {release} · {machine}"
+    label += " · Arduino UNO Q" if is_uno_q else " · not an UNO Q"
     return {"system": os_name, "os_release": release, "architecture": machine, "cpu_model": cpu,
             "board_model": board, "is_uno_q": is_uno_q, "label": label}
 

@@ -1,4 +1,4 @@
-"""Turkish text on evidence images with OpenCV's built-in Hershey font.
+"""English evidence labels with OpenCV's built-in Hershey font.
 
 The Hershey fonts have no ç ğ ı İ ö ş ü glyphs, and putText draws them as
 "?" or nothing. Each such letter is drawn as its ASCII base letter plus the
@@ -28,8 +28,18 @@ def _advance(ch, scale, thickness):
     return cv2.getTextSize(ch * 2, FONT, scale, thickness)[0][0] - cv2.getTextSize(ch, FONT, scale, thickness)[0][0]
 
 
+def _display_text(text):
+    # Localize the legacy annotation at the presentation boundary. The detector
+    # and its confidence/box calculations remain unchanged.
+    prefix = "Duman şüphesi %"
+    if text.startswith(prefix):
+        return "Smoke suspicion " + text[len(prefix):] + "%"
+    return text
+
+
 def text_size(text, scale, thickness):
     """Like cv2.getTextSize for the whole label, including marks above caps."""
+    text = _display_text(text)
     width = sum(_advance(_base(ch), scale, thickness) for ch in text) + (cv2.getTextSize("a", FONT, scale, thickness)[0][0] - _advance("a", scale, thickness))
     (_, height), baseline = cv2.getTextSize("Hg", FONT, scale, thickness)
     if any(TURKISH.get(ch, (None, None))[1] in ("dots", "dot", "breve") and ch.isupper() for ch in text):
@@ -52,6 +62,7 @@ def _ink(ch, scale, thickness):
 
 
 def put_text(image, text, org, scale, colour, thickness):
+    text = _display_text(text)
     x, y = org
     x_top = _ink("x", scale, thickness)[1]          # negative: x-height above baseline
     radius = max(1, round(thickness * .9))

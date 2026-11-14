@@ -60,59 +60,62 @@ async function panel(events = [], options = {}) {
 
 test('loading never claims no events or a connected station', async () => {
   const p = await panel([], {loading: true});
-  assert.match(p.$('#events').textContent, /yükleniyor/);
+  assert.match(p.$('#events').textContent, /Loading/);
   assert.equal(p.$('#events').getAttribute('aria-busy'), 'true');
-  assert.match(p.$('#connection').textContent, /bağlanılıyor/);
+  assert.match(p.$('#connection').textContent, /Connecting/);
   assert.equal(p.$('#cameras').children.length, 2);
-  assert.doesNotMatch(p.$('#events').textContent, /Henüz/);
+  assert.doesNotMatch(p.$('#events').textContent, /No smoke suspicion/);
   assert.ok(p.$('#event-panel').compareDocumentPosition(p.$('.observation')) & 4);
   assert.equal(p.window.document.title, stationTitle);
+  assert.equal(p.window.document.documentElement.lang, 'en');
+  assert.equal(p.$('#events').getAttribute('aria-label'), 'Records awaiting review');
 });
 
 test('normal has two feeds, one inactive status row, local demo labels and measured figures', async () => {
   const p = await panel();
   assert.equal(p.$('#cameras').children.length, 2);
-  assert.match(p.$('#inactive-cameras').textContent, /Sağ.*takılı, bağlı değil/);
+  assert.match(p.$('#inactive-cameras').textContent, /Right.*mounted, inactive/);
   assert.equal(p.window.document.querySelectorAll('.source-label').length, 2);
-  assert.match(p.$('.source-label').textContent, /Kayıtlı demo/);
-  assert.match(p.$('.camera-info').textContent, /Ölçülen.*54,8 ms/);
-  assert.match(p.$('#events').textContent, /Henüz duman şüphesi kaydı yok/);
+  assert.match(p.$('.source-label').textContent, /Recorded demo/);
+  assert.match(p.$('.camera-info').textContent, /Measured.*54\.8 ms/);
+  assert.match(p.$('#events').textContent, /No smoke suspicion records yet/);
   assert.equal(p.$('#system-warning').hidden, true);
+  assert.equal(p.$('.camera img').alt, 'Left camera feed');
   assert.equal(p.window.document.title, stationTitle);
 });
 
 test('pending count excludes decisions, includes closed records still awaiting a decision', async () => {
   const p = await panel([event({closed_at: 1700000010}), event({id: 'other', decision: 'rejected', decided_at: 1700000010})]);
-  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '1 awaiting decision');
   assert.equal(p.$('#history-count').textContent, '(1)');
-  assert.match(p.window.document.title, /\(1\) Duman şüphesi/);
+  assert.match(p.window.document.title, /\(1\) Smoke suspicion/);
   assert.ok(p.window.document.title.endsWith(stationTitle));
   assert.equal(p.$('.camera').classList.contains('suspected'), true); // other record remains open
 });
 
 test('open suspicion identifies the source camera and stops marking it once closed', async () => {
   const p = await panel([event()]);
-  assert.match(p.$('.camera-state').textContent, /Duman şüphesi · %88/);
+  assert.match(p.$('.camera-state').textContent, /Smoke suspicion · 88%/);
   assert.equal(p.$('.camera').classList.contains('suspected'), true);
   p.state.events[0].closed_at = 1700000010;
   await p.refresh();
   assert.equal(p.$('.camera').classList.contains('suspected'), false);
 });
 
-for (const [decision, selector, label] of [['confirmed', '.confirm', 'Operatör doğruladı'], ['rejected', '.reject', 'Operatör reddetti']]) {
+for (const [decision, selector, label] of [['confirmed', '.confirm', 'Operator confirmed suspicion'], ['rejected', '.reject', 'Operator rejected suspicion']]) {
   test(`${decision} persists then replaces both buttons with decision, time and change action`, async () => {
     const p = await panel([event()]);
     p.$(selector).click();
     await flush();
     assert.equal(p.state.posts[0].decision, decision);
-    assert.equal(p.$('#event-count').textContent, '0 karar bekliyor');
+    assert.equal(p.$('#event-count').textContent, '0 awaiting decision');
     assert.equal(p.$('#events .event'), null);
     assert.equal(p.$('#history').open, true);
     assert.match(p.$('.decision').textContent, new RegExp(`${label} · \\d`));
     assert.equal(p.$('.confirm'), null);
     assert.equal(p.$('.reject'), null);
     assert.equal(p.$('.event').classList.contains('decided'), true);
-    assert.match(p.$('.inline-status').textContent, /kaydedildi/);
+    assert.match(p.$('.inline-status').textContent, /Saved/);
     await p.refresh();
     assert.match(p.$('.decision').textContent, new RegExp(label));
     p.$('.change').click();
@@ -129,13 +132,13 @@ test('failed decision stays pending, shows retry feedback, and restores controls
   p.state.postFail = true;
   p.$('.confirm').click();
   await flush();
-  assert.match(p.$('.inline-status').textContent, /kaydedilemedi/);
+  assert.match(p.$('.inline-status').textContent, /could not be saved/);
   assert.equal(p.$('.confirm').disabled, false);
-  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '1 awaiting decision');
   p.state.postFail = false;
   p.$('.reject').click();
   await flush();
-  assert.match(p.$('.decision').textContent, /reddetti/);
+  assert.match(p.$('.decision').textContent, /rejected suspicion/);
 });
 
 test('an older in-flight poll cannot undo a successful operator decision', async () => {
@@ -155,7 +158,7 @@ test('an older in-flight poll cannot undo a successful operator decision', async
   await flush();
   release();
   await polling;
-  assert.match(p.$('.decision').textContent, /Operatör doğruladı/);
+  assert.match(p.$('.decision').textContent, /Operator confirmed suspicion/);
   assert.equal(p.$('.confirm'), null);
 });
 
@@ -175,12 +178,12 @@ test('camera drop warns of reduced coverage, clears its measurements and leaves 
   p.state.status.cameras[1].connected = false;
   await p.refresh();
   assert.equal(p.$('#system-warning').hidden, false);
-  assert.match(p.$('#system-warning').textContent, /Gözlem kapsamı azaldı · 1\/2.*Orta/);
+  assert.match(p.$('#system-warning').textContent, /Reduced observation coverage · 1\/2.*Center/);
   const dropped = p.$('.camera.disconnected');
-  assert.match(dropped.textContent, /Bağlantı koptu/);
+  assert.match(dropped.textContent, /Connection lost/);
   assert.equal(dropped.querySelector('img').hidden, true);
-  assert.equal(dropped.querySelector('.camera-info').textContent, 'Ölçülen · —');
-  assert.match(p.$('.camera:not(.disconnected) .camera-info').textContent, /54,8 ms/);
+  assert.equal(dropped.querySelector('.camera-info').textContent, 'Measured · —');
+  assert.match(p.$('.camera:not(.disconnected) .camera-info').textContent, /54\.8 ms/);
   p.state.status.cameras[1].connected = true;
   await p.refresh();
   assert.equal(p.$('#system-warning').hidden, true);
@@ -190,13 +193,13 @@ test('all active sources lost states observation unavailable', async () => {
   const p = await panel();
   p.state.status.cameras.forEach(item => { item.connected = false; });
   await p.refresh();
-  assert.match(p.$('#system-warning').textContent, /Gözlem kullanılamıyor · 0\/2/);
+  assert.match(p.$('#system-warning').textContent, /Observation unavailable · 0\/2/);
 });
 
 test('JPEG failure also reduces coverage until an image loads again', async () => {
   const p = await panel();
   p.$('.camera img').onerror();
-  assert.match(p.$('#system-warning').textContent, /Gözlem kapsamı azaldı · 1\/2/);
+  assert.match(p.$('#system-warning').textContent, /Reduced observation coverage · 1\/2/);
   p.$('.camera img').onload();
   assert.equal(p.$('#system-warning').hidden, true);
 });
@@ -205,15 +208,15 @@ test('server loss removes connected states, stale figures, empty all-clear and d
   const p = await panel([event()]);
   p.state.fail = true;
   await p.refresh();
-  assert.match(p.$('#system-warning').textContent, /İstasyon yanıt vermiyor.*Son veri/);
-  assert.equal(p.$('#connection').textContent, 'İstasyon bağlantısı yok');
-  assert.equal(p.$('#pending-summary').textContent, 'Kayıtlara erişilemiyor');
-  assert.equal(p.window.document.title, `Bağlantı yok — ${stationTitle}`);
-  assert.equal(p.$('.camera-state').textContent, 'Durum bilinmiyor');
-  assert.equal(p.$('.camera-info').textContent, 'Ölçülen · —');
+  assert.match(p.$('#system-warning').textContent, /Station not responding.*Last data received/);
+  assert.equal(p.$('#connection').textContent, 'Station disconnected');
+  assert.equal(p.$('#pending-summary').textContent, 'Records unavailable');
+  assert.equal(p.window.document.title, `No connection — ${stationTitle}`);
+  assert.equal(p.$('.camera-state').textContent, 'Status unknown');
+  assert.equal(p.$('.camera-info').textContent, 'Measured · —');
   assert.equal(p.$('.camera img').getAttribute('src'), null);
-  assert.match(p.$('#events').textContent, /Bağlantı bekleniyor/);
-  assert.doesNotMatch(p.$('#events').textContent, /Henüz/);
+  assert.match(p.$('#events').textContent, /Waiting for connection/);
+  assert.doesNotMatch(p.$('#events').textContent, /No smoke suspicion/);
   assert.equal(p.$('.confirm'), null);
   assert.equal(p.$('#history').hidden, true);
   p.state.fail = false;
@@ -228,16 +231,16 @@ test('USB sources use a live label and any configured active pair works', async 
   p.state.status.cameras = [camera('left', false), {...camera('centre'), kind: 'usb'}, camera('right')];
   await p.refresh();
   assert.equal(p.$('#cameras').children.length, 2);
-  assert.match(p.$('#inactive-cameras').textContent, /Sol/);
-  assert.equal(p.$('.source-label').textContent, 'Canlı kamera · yerel analiz');
+  assert.match(p.$('#inactive-cameras').textContent, /Left/);
+  assert.equal(p.$('.source-label').textContent, 'Live camera · local analysis');
 });
 
 test('pipeline errors are a failure warning, not a measured zero or a healthy analysis', async () => {
   const p = await panel();
   p.state.status.cameras[0].pipeline_error = 'inference failed';
   await p.refresh();
-  assert.match(p.$('#system-warning').textContent, /Analiz kesintisi/);
-  assert.match(p.$('.camera-info').textContent, /Analiz kullanılamıyor/);
+  assert.match(p.$('#system-warning').textContent, /Analysis outage/);
+  assert.match(p.$('.camera-info').textContent, /Analysis unavailable/);
 });
 
 const webm = '0123456789abcdef0123456789abcdef.webm';
@@ -257,12 +260,12 @@ test('WebM clip plays inline with the annotated snapshot as poster, recorded-dem
   assert.equal(video.getAttribute('poster'), '/events/0123456789abcdef0123456789abcdef.jpg');
   assert.equal(video.controls, true);
   assert.equal(p.$('.event .evidence').hidden, true);
-  assert.equal(p.$('.clip-label').textContent, 'Kayıtlı demo · olay klibi');
+  assert.equal(p.$('.clip-label').textContent, 'Recorded demo · event clip');
   assert.equal(p.$('.event .evidence-link').getAttribute('href'), `/events/${webm}`);
   assert.equal(p.$('.event .evidence-link').getAttribute('download'), webm);
-  assert.equal(p.$('.event .evidence-link').textContent, 'İndir (.webm)');
+  assert.equal(p.$('.event .evidence-link').textContent, 'Download (.webm)');
   assert.equal(p.$('.clip-status').hidden, true);
-  assert.doesNotMatch(p.$('.event').textContent, /yangın/i);
+  assert.doesNotMatch(p.$('.event').textContent, /fire detected|confirmed fire/i);
 });
 
 test('polling keeps the same video element and never reloads the clip being watched', async () => {
@@ -283,38 +286,38 @@ test('legacy AVI events show the snapshot, an honest message and the download, w
   assert.equal(p.$('.clip-player').hidden, true);
   assert.equal(p.$('.event video').getAttribute('src'), null);
   assert.equal(p.$('.event .evidence').hidden, false);
-  assert.match(p.$('.clip-status').textContent, /tarayıcıda oynatılamaz \(\.avi\).*indirilip/);
-  assert.equal(p.$('.event .evidence-link').textContent, 'İndir (.avi)');
-  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  assert.match(p.$('.clip-status').textContent, /cannot play in the browser \(\.avi\).*download/);
+  assert.equal(p.$('.event .evidence-link').textContent, 'Download (.avi)');
+  assert.equal(p.$('#event-count').textContent, '1 awaiting decision');
 });
 
 test('a browser without VP8 support, or a decode error, falls back to snapshot plus download', async () => {
   const unsupported = await clipPanel(webm, '');
   assert.equal(unsupported.$('.clip-player').hidden, true);
   assert.equal(unsupported.$('.event .evidence').hidden, false);
-  assert.match(unsupported.$('.clip-status').textContent, /Bu tarayıcı klibi oynatamıyor/);
+  assert.match(unsupported.$('.clip-status').textContent, /This browser cannot play the clip/);
   const p = await clipPanel(webm);
   p.$('.event video').dispatchEvent(new p.window.Event('error'));
   assert.equal(p.$('.clip-player').hidden, true);
   assert.equal(p.$('.event .evidence').hidden, false);
-  assert.match(p.$('.clip-status').textContent, /oynatamıyor/);
+  assert.match(p.$('.clip-status').textContent, /cannot play/);
   await p.refresh();
   assert.equal(p.$('.clip-player').hidden, true, 'a failed clip is not retried on every poll');
 });
 
 test('clip states: pending encode, failed encode and live camera label', async () => {
   const p = await clipPanel(null);
-  assert.match(p.$('.clip-status').textContent, /hazırlanıyor/);
+  assert.match(p.$('.clip-status').textContent, /Preparing/);
   assert.equal(p.$('.clip-bar').hidden, true);
   p.state.events[0].media_error = 'encoder failed';
   await p.refresh();
-  assert.match(p.$('.clip-status').textContent, /Klip kaydedilemedi/);
+  assert.match(p.$('.clip-status').textContent, /Clip could not be saved/);
   assert.equal(p.$('.clip-status').classList.contains('error'), true);
   p.state.events[0].clip = webm;
   p.state.events[0].media_error = null;
   p.state.status.cameras[0].kind = 'usb';
   await p.refresh();
-  assert.equal(p.$('.clip-label').textContent, 'Kamera kaydı · olay klibi');
+  assert.equal(p.$('.clip-label').textContent, 'Camera recording · event clip');
 });
 
 test('deciding pauses a playing clip', async () => {
@@ -328,7 +331,7 @@ test('deciding pauses a playing clip', async () => {
 
 test('large queue starts with one open record and polling preserves the reviewed disclosure', async () => {
   const p = await panel(Array.from({length: 60}, (_, i) => event({id: `queue-${i}`, opened_at: 1700000000 - i * 60})));
-  assert.equal(p.$('#event-count').textContent, '60 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '60 awaiting decision');
   assert.equal(p.window.document.querySelectorAll('#events .event[open]').length, 1);
   const reviewed = p.$('[data-event-id="queue-12"]');
   p.$('#events .event').open = false;
@@ -342,42 +345,42 @@ test('large queue starts with one open record and polling preserves the reviewed
 
 test('machine label accompanies measurements and confidence is explicitly latest', async () => {
   const p = await panel([event()]);
-  p.state.status.measured_on = {label: 'Ölçüm bu cihazda: Test CPU · Linux · UNO Q değil'};
+  p.state.status.measured_on = {label: 'Measured on this device: Test CPU · Linux · not an UNO Q'};
   await p.refresh();
   assert.match(p.$('#measured-on').textContent, /Test CPU/);
-  assert.match(p.$('.event-meta').textContent, /son gözlem güveni %88/);
+  assert.match(p.$('.event-meta').textContent, /latest observation confidence 88%/);
 });
 
 test('local flame and observed LED are separate from smoke events and go unknown on server loss', async () => {
   const p = await panel();
   p.state.status.mcu = {mode: 'simulated', simulated: true,
-    flame_sensor: {configured: true, connected: true, triggered: true, status_text: 'Alev sensörü tetiklendi', level_permille: 700, note: 'Yerel kısa menzilli sensör; kamera duman şüphesini doğrulamaz.'},
-    led: {shown: {colour: 'red', pattern: 'fast blink, 5 per second', text: 'Alev sensörü tetiklendi'}, requested: {text: 'Normal gözlem'}}};
+    flame_sensor: {configured: true, connected: true, triggered: true, status_text: 'Flame-sensor trigger', level_permille: 700, note: 'Local short-range sensor; it does not confirm camera smoke suspicions.'},
+    led: {shown: {colour: 'red', pattern: 'fast blink, 5 per second', text: 'Flame-sensor trigger'}, requested: {text: 'Normal observation'}}};
   await p.refresh();
-  assert.equal(p.$('#flame-status').textContent, 'Alev sensörü tetiklendi');
-  assert.match(p.$('.sensor-scope').textContent, /kısa menzilli.*doğrulamaz/);
-  assert.equal(p.$('#mcu-mode').textContent, 'Simülasyon');
-  assert.match(p.$('#led-status').textContent, /Kırmızı.*saniyede 5/);
-  assert.doesNotMatch(p.$('#led-status').textContent, /Normal gözlem/);
-  assert.match(p.$('#led-requested').textContent, /Normal gözlem/);
-  assert.match(p.$('#sensor-reading').textContent, /700\/1000.*kalibre edilmemiştir/);
-  assert.equal(p.$('#event-count').textContent, '0 karar bekliyor');
+  assert.equal(p.$('#flame-status').textContent, 'Flame-sensor trigger');
+  assert.match(p.$('.sensor-scope').textContent, /short-range.*does not confirm/);
+  assert.equal(p.$('#mcu-mode').textContent, 'Simulation');
+  assert.match(p.$('#led-status').textContent, /Red.*5 blinks per second/);
+  assert.doesNotMatch(p.$('#led-status').textContent, /Normal observation/);
+  assert.match(p.$('#led-requested').textContent, /Normal observation/);
+  assert.match(p.$('#sensor-reading').textContent, /700\/1000.*uncalibrated/);
+  assert.equal(p.$('#event-count').textContent, '0 awaiting decision');
   p.state.fail = true;
   await p.refresh();
-  assert.match(p.$('#flame-status').textContent, /bilinmiyor/);
-  assert.equal(p.$('#led-status').textContent, 'Durum LED’i: okunamıyor');
+  assert.match(p.$('#flame-status').textContent, /unknown/);
+  assert.equal(p.$('#led-status').textContent, 'Status LED: unavailable');
   assert.equal(p.$('#sensor-reading').textContent, '');
 });
 
 test('pending total has one visible home and older records disclose without hiding a watched clip', async () => {
   const events = Array.from({length: 60}, (_, i) => event({id: `ordered-${i}`, opened_at: 1700000000 - i * 60}));
   const p = await panel(events);
-  assert.equal(p.$('#pending-summary').textContent, 'Kayıtları incele');
-  assert.equal(p.$('#event-count').textContent, '60 karar bekliyor');
+  assert.equal(p.$('#pending-summary').textContent, 'Review records');
+  assert.equal(p.$('#event-count').textContent, '60 awaiting decision');
   assert.equal(p.window.document.querySelectorAll('#events .event:not([hidden])').length, 4);
-  assert.equal(p.$('#older-toggle').textContent, 'Önceki 56 kaydı göster');
-  assert.match(p.$('[data-event-id="ordered-0"] h3').textContent, /^En yeni/);
-  assert.match(p.$('[data-event-id="ordered-59"] h3').textContent, /^En eski yanıtsız/);
+  assert.equal(p.$('#older-toggle').textContent, 'Show 56 older records');
+  assert.match(p.$('[data-event-id="ordered-0"] h3').textContent, /^Newest/);
+  assert.match(p.$('[data-event-id="ordered-59"] h3').textContent, /^Oldest awaiting review/);
   p.$('#older-toggle').click();
   assert.equal(p.window.document.querySelectorAll('#events .event[hidden]').length, 0);
   const reviewing = p.$('[data-event-id="ordered-20"]');
@@ -422,25 +425,25 @@ test('profile explains its intended smoke scale and effective configuration besi
   const p = await panel();
   p.state.status.analysis_profile = {name:'field',input_size:640,confidence:.25,analysis_hz:1/6,interval_seconds:6,event_timeout_seconds:36,required_detections:3,window_analyses:5};
   await p.refresh();
-  assert.match(p.$('#analysis-profile').textContent, /Saha profili/);
-  assert.match(p.$('#analysis-profile').textContent, /küçük.*uzak/i);
-  assert.match(p.$('#profile-parameters').textContent, /640.*%25.*6 sn.*36 sn/);
+  assert.match(p.$('#analysis-profile').textContent, /Field profile/);
+  assert.match(p.$('#analysis-profile').textContent, /small.*distant/i);
+  assert.match(p.$('#profile-parameters').textContent, /640.*25%.*6 s.*36 s/);
   p.state.status.analysis_profile = {...p.state.status.analysis_profile,name:'demo',input_size:192,confidence:.35,interval_seconds:1,event_timeout_seconds:12};
   await p.refresh();
-  assert.match(p.$('#analysis-profile').textContent, /Demo profili.*yakın/i);
-  assert.match(p.$('#profile-parameters').textContent, /192.*%35.*1 sn/);
+  assert.match(p.$('#analysis-profile').textContent, /Demo profile.*nearby/i);
+  assert.match(p.$('#profile-parameters').textContent, /192.*35%.*1 s/);
   p.state.fail = true; await p.refresh();
-  assert.match(p.$('#analysis-profile').textContent, /bilinmiyor/);
+  assert.match(p.$('#analysis-profile').textContent, /unknown/);
 });
 
 test('mounted inactive camera is a tile without a frame request and LED state uses a static swatch', async () => {
   const p = await panel();
   const tile = p.$('#inactive-cameras .camera');
-  assert.match(tile.textContent, /Sağ.*takılı, bağlı değil/);
+  assert.match(tile.textContent, /Right.*mounted, inactive/);
   assert.equal(tile.querySelector('img'), null);
-  p.state.status.mcu = {simulated:true,flame_sensor:{status_text:'Alev sensörü normal'},led:{shown:{colour:'amber',pattern:'steady',text:'Duman şüphesi operatör kararı bekliyor'}}};
+  p.state.status.mcu = {simulated:true,flame_sensor:{status_text:'Flame sensor normal'},led:{shown:{colour:'amber',pattern:'steady',text:'Smoke suspicion awaiting operator decision'}}};
   await p.refresh();
-  assert.match(p.$('#mcu-mode').textContent, /Simülasyon/);
+  assert.match(p.$('#mcu-mode').textContent, /Simulation/);
   assert.equal(p.$('#led-swatch').dataset.colour, 'amber');
 });
 
@@ -456,7 +459,7 @@ test('after a decision, leaving the queue opens the next pending record without 
   p.$('#event-panel').dispatchEvent(new p.window.Event('pointerleave'));
   p.window.document.activeElement?.blur(); await flush();
   assert.equal(p.$('[data-event-id="second"]').open,true);
-  assert.match(p.$('[data-event-id="second"] summary').textContent,/Kaydı daralt/);
+  assert.match(p.$('[data-event-id="second"] summary').textContent,/Collapse record/);
 });
 
 test('one completed analysis reports its time but waits for a second analysis before showing a measured rate', async () => {
@@ -464,29 +467,29 @@ test('one completed analysis reports its time but waits for a second analysis be
   p.state.status.cameras[0].analyses = 1;
   p.state.status.cameras[0].analysis_hz = 0;
   await p.refresh();
-  assert.match(p.$('.camera-info').textContent,/54,8 ms/);
-  assert.match(p.$('.camera-info').textContent,/— analiz\/sn/);
+  assert.match(p.$('.camera-info').textContent,/54\.8 ms/);
+  assert.match(p.$('.camera-info').textContent,/— analyses\/s/);
   p.state.status.cameras[0].analyses = 2;
   p.state.status.cameras[0].analysis_hz = 1/6;
   await p.refresh();
-  assert.match(p.$('.camera-info').textContent,/0,17 analiz\/sn/);
+  assert.match(p.$('.camera-info').textContent,/0\.17 analyses\/s/);
 });
 
 
 test('old pending behind newest 200 decided records remains reviewable with truthful total', async () => {
   const old = event({id:'hidden-old', opened_at:1, clip:webm});
   const p = await panel([...Array.from({length:200}, (_,i) => event({id:`decided-${i}`,opened_at:1000-i,decision:'rejected'})), old]);
-  assert.equal(p.$('#event-count').textContent, '1 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '1 awaiting decision');
   const row = p.$('[data-event-id="hidden-old"]');
   assert.ok(row && row.parentNode === p.$('#events'));
   row.querySelector('.confirm').click(); await flush();
-  assert.equal(p.$('#event-count').textContent, '0 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '0 awaiting decision');
   assert.equal(p.state.posts[0].url, '/api/events/hidden-old/decision');
 });
 
 test('bounded pending pages reach all 405 records and global oldest/newest with stable decisions and video', async () => {
   const p = await panel(Array.from({length:405}, (_,i) => event({id:`pending-${String(i).padStart(3,'0')}`,opened_at:1000-i,clip:webm})));
-  assert.equal(p.$('#event-count').textContent, '405 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '405 awaiting decision');
   assert.equal(p.window.document.querySelectorAll('#events .event').length,200);
   assert.equal(p.$('#queue-next-page').hidden, false);
   const watched = p.$('#events .event video');
@@ -501,10 +504,10 @@ test('bounded pending pages reach all 405 records and global oldest/newest with 
   assert.equal(p.$('#events .event').dataset.eventId,'pending-404');
   assert.equal(p.$('#events .event').open,true);
   p.$('#events .confirm').click(); await flush();
-  assert.equal(p.$('#event-count').textContent, '404 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '404 awaiting decision');
   p.$('#queue-newest').click(); await flush();
   assert.equal(p.$('#events .event').dataset.eventId,'pending-000');
-  assert.equal(p.$('#event-count').textContent, '404 karar bekliyor');
+  assert.equal(p.$('#event-count').textContent, '404 awaiting decision');
 });
 
 test('jump to oldest during an in-flight poll focuses the newly loaded global page', async () => {
@@ -534,7 +537,7 @@ test('successful poll restores attached usable queue while pointer remains acros
   assert.equal(row.isConnected, false);
   assert.equal(p.$('#events').getAttribute('aria-busy'), 'true');
   p.state.fail = false; await p.refresh();
-  assert.match(p.$('#connection').textContent, /İstasyon bağlı/);
+  assert.match(p.$('#connection').textContent, /Station connected/);
   assert.ok(p.$('#events .event') === row, 'recovery reattaches the existing row');
   assert.equal(row.isConnected, true);
   assert.equal(p.$('#events').getAttribute('aria-busy'), 'false');
@@ -553,11 +556,33 @@ test('runtime death and retention faults are visible separately from live camera
   p.state.status.runtime = {state:'failed',analysis_running:false,error:'Analysis loop stopped unexpectedly',retention_error:null};
   await p.refresh();
   assert.equal(p.$('#system-warning').hidden, false);
-  assert.match(p.$('#system-warning').textContent,/Analiz kesintisi/);
+  assert.match(p.$('#system-warning').textContent,/Analysis outage/);
   p.state.status.runtime = {state:'running',analysis_running:true,error:null,retention_error:'Retention unavailable'};
   await p.refresh();
-  assert.match(p.$('#system-warning').textContent,/Kayıt bakımı/);
-  assert.match(p.$('.camera-info').textContent,/54,8 ms/);
+  assert.match(p.$('#system-warning').textContent,/Record maintenance/);
+  assert.match(p.$('.camera-info').textContent,/54\.8 ms/);
   p.state.status.runtime.retention_error = null; await p.refresh();
   assert.equal(p.$('#system-warning').hidden, true);
 });
+
+for (const [status, expected] of [
+  [401, 'Incorrect secret.'],
+  [429, 'Too many attempts. Wait five minutes.'],
+  [503, 'Set ACORN_PANEL_SECRET on the station.'],
+  [null, 'Station unavailable.']
+]) {
+  test(`English sign-in feedback for ${status ?? 'network failure'}`, async () => {
+    const window = new Window({url:'http://127.0.0.1/login', settings:{disableCSSFileLoading:true,disableJavaScriptFileLoading:true}});
+    window.document.write(readFileSync(new URL('../station/static/login.html', import.meta.url), 'utf8'));
+    window.fetch = async () => { if (status === null) throw new Error('offline'); return {ok:false,status}; };
+    window.eval(readFileSync(new URL('../station/static/login.js', import.meta.url), 'utf8'));
+    const form = window.document.getElementById('login');
+    window.document.getElementById('secret').value = 'test-only';
+    form.dispatchEvent(new window.Event('submit', {cancelable:true}));
+    await flush();
+    assert.equal(window.document.documentElement.lang, 'en');
+    assert.equal(window.document.getElementById('message').textContent, expected);
+    assert.equal(form.querySelector('button').disabled, false);
+    await window.happyDOM.close();
+  });
+}

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{station_title}}</title>
@@ -11,40 +11,40 @@
 <body>
 <header class="station-bar">
   <h1 title="{{station_title}}" aria-label="{{station_title}}"><img class="brand-wordmark" src="/static/brand/acorn-wordmark-white.svg" width="639" height="207" alt=""></h1>
-  <span class="station-section">İstasyon · yakın mesafe Wi-Fi</span>
-  <p id="connection" role="status">İstasyona bağlanılıyor…</p>
-  <a id="pending-summary" href="#event-panel">Kayıtları incele</a>
+  <span class="station-section">Station · close-range Wi-Fi</span>
+  <p id="connection" role="status">Connecting to station…</p>
+  <a id="pending-summary" href="#event-panel">Review records</a>
 </header>
 <main>
   <div id="system-warning" class="system-warning" role="alert" hidden></div>
   <section id="event-panel" class="event-panel" aria-labelledby="event-title">
-    <div class="queue-head"><div class="section-heading"><h2 id="event-title">Duman şüphesi</h2><p id="event-count">Kayıtlar yükleniyor…</p></div>
-    <p class="event-note">Kararınız şüphe kaydına işlenir.</p>
-    <div id="queue-controls" class="queue-controls" hidden><button id="queue-newest" type="button">En yeni</button><button id="queue-oldest" type="button">En eski yanıtsız</button><button id="queue-prev-page" type="button" hidden>Önceki sayfa</button><button id="queue-next-page" type="button" hidden>Sonraki sayfa</button></div>
+    <div class="queue-head"><div class="section-heading"><h2 id="event-title">Smoke suspicion</h2><p id="event-count">Loading records…</p></div>
+    <p class="event-note">Your decision is saved with the suspicion record.</p>
+    <div id="queue-controls" class="queue-controls" hidden><button id="queue-newest" type="button">Newest</button><button id="queue-oldest" type="button">Oldest awaiting review</button><button id="queue-prev-page" type="button" hidden>Previous page</button><button id="queue-next-page" type="button" hidden>Next page</button></div>
     <button id="older-toggle" class="older-toggle" type="button" aria-expanded="false" aria-controls="events" hidden></button></div>
     <div class="queue-arrivals-slot"><p id="queue-arrivals" role="status" hidden></p></div>
-    <div id="events" aria-label="Karar bekleyen kayıtlar" aria-busy="true"><p class="empty skeleton">Kayıtlar yükleniyor…</p></div>
-    <details id="history" class="history" hidden><summary>Değerlendirilen kayıtlar <span id="history-count"></span></summary><div id="history-events"></div></details>
+    <div id="events" aria-label="Records awaiting review" aria-busy="true"><p class="empty skeleton">Loading records…</p></div>
+    <details id="history" class="history" hidden><summary>Reviewed records <span id="history-count"></span></summary><div id="history-events"></div></details>
   </section>
   <section class="observation" aria-labelledby="feed-title">
-    <div class="section-heading"><h2 id="feed-title">Kamera görüntüleri</h2><p id="coverage">Giriş bilgileri yükleniyor…</p></div>
-    <div class="analysis-profile"><p id="analysis-profile">Analiz profili yükleniyor…</p><p id="profile-parameters"></p></div>
+    <div class="section-heading"><h2 id="feed-title">Camera feeds</h2><p id="coverage">Loading camera input status…</p></div>
+    <div class="analysis-profile"><p id="analysis-profile">Loading analysis profile…</p><p id="profile-parameters"></p></div>
     <div id="cameras" class="cameras" aria-busy="true">
-      <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
-      <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
+      <div class="camera loading"><div class="image-wrap skeleton"><p>Waiting for image…</p></div></div>
+      <div class="camera loading"><div class="image-wrap skeleton"><p>Waiting for image…</p></div></div>
     </div>
-    <p id="measured-on" class="measured-on">Ölçüm cihazı bekleniyor…</p>
+    <p id="measured-on" class="measured-on">Waiting for measurement device…</p>
     <div class="hardware-strip"><div id="inactive-cameras" class="inactive-cameras"></div>
     <section class="module-state" aria-labelledby="module-title">
-      <div class="section-heading"><h2 id="module-title">Modüldeki sensör ve LED</h2><span id="mcu-mode" class="tag tag-sim"></span></div>
-      <div id="flame-status" role="status">Alev sensörü verisi bekleniyor…</div>
-      <div class="led-reading"><span id="led-swatch" aria-hidden="true"></span><p id="led-status">Durum LED’i: —</p></div>
-      <p class="sensor-scope">Modüldeki kısa menzilli kızılötesi sensör; kamera duman şüphesini doğrulamaz.</p>
-      <details class="sensor-details"><summary>Yerel sensörün kapsamı</summary><p id="flame-note">Modüldeki kısa menzilli kızılötesi sensör. Kamera duman şüphesini doğrulamaz.</p><p id="sensor-reading"></p><p id="led-requested"></p></details>
+      <div class="section-heading"><h2 id="module-title">Local sensor and LED</h2><span id="mcu-mode" class="tag tag-sim"></span></div>
+      <div id="flame-status" role="status">Waiting for flame-sensor data…</div>
+      <div class="led-reading"><span id="led-swatch" aria-hidden="true"></span><p id="led-status">Status LED: —</p></div>
+      <p class="sensor-scope">Local short-range infrared sensor; it does not confirm camera smoke suspicions.</p>
+      <details class="sensor-details"><summary>Local sensor scope</summary><p id="flame-note">Local short-range infrared sensor. It does not confirm camera smoke suspicions.</p><p id="sensor-reading"></p><p id="led-requested"></p></details>
     </section>
     </div>
-    <details class="configuration"><summary>Kamera yapılandırması</summary><div id="geometry">Yapılandırma yükleniyor…</div><p id="settings"></p></details>
+    <details class="configuration"><summary>Camera configuration</summary><div id="geometry">Loading configuration…</div><p id="settings"></p></details>
   </section>
 </main>
-<footer><span>Tam görüntü ve kayıt · Wi-Fi üzerinden · LoRa ile iletilmez</span><span>Deneysel prototip · Uyarılar operatör değerlendirmesi gerektirir</span></footer>
+<footer><span>Full imagery and records · over Wi-Fi · not carried by LoRa</span><span>Experimental prototype · Alerts require operator review</span></footer>
 </body></html>

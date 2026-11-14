@@ -1,7 +1,7 @@
 'use strict';
 const stationTitle = document.title;
-const labels = {left: 'Sol', centre: 'Orta', right: 'Sağ'};
-const decisions = {confirmed: 'Operatör doğruladı', rejected: 'Operatör reddetti'};
+const labels = {left: 'Left', centre: 'Center', right: 'Right'};
+const decisions = {confirmed: 'Operator confirmed suspicion', rejected: 'Operator rejected suspicion'};
 const cameraElements = new Map();
 const eventElements = new Map();
 const editing = new Set();
@@ -26,10 +26,10 @@ const text = (tag, value, className) => {
   return element;
 };
 const num = (value, digits = 1) => Number.isFinite(value)
-  ? value.toLocaleString('tr-TR', {minimumFractionDigits: digits, maximumFractionDigits: digits}).replace('-', '−') : '—';
-const parameter = value => Number.isFinite(value) ? value.toLocaleString('tr-TR', {maximumFractionDigits: 3}) : '—';
-const time = value => value ? new Date(value * 1000).toLocaleTimeString('tr-TR') : '—';
-const dateTime = value => new Date(value * 1000).toLocaleString('tr-TR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+  ? value.toLocaleString('en-GB', {minimumFractionDigits: digits, maximumFractionDigits: digits}).replace('-', '−') : '—';
+const parameter = value => Number.isFinite(value) ? value.toLocaleString('en-GB', {maximumFractionDigits: 3}) : '—';
+const time = value => value ? new Date(value * 1000).toLocaleTimeString('en-GB') : '—';
+const dateTime = value => new Date(value * 1000).toLocaleString('en-GB', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
 async function json(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
@@ -48,9 +48,9 @@ function cameraCard(camera) {
   top.append(title, state);
   const wrap = text('div', '', 'image-wrap');
   const image = document.createElement('img');
-  image.alt = `${labels[camera.name]} kamera görüntüsü`;
+  image.alt = `${labels[camera.name]} camera feed`;
   image.hidden = true;
-  const placeholder = text('p', 'Görüntü bekleniyor…', 'placeholder');
+  const placeholder = text('p', 'Waiting for image…', 'placeholder');
   wrap.append(image, placeholder);
   const source = text('p', '', 'source-label');
   const info = text('div', '', 'camera-info');
@@ -83,31 +83,31 @@ function updateCamera(camera, requestFrame = true) {
   const suspicion = currentEvents.filter(event => event.camera === camera.name && !event.closed_at);
   item.card.className = `camera${!online ? ' unavailable' : !connected ? ' disconnected' : ''}${online && suspicion.length ? ' suspected' : ''}`;
   item.title.textContent = `${labels[camera.name]} · ${num(camera.yaw, 0)}°`;
-  item.state.textContent = !online ? 'Durum bilinmiyor' : !connected ? 'Bağlantı koptu' : suspicion.length
-    ? `Duman şüphesi · %${Math.round(Math.max(...suspicion.map(event => event.confidence)) * 100)}` : 'Görüntü alınıyor';
-  item.source.textContent = camera.kind === 'file' ? 'Kayıtlı demo · yerel analiz' : 'Canlı kamera · yerel analiz';
+  item.state.textContent = !online ? 'Status unknown' : !connected ? 'Connection lost' : suspicion.length
+    ? `Smoke suspicion · ${Math.round(Math.max(...suspicion.map(event => event.confidence)) * 100)}%` : 'Receiving images';
+  item.source.textContent = camera.kind === 'file' ? 'Recorded demo · local analysis' : 'Live camera · local analysis';
   if (!connected) {
     item.image.hidden = true;
     item.image.removeAttribute('src');
     item.busy = false;
     item.placeholder.hidden = false;
-    item.placeholder.textContent = online ? 'Görüntü alınamıyor · yeniden deneniyor' : 'İstasyon verisi bekleniyor…';
+    item.placeholder.textContent = online ? 'Image unavailable · retrying' : 'Waiting for station data…';
   }
   item.info.replaceChildren();
   if (connected && !camera.pipeline_error) {
     const device = currentStatus?.measured_on?.board_model || currentStatus?.measured_on?.cpu_model;
-    item.info.append(text('span', device ? `Ölçülen · ${device}` : 'Ölçülen', 'metric-label'));
+    item.info.append(text('span', device ? `Measured · ${device}` : 'Measured', 'metric-label'));
     const values = text('p', '', 'metric-values');
     const measured = camera.analyses > 0;
     for (const value of [
-      `Analiz ${num(measured ? camera.analysis_ms : null)} ms`,
-      `çıkarım ${num(measured ? camera.inference_ms : null)} ms`,
-      `${num(camera.analyses > 1 ? camera.analysis_hz : null, 2)} analiz/sn`,
-      `${num(camera.capture_fps)} kare/sn`
+      `Analysis ${num(measured ? camera.analysis_ms : null)} ms`,
+      `inference ${num(measured ? camera.inference_ms : null)} ms`,
+      `${num(camera.analyses > 1 ? camera.analysis_hz : null, 2)} analyses/s`,
+      `${num(camera.capture_fps)} frames/s`
     ]) values.append(text('span', value));
     item.info.append(values);
   } else {
-    item.info.append(text('p', camera.pipeline_error && online ? 'Analiz kullanılamıyor · yerel günlükleri kontrol edin' : 'Ölçülen · —', camera.pipeline_error && online ? 'pipeline-error' : ''));
+    item.info.append(text('p', camera.pipeline_error && online ? 'Analysis unavailable · check local logs' : 'Measured · —', camera.pipeline_error && online ? 'pipeline-error' : ''));
   }
   if (online && camera.connected && requestFrame && !item.busy) {
     item.busy = true;
@@ -119,7 +119,7 @@ function updateCoverage() {
   if (!online || !currentStatus) return;
   const active = currentStatus.cameras.filter(camera => camera.active);
   const receiving = active.filter(camera => camera.connected && !cameraElements.get(camera.name)?.frameFailed);
-  $('#coverage').textContent = `${receiving.length}/${active.length} etkin giriş görüntü alıyor`;
+  $('#coverage').textContent = `${receiving.length}/${active.length} active inputs receiving images`;
   const warning = $('#system-warning');
   const failed = active.filter(camera => !receiving.includes(camera));
   const pipelineFailed = receiving.filter(camera => camera.pipeline_error);
@@ -127,12 +127,12 @@ function updateCoverage() {
   const retentionFailed = currentStatus.runtime?.retention_error;
   warning.hidden = !failed.length && !pipelineFailed.length && !runtimeFailed && !retentionFailed && active.length > 0;
   if (!warning.hidden) {
-    const title = !receiving.length ? 'Gözlem kullanılamıyor' : failed.length ? 'Gözlem kapsamı azaldı' : pipelineFailed.length || runtimeFailed ? 'Analiz kesintisi' : 'Kayıt bakımı kesintisi';
-    const reason = failed.length ? `${failed.map(camera => labels[camera.name]).join(', ')} kamera bağlantısı koptu. Yeniden deneniyor.`
-      : runtimeFailed ? 'Görüntü var; duman analizi durdu. Yerel günlükleri kontrol edin.'
-      : pipelineFailed.length ? `${pipelineFailed.map(camera => labels[camera.name]).join(', ')} kamerada görüntü var; duman analizi çalışmıyor.`
-      : retentionFailed ? 'Eski kayıtlar temizlenemedi; yeniden deneniyor. Duman analizi sürüyor.' : 'Etkin kamera girişi yok.';
-    warning.replaceChildren(text('strong', `${title} · ${receiving.length}/${active.length} giriş`), text('span', reason));
+    const title = !receiving.length ? 'Observation unavailable' : failed.length ? 'Reduced observation coverage' : pipelineFailed.length || runtimeFailed ? 'Analysis outage' : 'Record maintenance outage';
+    const reason = failed.length ? `${failed.map(camera => labels[camera.name]).join(', ')} camera connection lost. Retrying.`
+      : runtimeFailed ? 'Images available; smoke analysis stopped. Check local logs.'
+      : pipelineFailed.length ? `${pipelineFailed.map(camera => labels[camera.name]).join(', ')} camera images available; smoke analysis is not running.`
+      : retentionFailed ? 'Old records could not be removed; retrying. Smoke analysis continues.' : 'No active camera inputs.';
+    warning.replaceChildren(text('strong', `${title} · ${receiving.length}/${active.length} inputs`), text('span', reason));
   }
 }
 function renderStatus(status) {
@@ -150,39 +150,39 @@ function renderStatus(status) {
     .map(camera => {
       const tile = text('article', '', 'camera inactive');
       tile.append(text('h3', `${labels[camera.name]} · ${num(camera.yaw, 0)}°`),
-        text('p', 'takılı, bağlı değil'), text('span', 'Üçüncü kamera · iki etkin giriş', 'inactive-note'));
+        text('p', 'mounted, inactive'), text('span', 'Third camera · two active inputs', 'inactive-note'));
       return tile;
     }));
   $('#geometry').replaceChildren(...status.cameras.map(camera => text('p',
-    `${labels[camera.name]}: eğim ${num(camera.tilt, 0)}° · yatay/dikey görüş ${num(camera.hfov, 0)}° / ${num(camera.vfov, 0)}°`)));
-  $('#settings').textContent = `Yapılandırılan hedef: ${num(status.target_analysis_hz, 2)} analiz/sn/kamera · model girişi ${status.input_size}px. Giriş çifti yapılandırmadan seçilir.`;
+    `${labels[camera.name]}: tilt ${num(camera.tilt, 0)}° · horizontal/vertical FOV ${num(camera.hfov, 0)}° / ${num(camera.vfov, 0)}°`)));
+  $('#settings').textContent = `Configured target: ${num(status.target_analysis_hz, 2)} analyses/s/camera · model input ${status.input_size}px. Select the camera pair in configuration.`;
   const profile = status.analysis_profile;
   $('#analysis-profile').textContent = profile ? profile.name === 'demo'
-    ? 'Demo profili · Yakındaki dumana ayarlı; küçük, uzak dumanı kaçırabilir.'
-    : 'Saha profili · Küçük ve uzak duman için daha büyük model girişi, daha yavaş analiz.'
-    : 'Analiz profili bilgisi alınamadı';
+    ? 'Demo profile · Tuned for nearby smoke; may miss small, distant smoke.'
+    : 'Field profile · Larger model input for small, distant smoke; slower analysis.'
+    : 'Analysis profile unavailable';
   $('#profile-parameters').textContent = profile
-    ? `Model ${profile.input_size}px · güven eşiği %${parameter(profile.confidence * 100)} · hedef ${parameter(profile.interval_seconds)} sn/kamera · olay zaman aşımı ${parameter(profile.event_timeout_seconds)} sn`
+    ? `Model ${profile.input_size}px · confidence threshold ${parameter(profile.confidence * 100)}% · target ${parameter(profile.interval_seconds)} s/camera · event timeout ${parameter(profile.event_timeout_seconds)} s`
     : '';
   renderModule(status.mcu);
-  $('#measured-on').textContent = status.measured_on?.label || 'Ölçüm cihazı bilgisi alınamadı';
+  $('#measured-on').textContent = status.measured_on?.label || 'Measurement device unavailable';
   updateCoverage();
 }
 function renderModule(mcu) {
   const sensor = mcu?.flame_sensor;
   const state = $('#flame-status');
   $('#mcu-mode').hidden = !mcu?.simulated && mcu?.mode !== 'off';
-  $('#mcu-mode').textContent = mcu?.simulated ? 'Simülasyon' : mcu?.mode === 'off' ? 'Yapılandırılmamış' : '';
-  state.textContent = sensor?.status_text || 'Alev sensörü durumu bilinmiyor';
+  $('#mcu-mode').textContent = mcu?.simulated ? 'Simulation' : mcu?.mode === 'off' ? 'Not configured' : '';
+  state.textContent = sensor?.status_text || 'Flame-sensor status unknown';
   state.className = sensor?.triggered ? 'triggered' : sensor?.configured && !sensor.connected ? 'lost' : '';
-  $('#flame-note').textContent = sensor?.note || 'Modüldeki kısa menzilli kızılötesi sensör. Kamera duman şüphesini doğrulamaz.';
+  $('#flame-note').textContent = sensor?.note || 'Local short-range infrared sensor. It does not confirm camera smoke suspicions.';
   const shown = mcu?.led?.shown;
   $('#led-swatch').dataset.colour = shown?.colour || 'unknown';
-  const colours = {green: 'Yeşil', amber: 'Kehribar', blue: 'Mavi', red: 'Kırmızı', 'red→green→blue': 'Kırmızı → yeşil → mavi'};
-  const patterns = {steady: 'sabit', 'double blink every 1.2 s': '1,2 sn’de çift yanıp sönme', 'slow blink, 1 s on / 1 s off': '1 sn açık / 1 sn kapalı', 'fast blink, 5 per second': 'saniyede 5 kez yanıp sönme', 'short flash every 2 s': '2 sn’de kısa yanıp sönme', 'one 0.75 s lamp test at power-up': 'başlangıçta 0,75 sn lamba testi'};
-  $('#led-status').textContent = shown ? `Durum LED’i: ${colours[shown.colour] || shown.colour || '—'} · ${patterns[shown.pattern] || shown.pattern || '—'} · ${shown.text}` : 'Durum LED’i: okunamıyor';
-  $('#sensor-reading').textContent = sensor?.connected && Number.isFinite(sensor.level_permille) ? `Bağıl kızılötesi düzeyi: ${num(sensor.level_permille, 0)}/1000 · kalibre edilmemiştir; mesafe veya alev boyutu değildir.` : '';
-  $('#led-requested').textContent = mcu?.led?.requested ? `İstasyonun istediği LED durumu: ${mcu.led.requested.text}. Yukarıdaki durum mikrodenetleyiciden okunur.` : '';
+  const colours = {green: 'Green', amber: 'Amber', blue: 'Blue', red: 'Red', 'red→green→blue': 'Red → green → blue'};
+  const patterns = {steady: 'steady', 'double blink every 1.2 s': 'double blink every 1.2 s', 'slow blink, 1 s on / 1 s off': '1 s on / 1 s off', 'fast blink, 5 per second': '5 blinks per second', 'short flash every 2 s': 'short flash every 2 s', 'one 0.75 s lamp test at power-up': '0.75 s lamp test at startup'};
+  $('#led-status').textContent = shown ? `Status LED: ${colours[shown.colour] || shown.colour || '—'} · ${patterns[shown.pattern] || shown.pattern || '—'} · ${shown.text}` : 'Status LED: unavailable';
+  $('#sensor-reading').textContent = sensor?.connected && Number.isFinite(sensor.level_permille) ? `Relative infrared level: ${num(sensor.level_permille, 0)}/1000 · uncalibrated; not a distance or flame size.` : '';
+  $('#led-requested').textContent = mcu?.led?.requested ? `Station-requested LED state: ${mcu.led.requested.text}. The state above is read from the microcontroller.` : '';
 }
 function eventRow(event) {
   const row = text('details', '', 'event');
@@ -195,7 +195,7 @@ function eventRow(event) {
   const evidence = text('a', '', 'evidence');
   evidence.target = '_blank'; evidence.rel = 'noopener';
   const image = document.createElement('img');
-  image.alt = 'Duman şüphesi işaretlenmiş olay görüntüsü';
+  image.alt = 'Event image with smoke suspicion marked';
   image.loading = 'lazy';
   evidence.append(image);
   const player = text('div', '', 'clip-player');
@@ -204,7 +204,7 @@ function eventRow(event) {
   video.muted = true;
   video.playsInline = true;
   video.preload = 'none';
-  video.setAttribute('aria-label', 'Duman şüphesi olay klibi');
+  video.setAttribute('aria-label', 'Smoke suspicion event clip');
   video.addEventListener('error', () => {
     // A decoder that refuses the clip falls back to the snapshot and download.
     item.playbackFailed = video.getAttribute('src');
@@ -215,7 +215,7 @@ function eventRow(event) {
   });
   player.append(video);
   player.hidden = true;
-  const noImage = text('p', 'Görüntü kaydı bekleniyor…', 'event-detail');
+  const noImage = text('p', 'Waiting for saved image…', 'event-detail');
   const detail = text('p', '', 'event-detail');
   const clipBar = text('div', '', 'clip-bar');
   const clipLabel = text('span', '', 'clip-label');
@@ -223,8 +223,8 @@ function eventRow(event) {
   clipBar.append(clipLabel, clip);
   const clipStatus = text('p', '', 'event-detail clip-status');
   const actions = text('div', '', 'actions');
-  const disclosure = text('span', 'Kaydı aç', 'event-disclosure');
-  row.addEventListener('toggle', () => {disclosure.textContent = row.open ? 'Kaydı daralt' : 'Kaydı aç';});
+  const disclosure = text('span', 'Open record', 'event-disclosure');
+  row.addEventListener('toggle', () => {disclosure.textContent = row.open ? 'Collapse record' : 'Open record';});
   summary.append(title, meta, disclosure);
   const body = text('div', '', 'event-body');
   body.append(player, evidence, noImage, clipBar, clipStatus, detail, actions);
@@ -235,7 +235,7 @@ function eventRow(event) {
 }
 function sourceLabel(event) {
   const camera = currentStatus?.cameras.find(candidate => candidate.name === event.camera);
-  return (event.source_kind || camera?.kind) === 'usb' ? 'Kamera kaydı' : (event.source_kind || camera?.kind) === 'file' ? 'Kayıtlı demo' : 'Olay kaydı';
+  return (event.source_kind || camera?.kind) === 'usb' ? 'Camera recording' : (event.source_kind || camera?.kind) === 'file' ? 'Recorded demo' : 'Event recording';
 }
 function renderClip(item, event) {
   const clipUrl = event.clip ? `/events/${event.clip}` : null;
@@ -260,21 +260,21 @@ function renderClip(item, event) {
   }
   item.clipBar.hidden = !clipUrl;
   if (clipUrl) {
-    item.clipLabel.textContent = `${sourceLabel(event)} · olay klibi`;
-    item.clip.textContent = `İndir (.${extension})`;
+    item.clipLabel.textContent = `${sourceLabel(event)} · event clip`;
+    item.clip.textContent = `Download (.${extension})`;
     item.clip.setAttribute('href', clipUrl);
     item.clip.setAttribute('download', event.clip);
   }
   item.clipStatus.classList.remove('error');
   if (!clipUrl) {
-    item.clipStatus.textContent = event.media_error ? 'Klip kaydedilemedi · işaretli görüntü yukarıda' : 'Olay klibi hazırlanıyor…';
+    item.clipStatus.textContent = event.media_error ? 'Clip could not be saved · marked image above' : 'Preparing event clip…';
     item.clipStatus.classList.toggle('error', !!event.media_error);
   } else if (playable) {
     item.clipStatus.textContent = '';
   } else if (extension === 'webm') {
-    item.clipStatus.textContent = 'Bu tarayıcı klibi oynatamıyor · işaretli görüntü gösteriliyor, klip indirilebilir';
+    item.clipStatus.textContent = 'This browser cannot play the clip · marked image shown; clip available to download';
   } else {
-    item.clipStatus.textContent = 'Bu klip tarayıcıda oynatılamaz (.avi) · işaretli görüntü gösteriliyor, klip indirilip yerel oynatıcıda açılabilir';
+    item.clipStatus.textContent = 'This clip cannot play in the browser (.avi) · marked image shown; download the clip to play it locally';
   }
   item.clipStatus.hidden = !item.clipStatus.textContent;
 }
@@ -284,31 +284,31 @@ function renderActions(item, event) {
   if (item.mode === signature) return;
   item.mode = signature;
   item.actions.replaceChildren();
-  item.actions.append(text('p', mode === 'editing' ? 'Karar bekliyor' : `${decisions[event.decision]} · ${time(event.decided_at)}`, 'decision'));
+  item.actions.append(text('p', mode === 'editing' ? 'Awaiting decision' : `${decisions[event.decision]} · ${time(event.decided_at)}`, 'decision'));
   if (mode === 'editing') {
-    for (const [choice, label] of [['confirmed', 'Doğrula'], ['rejected', 'Reddet']]) {
+    for (const [choice, label] of [['confirmed', 'Confirm suspicion'], ['rejected', 'Reject suspicion']]) {
       const button = text('button', label, choice === 'rejected' ? 'reject' : 'confirm');
       button.type = 'button';
       button.addEventListener('click', () => decide(event.id, choice));
       item.actions.append(button);
     }
     if (event.decision !== 'pending') {
-      item.actions.firstChild.textContent = 'Kararı değiştir';
-      const cancel = text('button', 'Vazgeç', 'cancel');
+      item.actions.firstChild.textContent = 'Change decision';
+      const cancel = text('button', 'Cancel', 'cancel');
       cancel.type = 'button';
       cancel.onclick = () => { editing.delete(event.id); renderEvents(currentEvents, true); item.actions.querySelector('button')?.focus(); };
       item.actions.append(cancel);
     }
   } else {
-    const change = text('button', 'Değiştir', 'change');
+    const change = text('button', 'Change', 'change');
     change.type = 'button';
-    change.setAttribute('aria-label', `${labels[event.camera]} kamera kararını değiştir`);
+    change.setAttribute('aria-label', `Change decision for ${labels[event.camera]} camera`);
     change.onclick = () => { editing.add(event.id); renderEvents(currentEvents, true); item.actions.querySelector('button')?.focus(); };
     item.actions.append(change);
   }
   const message = text('p', '', 'inline-status');
   message.setAttribute('role', 'status');
-  if (item.savedUntil > Date.now()) message.textContent = 'Bu cihazda kaydedildi.';
+  if (item.savedUntil > Date.now()) message.textContent = 'Saved on this device.';
   item.actions.append(message);
 }
 let queuePointerInside = false;
@@ -323,11 +323,11 @@ queuePanel.addEventListener('pointerenter', () => { queuePointerInside=true; });
 queuePanel.addEventListener('pointerleave', () => { queuePointerInside=false;flushQueue(); });
 queuePanel.addEventListener('focusout', () => { queueMicrotask(flushQueue); });
 function renderPendingTotal(events) {
-  $('#event-count').textContent = `${pendingCount} karar bekliyor`;
+  $('#event-count').textContent = `${pendingCount} awaiting decision`;
   $('#event-count').classList.toggle('has-pending', pendingCount > 0);
-  $('#pending-summary').textContent = 'Kayıtları incele';
+  $('#pending-summary').textContent = 'Review records';
   $('#pending-summary').classList.remove('has-pending');
-  document.title = pendingCount ? `(${pendingCount}) Duman şüphesi — ${[...new Set(events.filter(event=>event.decision==='pending').map(event => labels[event.camera]))].join(', ')} — ${stationTitle}` : stationTitle;
+  document.title = pendingCount ? `(${pendingCount}) Smoke suspicion — ${[...new Set(events.filter(event=>event.decision==='pending').map(event => labels[event.camera]))].join(', ')} — ${stationTitle}` : stationTitle;
 }
 function renderEvents(events, deliberate=false) {
   renderPendingTotal(events);
@@ -335,7 +335,7 @@ function renderEvents(events, deliberate=false) {
     queuedEvents=events;
     const arrivals=events.filter(event=>event.decision==='pending'&&!eventElements.has(event.id)).length;
     $('#queue-arrivals').hidden=!arrivals;
-    $('#queue-arrivals').textContent=`${arrivals} yeni kayıt · listeden ayrıldığınızda gösterilecek`;
+    $('#queue-arrivals').textContent=`${arrivals} new records · shown when you leave the list`;
     return;
   }
   queuedEvents=null;
@@ -361,15 +361,15 @@ function renderEvents(events, deliberate=false) {
     const first = event === pending[0], last = event === pending[pending.length-1];
     const newest = pendingOrder === 'newest' ? first && !pendingCursor : last && !pendingNextCursor;
     const oldest = pendingOrder === 'oldest' ? first && !pendingCursor : last && !pendingNextCursor;
-    const position = isPending && newest ? 'En yeni · ' : isPending && oldest ? 'En eski yanıtsız · ' : '';
-    item.title.textContent = `${position}${labels[event.camera]} kamera · Duman şüphesi`;
+    const position = isPending && newest ? 'Newest · ' : isPending && oldest ? 'Oldest awaiting review · ' : '';
+    item.title.textContent = `${position}${labels[event.camera]} camera · Smoke suspicion`;
     item.row.dataset.queuePosition = isPending && event === pending[pending.length-1] && pending.length > 1 ? 'oldest' : isPending && event === pending[0] ? 'newest' : '';
     const keepVisible = pending.indexOf(event) < 3 || event === pending[pending.length-1] || item.row.open || item.row.contains(document.activeElement);
     item.row.hidden = isPending && !showOlderPending && !keepVisible;
-    item.meta.textContent = `${dateTime(event.opened_at)} · son gözlem güveni %${Math.round(event.confidence * 100)}`;
+    item.meta.textContent = `${dateTime(event.opened_at)} · latest observation confidence ${Math.round(event.confidence * 100)}%`;
     item.event = event;
     renderClip(item, event);
-    item.detail.textContent = `${event.closed_at ? 'Gözlem sona erdi' : 'İzleme sürüyor'} · son gözlem ${time(event.last_seen)}`;
+    item.detail.textContent = `${event.closed_at ? 'Observation ended' : 'Monitoring continues'} · last observed ${time(event.last_seen)}`;
     renderActions(item, event);
     const target = isPending ? $('#events') : $('#history-events');
     // Keep existing rows and controls in place while measurements poll.
@@ -377,13 +377,13 @@ function renderEvents(events, deliberate=false) {
     const index = group.indexOf(event);
     if (target.children[index] !== item.row) target.insertBefore(item.row, target.children[index] || null);
   }
-  if (!pending.length) $('#events').append(text('p', pendingCount ? 'Bu sayfada karar bekleyen kayıt yok. En yeni veya önceki sayfayı açın.' : events.length ? 'Karar bekleyen kayıt yok.' : 'Henüz duman şüphesi kaydı yok.', 'empty'));
+  if (!pending.length) $('#events').append(text('p', pendingCount ? 'No records awaiting review on this page. Open the newest or previous page.' : events.length ? 'No records awaiting review.' : 'No smoke suspicion records yet.', 'empty'));
   const olderCount = [...$('#events').children].filter(row => row.hidden).length;
   $('#queue-controls').hidden = pendingCount < 2;
   $('#queue-next-page').hidden = !pendingNextCursor;
   $('#queue-prev-page').hidden = !pendingTrail.length;
   $('#older-toggle').hidden = !olderCount && !showOlderPending;
-  $('#older-toggle').textContent = showOlderPending ? 'Eski kayıtları daralt' : `Önceki ${olderCount} kaydı göster`;
+  $('#older-toggle').textContent = showOlderPending ? 'Collapse older records' : `Show ${olderCount} older records`;
   $('#older-toggle').setAttribute('aria-expanded', String(showOlderPending));
   $('#events').setAttribute('aria-busy', 'false');
   $('#history').hidden = !history.length;
@@ -436,7 +436,7 @@ async function decide(id, decision) {
   item.actions.querySelectorAll('button').forEach(button => { button.disabled = true; });
   const message = item.actions.querySelector('.inline-status');
   message.classList.remove('error');
-  message.textContent = 'Kaydediliyor…';
+  message.textContent = 'Saving…';
   try {
     await json(`/api/events/${id}/decision`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({decision})});
     decisionRevision++;
@@ -463,7 +463,7 @@ async function decide(id, decision) {
     }, 4000);
   } catch (error) {
     message.classList.add('error');
-    message.textContent = 'Karar kaydedilemedi. Yeniden deneyin.';
+    message.textContent = 'Decision could not be saved. Try again.';
   } finally {
     item.saving = false;
     item.actions.querySelectorAll('button').forEach(button => { button.disabled = false; });
@@ -471,28 +471,28 @@ async function decide(id, decision) {
 }
 function serverLost() {
   online = false;
-  document.title = `Bağlantı yok — ${stationTitle}`;
-  $('#connection').textContent = 'İstasyon bağlantısı yok';
+  document.title = `No connection — ${stationTitle}`;
+  $('#connection').textContent = 'Station disconnected';
   $('#connection').className = 'lost';
-  $('#pending-summary').textContent = 'Kayıtlara erişilemiyor';
+  $('#pending-summary').textContent = 'Records unavailable';
   $('#queue-controls').hidden = true;
   $('#older-toggle').hidden = true;
   $('#pending-summary').classList.remove('has-pending');
   const warning = $('#system-warning');
   warning.hidden = false;
-  warning.replaceChildren(text('strong', 'İstasyon yanıt vermiyor · yeniden deneniyor'),
-    text('span', lastUpdate ? `Son veri ${time(lastUpdate)}. Görüntü, ölçüm ve karar listesi güncel değil.` : 'Görüntü, ölçüm ve karar listesi alınamıyor.'));
-  $('#coverage').textContent = 'Giriş durumları bilinmiyor';
-  $('#measured-on').textContent = 'Ölçüm cihazı bilgisi alınamıyor';
-  $('#analysis-profile').textContent = 'Analiz profili bilinmiyor · istasyon bağlantısı yok';
+  warning.replaceChildren(text('strong', 'Station not responding · retrying'),
+    text('span', lastUpdate ? `Last data received ${time(lastUpdate)}. Images, measurements and decision list are out of date.` : 'Images, measurements and decision list are unavailable.'));
+  $('#coverage').textContent = 'Input status unknown';
+  $('#measured-on').textContent = 'Measurement device unavailable';
+  $('#analysis-profile').textContent = 'Analysis profile unknown · station disconnected';
   $('#profile-parameters').textContent = '';
   $('#led-swatch').dataset.colour = 'unknown';
   renderModule(null);
   for (const item of cameraElements.values()) updateCamera(item.camera, false);
   $('#cameras').setAttribute('aria-busy', 'true');
-  $('#event-count').textContent = 'Kayıtlar alınamıyor';
+  $('#event-count').textContent = 'Records unavailable';
   $('#event-count').classList.remove('has-pending');
-  $('#events').replaceChildren(text('p', 'Bağlantı bekleniyor… Karar listesi yeniden yüklenecek.', 'empty'));
+  $('#events').replaceChildren(text('p', 'Waiting for connection… The decision list will reload.', 'empty'));
   $('#events').setAttribute('aria-busy', 'true');
   $('#history').hidden = true;
 }
@@ -513,7 +513,7 @@ async function refresh(deliberate = false) {
     currentEvents = events;
     online = true;
     lastUpdate = Date.now() / 1000;
-    $('#connection').textContent = `İstasyon bağlı · ${time(lastUpdate)}`;
+    $('#connection').textContent = `Station connected · ${time(lastUpdate)}`;
     $('#connection').className = '';
     renderEvents(events, deliberate);
     renderStatus(status);

@@ -36,7 +36,7 @@ def test_presets_water_and_accounting(preset_results):
             assert 0<=m['overlap_forest_ha']<=m['visible_forest_ha']
             assert r['reference']['metrics'][name]['visible_forest_ha']>=m['visible_forest_ha']
         assert r['metrics']['canopy_smoke']['visible_forest_ha']>0
-        assert r['sectors'][2]['label'].endswith('bağlı değil')
+        assert r['sectors'][2]['label'].endswith('disconnected')
 
 def test_pair_comparison_counts(preset_results):
     for r in preset_results:
@@ -60,7 +60,7 @@ def test_heading_changes_and_reference():
     c['reference']=True
     for cam in c['cameras']:cam['active']=True
     ref=analyze(Candidate(**c))
-    assert ref['mode']=='üç kamera, referans'
+    assert ref['mode']=='three cameras, reference'
     assert ref['metrics']==ref['reference']['metrics']
 
 def test_real_priority_and_cache(preset_results):

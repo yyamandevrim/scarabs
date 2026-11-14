@@ -21,6 +21,8 @@ async function dashboard(server={enabled:false}){
 }
 test('bearings use whole approximate degrees and Turkish transport/confidence are localized',async()=>{
  const p=await dashboard();
+ assert.equal(p.w.document.documentElement.lang, 'en');
+ assert.equal(p.$('.alert-title').textContent, 'Smoke suspicion');
  assert.match(p.$('.bearing').textContent,/≈ 293°/);
  const collect=[...p.w.document.querySelectorAll('.alert.selected button')].find(b=>b.textContent==='Collect evidence over Wi-Fi');collect.click();await flush();
  p.$('#language').click();await flush();

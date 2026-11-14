@@ -78,7 +78,7 @@ def unplug(config, name):
     if not source.exists():
         raise ValueError(f"{name}: source file is missing")
     source.rename(parked)
-    return f"{name} unplugged: its recorded source is hidden; the running panel shows “bağlantı koptu” within about a second"
+    return f"{name} unplugged: its recorded source is hidden; the running panel shows “Connection lost” within about a second"
 
 
 def replug(config, name):

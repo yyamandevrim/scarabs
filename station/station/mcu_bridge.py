@@ -162,13 +162,13 @@ class McuBridge:
             rejected = self.rejected
         simulated = bool(self.link is not None and self.link.simulated)
         if self.link is None:
-            text = "Alev sensörü yapılandırılmamış"
+            text = "Flame sensor not configured"
         elif not connected:
-            text = "Alev sensörü bağlı değil"
+            text = "Flame sensor disconnected"
         elif r["triggered"]:
             text = FLAME_TRIGGERED_TEXT
         else:
-            text = "Alev sensörü normal"
+            text = "Flame sensor normal"
         live = r if connected else None
         sensor = {
             "kind": "local_flame_sensor", "model": "Joy-IT KY-026", "scope": "station_local_short_range",
@@ -206,6 +206,6 @@ def register_routes(app, station):
     def mcu_simulate(body: Simulation):
         link = station.mcu.link
         if not isinstance(link, SimulatedLink):
-            raise HTTPException(409, "Simülasyon yalnızca mcu.mode = \"simulated\" iken kullanılabilir")
+            raise HTTPException(409, "Simulation is available only when mcu.mode = \"simulated\"")
         link.simulate(flame=body.flame, linux_silent=body.linux_silent)
         return {"ok": True, "simulated": True, "flame": body.flame, "linux_silent": body.linux_silent}

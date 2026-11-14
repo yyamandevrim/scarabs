@@ -31,7 +31,7 @@ class Candidate(BaseModel):
     @model_validator(mode="after")
     def validate_cameras(self):
         if not self.reference and sum(c.active for c in self.cameras) > 2:
-            raise ValueError("En fazla iki kamera bağlanabilir; üç kamera için referans modunu seçin.")
+            raise ValueError("At most two cameras can be connected; select reference mode for three cameras.")
         if self.priority is not None:
             from shapely.geometry import Polygon
             if len(self.priority) < 3 or any(len(p) != 2 for p in self.priority):

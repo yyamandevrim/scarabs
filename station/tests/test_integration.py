@@ -52,6 +52,6 @@ def test_real_smoke_negative_pipeline_offline(tmp_path,monkeypatch,negative):
         station.workers['left'].stop()
         wait_until(lambda:station.metrics['centre']['analyses']>=before+2)
         status={c['name']:c for c in client.get('/api/status').json()['cameras']}
-        assert status['left']['status_text']=='bağlantı koptu'
+        assert status['left']['status_text']=='connection lost'
         assert status['centre']['connected']
-        assert status['right']['status_text']=='takılı, bağlı değil'
+        assert status['right']['status_text']=='mounted, inactive'

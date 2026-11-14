@@ -89,7 +89,7 @@ def test_default_pair_and_max_two_active():
     c=PRESETS[0]
     assert [x.active for x in c.cameras]==[True,True,False]
     data=c.model_dump();data['cameras'][2]['active']=True
-    with pytest.raises(ValidationError,match='En fazla iki'):Candidate(**data)
+    with pytest.raises(ValidationError,match='At most two'):Candidate(**data)
     data['reference']=True
     assert sum(x.active for x in Candidate(**data).cameras)==3
 

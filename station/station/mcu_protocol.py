@@ -18,29 +18,29 @@ LED_BOOT, LED_NORMAL, LED_SMOKE_PENDING, LED_DEGRADED, LED_FLAME, LED_LINUX_SILE
 # One table for the whole LED scheme: colour plus a distinct rhythm per state.
 LED_STATES = {
     LED_BOOT: {"name": "boot", "colour": "red→green→blue", "pattern": "one 0.75 s lamp test at power-up",
-               "text": "Başlatılıyor"},
+               "text": "Starting up"},
     LED_NORMAL: {"name": "normal", "colour": "green", "pattern": "steady",
-                 "text": "Normal gözlem"},
+                 "text": "Normal observation"},
     LED_SMOKE_PENDING: {"name": "smoke_pending", "colour": "amber", "pattern": "double blink every 1.2 s",
-                        "text": "Duman şüphesi operatör kararı bekliyor"},
+                        "text": "Smoke suspicion awaiting operator decision"},
     LED_DEGRADED: {"name": "degraded", "colour": "blue", "pattern": "slow blink, 1 s on / 1 s off",
-                   "text": "Gözlem kapsamı azaldı"},
+                   "text": "Reduced observation coverage"},
     LED_FLAME: {"name": "flame_sensor", "colour": "red", "pattern": "fast blink, 5 per second",
-                "text": "Alev sensörü tetiklendi"},
+                "text": "Flame-sensor trigger"},
     LED_LINUX_SILENT: {"name": "linux_silent", "colour": "blue", "pattern": "short flash every 2 s",
-                       "text": "İstasyon yazılımı yanıt vermiyor"},
+                       "text": "Station software not responding"},
 }
 
-FLAME_TRIGGERED_TEXT = "Alev sensörü tetiklendi"
-FLAME_SCOPE_NOTE = ("İstasyondaki yerel kızılötesi alev sensörü (KY-026): yalnızca yaklaşık bir metre içindeki "
-                    "açık alevi algılar, güneş ışığı ve diğer kızılötesi kaynaklarla tetiklenebilir. "
-                    "Uzaktan orman yangını tespiti yapmaz ve kamera duman şüphesini doğrulamaz.")
+FLAME_TRIGGERED_TEXT = "Flame-sensor trigger"
+FLAME_SCOPE_NOTE = ("Local short-range infrared flame sensor (KY-026): senses exposed flames within approximately "
+                    "one metre and may also be triggered by sunlight or other infrared sources. "
+                    "It does not detect distant forest fires or confirm camera smoke suspicions.")
 
 
 def led_info(code):
     if code is None:
         return None
-    info = LED_STATES.get(code, {"name": "unknown", "colour": None, "pattern": None, "text": "Bilinmiyor"})
+    info = LED_STATES.get(code, {"name": "unknown", "colour": None, "pattern": None, "text": "Unknown"})
     return {"code": code, **info}
 
 

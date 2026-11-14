@@ -41,11 +41,11 @@ def test_removed_file_source_is_lost_live_and_recovers(config, video, tmp_path):
         wait_until(lambda: slot("left")["connected"] and slot("centre")["connected"])
         parked = left.with_name(left.name + ".unplugged")
         left.rename(parked)  # what `forest-station unplug left` does
-        wait_until(lambda: slot("left")["status_text"] == "bağlantı koptu", timeout=2)
+        wait_until(lambda: slot("left")["status_text"] == "connection lost", timeout=2)
         before = station.metrics["centre"]["analyses"]
         wait_until(lambda: station.metrics["centre"]["analyses"] >= before + 2)
         assert slot("centre")["connected"]
-        assert slot("right")["status_text"] == "takılı, bağlı değil"
+        assert slot("right")["status_text"] == "mounted, inactive"
         assert client.get("/api/cameras/left/frame.jpg").status_code == 503
         parked.rename(left)
         wait_until(lambda: slot("left")["connected"], timeout=3)
@@ -103,8 +103,9 @@ def test_turkish_letters_get_their_marks():
     assert bottom_sc > bottom_s + 3, "ş needs a cedilla below"
     for ch in "çğıİöşüÇĞÖŞÜ":
         assert ink(ch)[0].any()
-    # Same advance width as the ASCII spelling, so layout is unchanged.
-    assert overlay_text.text_size("Duman şüphesi %62", 1, 2)[0][0] == cv2.getTextSize("Duman suphesi %62", cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0][0]
+    # Legacy detector labels are laid out and drawn as English.
+    assert overlay_text.text_size("Duman şüphesi %62", 1, 2) == overlay_text.text_size("Smoke suspicion 62%", 1, 2)
+    assert np.array_equal(ink("Duman şüphesi %62")[0], ink("Smoke suspicion 62%")[0])
 
 
 def test_snapshot_label_is_not_question_marks():
@@ -114,9 +115,7 @@ def test_snapshot_label_is_not_question_marks():
     wrong = frame.copy()
     cv2.putText(wrong, "Duman ??phesi %62", (0, 0), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 0, 0), 1)
     assert not np.array_equal(out, wrong) and out.shape == frame.shape
-    import inspect
-    from station import detector
-    assert "Duman şüphesi" in inspect.getsource(detector.annotate)
+    assert overlay_text._display_text("Duman şüphesi %62") == "Smoke suspicion 62%"
 
 
 # -- Confidence fields -------------------------------------------------------------
@@ -143,9 +142,9 @@ def test_machine_identity_in_status(config):
         with TestClient(create_app(station, manage_lifecycle=False)) as client:
             ident = client.get("/api/status").json()["measured_on"]
         assert set(ident) >= {"system", "architecture", "cpu_model", "board_model", "is_uno_q", "label"}
-        assert ident["label"].startswith("Ölçüm bu cihazda")
+        assert ident["label"].startswith("Measured on this device")
         if sys.platform == "darwin":
-            assert ident["is_uno_q"] is False and "UNO Q değil" in ident["label"]
+            assert ident["is_uno_q"] is False and "not an UNO Q" in ident["label"]
     finally:
         station.stop()
         station.store.shutdown()
@@ -208,7 +207,7 @@ def test_archive_cli_requires_typed_confirmation(tmp_path):
 
 def test_team_board_device_tree_spelling_is_recognised():
     actual=machine.describe('Linux','aarch64','test','QRB2210','Arduino UnoQ')
-    assert actual['is_uno_q'] and not actual['label'].endswith('UNO Q değil')
+    assert actual['is_uno_q'] and not actual['label'].endswith('not an UNO Q')
 
 
 @pytest.mark.parametrize("delete", [False, True])

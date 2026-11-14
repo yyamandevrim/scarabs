@@ -38,6 +38,7 @@ def create_app(station, manage_lifecycle=True):
         response = await call_next(request)
         response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; media-src 'self'; object-src 'none'; frame-ancestors 'none'"
         response.headers["Cache-Control"] = "no-store"
+        response.headers["Content-Language"] = "en"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
@@ -68,16 +69,16 @@ def create_app(station, manage_lifecycle=True):
     @app.post("/api/events/{event_id}/decision")
     def decide(event_id: str, body: Decision):
         if not station.store.decide(event_id,body.decision):
-            raise HTTPException(404, "Olay bulunamadı")
+            raise HTTPException(404, "Event not found")
         return {"ok":True, "decision":body.decision}
 
     @app.get("/api/cameras/{name}/frame.jpg")
     def frame(name: str):
         if name not in station.workers:
-            raise HTTPException(404,"Kamera etkin değil")
+            raise HTTPException(404,"Camera inactive")
         data = station.jpeg(name)
         if not data:
-            raise HTTPException(503,"Bağlantı koptu")
+            raise HTTPException(503,"Connection lost")
         return Response(data,media_type="image/jpeg")
 
     @app.get("/events/{filename}")

@@ -151,7 +151,7 @@ def main():
     valid=(terrain!=-9999)&(clc!=65535)
     if args.assumed_canopy:
         height=np.where(forest,20,0).astype('float32');cover=np.where(forest,100,0).astype('float32');missing=forest.copy()
-        canopy_name='Varsayılan 20 m kapalı taç senaryosu (ölçüm değil)'
+        canopy_name='Assumed 20 m opaque canopy scenario (not measured)'
         source('Assumed opaque canopy scenario','local assumption','Not a real dataset',height_m=20)
     else:
         rawheight=luke_raster('keskipituus');rawcover=luke_raster('latvuspeitto')
@@ -161,7 +161,7 @@ def main():
         height=np.where(measured,rawheight/10,0).astype('float32')
         cover=np.where((rawcover>=0)&(rawcover<=100),rawcover,0).astype('float32')
         height[missing]=20;cover[missing]=100
-        canopy_name='Luke MS-NFI 2023 sayısal ortalama ağaç boyu + taç örtüsü; eksik orman hücrelerinde 20 m varsayımı'
+        canopy_name='Luke MS-NFI 2023 numeric mean tree height + canopy cover; 20 m assumed in missing forest cells'
     buildings=np.zeros(SHAPE,dtype='float32')
     if args.building_heights:
         buildings=np.maximum(regrid(args.building_heights,Resampling.max),0)

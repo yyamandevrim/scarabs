@@ -319,13 +319,13 @@ def test_flame_trigger_becomes_its_own_event(tmp_path):
         bridge.tick()
         assert bridge.link.sent[-1][0] == LED_FLAME
         event = store.events(kind="flame_sensor")[0]
-        assert event["kind"] == "flame_sensor" and event["title"] == "Alev sensörü tetiklendi"
+        assert event["kind"] == "flame_sensor" and event["title"] == "Flame-sensor trigger"
         assert event["camera"] is None and event["box"] is None and event["confidence"] is None
         assert event["opened_at"] == 1000 and event["closed_at"] is None and event["decision"] == "pending"
         assert event["details"]["trigger_reading"]["level_permille"] == 700
         assert event["details"]["peak_level_permille"] == 850 and event["details"]["source"] == "hardware"
         status = bridge.status()
-        assert status["flame_sensor"]["triggered"] and status["flame_sensor"]["status_text"] == "Alev sensörü tetiklendi"
+        assert status["flame_sensor"]["triggered"] and status["flame_sensor"]["status_text"] == "Flame-sensor trigger"
         assert status["flame_sensor"]["open_event_id"] == event["id"]
         assert status["led"]["shown"]["name"] == "flame_sensor"
         assert store.events() == []  # camera list stays smoke-only by default
@@ -340,7 +340,7 @@ def test_flame_trigger_becomes_its_own_event(tmp_path):
         events = store.events(kind="flame_sensor")
         assert len(events) == 2 and events[0]["details"]["closed_reason"] == "sensor_disconnected"
         assert not bridge.status()["flame_sensor"]["connected"]
-        assert bridge.status()["flame_sensor"]["status_text"] == "Alev sensörü bağlı değil"
+        assert bridge.status()["flame_sensor"]["status_text"] == "Flame sensor disconnected"
         assert bridge.link.sent[-1][0] == LED_NORMAL  # stale flame reading no longer requests flame
         with pytest.raises(ValueError):
             bridge.on_reading([1, 2])
@@ -381,7 +381,7 @@ def test_off_mode_status():
     bridge.stop()
     status = bridge.status()
     assert status["mode"] == "off" and not status["flame_sensor"]["configured"]
-    assert status["flame_sensor"]["status_text"] == "Alev sensörü yapılandırılmamış"
+    assert status["flame_sensor"]["status_text"] == "Flame sensor not configured"
 
 
 def test_mcu_config_validation():
@@ -409,7 +409,7 @@ def test_simulated_flame_through_api(config):
         assert client.post("/api/mcu/simulate", json={"flame": True}).status_code == 200
         wait_until(lambda: client.get("/api/events", params={"kind": "flame_sensor"}).json())
         event = client.get("/api/events", params={"kind": "flame_sensor"}).json()[0]
-        assert event["title"] == "Alev sensörü tetiklendi" and event["details"]["source"] == "simulated"
+        assert event["title"] == "Flame-sensor trigger" and event["details"]["source"] == "simulated"
         assert client.get("/api/mcu").json()["led"]["shown"]["name"] == "flame_sensor"
         assert client.get("/api/events").json() == []
         assert [e["kind"] for e in client.get("/api/events", params={"kind": "all"}).json()] == ["flame_sensor"]
@@ -453,7 +453,7 @@ def test_old_database_is_migrated_in_place(tmp_path):
         store = EventStore(tmp_path)
         try:
             old = store.events()[0]
-            assert old["kind"] == "smoke" and old["title"] == "Duman şüphesi"
+            assert old["kind"] == "smoke" and old["title"] == "Smoke suspicion"
             assert old["decision"] == "confirmed" and old["clip"] == "old.avi" and old["box"] == [.1, .2, .3, .4]
             assert old["confidence"] == old["latest_confidence"] == .45
             assert old["alarm_confidence"] is None and old["peak_confidence"] is None  # never recorded

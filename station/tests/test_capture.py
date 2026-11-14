@@ -43,9 +43,9 @@ def test_loss_other_active_camera_continues_and_retries(config,video,tmp_path):
     try:
         wait_until(lambda:station.metrics['centre']['analyses']>=3)
         states={c['name']:c for c in station.status()['cameras']}
-        assert states['left']['status_text']=='bağlantı koptu'
+        assert states['left']['status_text']=='connection lost'
         assert states['centre']['connected']
-        assert states['right']['status_text']=='takılı, bağlı değil'
+        assert states['right']['status_text']=='mounted, inactive'
         assert 'right' not in station.workers
         before=station.metrics['centre']['analyses']
         import shutil

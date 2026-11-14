@@ -118,14 +118,14 @@ class Station:
             item = asdict(camera)
             item.pop("source")  # Do not expose host paths in the panel.
             if not camera.active:
-                item.update(status="inactive", status_text="takılı, bağlı değil", connected=False)
+                item.update(status="inactive", status_text="mounted, inactive", connected=False)
             else:
                 state = self.workers[camera.name].status()
                 connected = state["connected"] and state["last_frame_at"] is not None and now-state["last_frame_at"] <= self.config.stale_seconds
                 with self.lock:
                     item.update(self.metrics[camera.name])
                 item.update(state)
-                item.update(connected=connected, status="connected" if connected else "disconnected", status_text="bağlı" if connected else "bağlantı koptu")
+                item.update(connected=connected, status="connected" if connected else "disconnected", status_text="connected" if connected else "connection lost")
             cameras.append(item)
         running = self.thread is not None and self.thread.is_alive()
         state = self.runtime_state

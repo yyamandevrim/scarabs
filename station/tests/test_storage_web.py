@@ -60,7 +60,8 @@ def test_api_and_locally_served_assets(config):
         with TestClient(app) as client:
             response=client.get('/')
             assert response.status_code==200
-            assert 'lang="tr"' in response.text
+            assert 'lang="en"' in response.text
+            assert response.headers['content-language'] == 'en'
             assert f'<title>{identity.NAME}</title>' in response.text
             assert f'aria-label="{identity.NAME}"' in response.text
             assert 'src="/static/brand/acorn-wordmark-white.svg"' in response.text
@@ -73,7 +74,7 @@ def test_api_and_locally_served_assets(config):
                 r=client.get(asset);assert r.status_code==200
                 assert not re.search(r'https?://|@import|fonts.googleapis|cdn\.',r.text)
             assert len(client.get('/api/status').json()['cameras'])==3
-            assert client.get('/api/events').json()[0]['title']=='Duman şüphesi'
+            assert client.get('/api/events').json()[0]['title']=='Smoke suspicion'
             for decision in ('confirmed','rejected'):
                 assert client.post(f'/api/events/{event_id}/decision',json={'decision':decision}).status_code==200
                 assert station.store.events()[0]['decision']==decision

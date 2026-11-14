@@ -21,7 +21,7 @@ PREP=Path(os.environ.get('PLACEMENT_PREPARED', ROOT/'data/prepared'))
 CACHE=Path(os.environ.get('PLACEMENT_CACHE', ROOT/'data/results'))
 TO_METRIC=Transformer.from_crs(4326,3067,always_xy=True)
 TO_LONLAT=Transformer.from_crs(3067,4326,always_xy=True)
-ALGORITHM='opaque-ray-half-cell-v7-unknown-elevation-warning'
+ALGORITHM='opaque-ray-half-cell-v7-unknown-elevation-warning-en'
 SCENARIOS=('bare_ground','bare_smoke','canopy_ground','canopy_smoke')
 
 @lru_cache(maxsize=2)
@@ -30,8 +30,15 @@ def load_grid(resolution):
 
 def metadata():
     path=PREP/'metadata.json'
-    if not path.exists():raise FileNotFoundError('Veri hazır değil. placement/ içinde uv run python scripts/prepare_data.py çalıştırın.')
-    return json.loads(path.read_text())
+    if not path.exists():raise FileNotFoundError('Data is not ready. Run uv run python scripts/prepare_data.py from placement/.')
+    meta = json.loads(path.read_text())
+    # Older prepared datasets remain usable without rebuilding numeric rasters.
+    names = {
+        'Varsayılan 20 m kapalı taç senaryosu (ölçüm değil)': 'Assumed 20 m opaque canopy scenario (not measured)',
+        'Luke MS-NFI 2023 sayısal ortalama ağaç boyu + taç örtüsü; eksik orman hücrelerinde 20 m varsayımı': 'Luke MS-NFI 2023 numeric mean tree height + canopy cover; 20 m assumed in missing forest cells',
+    }
+    meta["canopy_name"] = names.get(meta.get("canopy_name"), meta.get("canopy_name"))
+    return meta
 
 def priority_mask(points,x,y):
     if not points:return np.zeros(x.shape,dtype=bool)
@@ -92,7 +99,7 @@ def analyze(candidate:Candidate,use_cache=True):
         llbounds=write_overlay(rgba,localbounds,imagefile,cell)
         images[name]=dict(url='/results/'+imagefile.name,bounds=llbounds)
     pairs=[]
-    for indices,label in [([0,1],'Sol + merkez'),([1,2],'Merkez + sağ'),([0,2],'Sol + sağ')]:
+    for indices,label in [([0,1],'Left + center'),([1,2],'Center + right'),([0,2],'Left + right')]:
         pairs.append(dict(pair=indices,label=label,**{name:metrics(i,indices)[0] for i,name in enumerate(SCENARIOS)}))
     sensitivity=[]
     for delta in [-20,-10,0,10,20]:
@@ -105,23 +112,23 @@ def analyze(candidate:Candidate,use_cache=True):
     # Conservative provenance, not an affected-ray mask or hectare estimate. Include
     # the entire sampled window: boundary rays can cross cells centred outside range.
     unknown_elevation=bool(np.any(~data['valid']))
-    notes=[f"NLS 10 m (2019 arşivi), Syke CORINE 2024 (20 m). {meta['canopy_name']}.",
-           f"Eksik orman taç verisi: %{meta['assumed_canopy_forest_pct']}; bu hücrelerde 20 m kapalı taç varsayımı.",
-           'Taç örtüsü >0 olan hücreler opak kabul edilir. Ortalama boy, tekil ağaç tepesi değildir; saydamlık modellenmez.',
-           'Bina yükseklikleri dahil.' if meta['buildings_included'] else 'Bina yükseklikleri yok; binaların perdelemesi eksik. Yapılaşma yalnız haritada gösterilir.',
-           f'{cell} m hesap ızgarası; arazi/engel yüksekliği hücredeki maksimum, hedef alanı 20 m orman oranıyla ağırlıklı.',
-           'Dünya eğriliği dahil; atmosferik kırılma, pus, rüzgâr ve optik algılama modellenmez.',
-           'Hedef, taç yüzeyinin üzerinde seçilen yükseklikte tek bir geometrik noktadır; duman yayılım modeli değildir.']
-    if clipped:notes.append('Menzil veri sınırını aşıyor; alanlar yalnız hazırlanan bölgenin içindedir.')
-    if unknown:notes.append(f'Yükselti verisi eksik {unknown} ha orman kör alana dahil edildi; görüşü doğrulanamadı.')
+    notes=[f"NLS 10 m (2019 archive), Syke CORINE 2024 (20 m). {meta['canopy_name']}.",
+           f"Missing forest canopy data: {meta['assumed_canopy_forest_pct']}%; a 20 m opaque canopy is assumed in these cells.",
+           'Cells with canopy cover >0 are treated as opaque. Mean height is not an individual treetop height; transparency is not modelled.',
+           'Building heights included.' if meta['buildings_included'] else 'No building heights; building obstruction is omitted. Built-up areas are shown only on the map.',
+           f'{cell} m analysis grid; terrain/obstruction heights use cell maxima, and target area is weighted by the 20 m forest fraction.',
+           'Earth curvature included; atmospheric refraction, haze, wind and optical detection are not modelled.',
+           'The target is a single geometric point at the selected height above the canopy surface; this is not a smoke-dispersion model.']
+    if clipped:notes.append('Range extends beyond the data boundary; areas include only the prepared region.')
+    if unknown:notes.append(f'{unknown} ha of forest with missing elevation is included in the blind area; visibility could not be verified.')
     if unknown_elevation:notes.append('Unknown elevation in the analysis window: crossing sightlines remain unverified and blind. In-view blind area may include these rays as well as physical obstruction; affected area has not been quantified.')
     result=dict(id=key,input=candidate.model_dump(),resolution_m=cell,observer_elevation_m=round(observer_z,2),
-        active_cameras=active,mode='üç kamera, referans' if candidate.reference else 'iki girişli modül',
-        metrics=results,pair_comparison=pairs,reference=dict(label='üç kamera, referans',metrics={name:metrics(i,[0,1,2])[0] for i,name in enumerate(SCENARIOS)}),
+        active_cameras=active,mode='three cameras, reference' if candidate.reference else 'two-input module',
+        metrics=results,pair_comparison=pairs,reference=dict(label='three cameras, reference',metrics={name:metrics(i,[0,1,2])[0] for i,name in enumerate(SCENARIOS)}),
         heading_sensitivity=sensitivity,images=images,
-        sectors=[dict(active=c.active,label=['Sol','Merkez','Sağ'][i]+('' if c.active else ' · bağlı değil'),points=sector(candidate,c,x,y)) for i,c in enumerate(candidate.cameras)],
+        sectors=[dict(active=c.active,label=['Left','Center','Right'][i]+('' if c.active else ' · disconnected'),points=sector(candidate,c,x,y)) for i,c in enumerate(candidate.cameras)],
         uncertainty=notes,range_clipped=clipped,unknown_forest_ha=unknown,unknown_elevation_in_window=unknown_elevation,
-        field_checks=dict(road_access='sahada doğrulanacak',shadow='sahada doğrulanacak',site_constraints='sahada doğrulanacak'),
+        field_checks=dict(road_access='to be verified in the field',shadow='to be verified in the field',site_constraints='to be verified in the field'),
         computed_seconds=round(time.perf_counter()-started,4),cached=False,data_prepared_at=meta['prepared_at'],algorithm=ALGORITHM)
     # Bounded generated cache: 256 analyses, including their four images.
     entries=sorted(CACHE.glob('*.json'),key=lambda p:p.stat().st_mtime)

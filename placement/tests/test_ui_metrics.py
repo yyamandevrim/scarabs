@@ -21,6 +21,7 @@ def test_server_renders_config_identity_before_javascript():
     with TestClient(app) as client:
         for path in ('/', '/map'):
             page=client.get(path).text
+            assert '<html lang="en">' in page
             assert 'data-brand-logo src="'+brand['logo']+'"' in page
             assert brand['name'] in page
             assert client.get(brand['logo']).status_code==200

@@ -9,7 +9,7 @@ from threading import RLock
 import uuid
 
 KINDS = ("smoke", "flame_sensor")
-TITLES = {"smoke": "Duman şüphesi", "flame_sensor": "Alev sensörü tetiklendi"}
+TITLES = {"smoke": "Smoke suspicion", "flame_sensor": "Flame-sensor trigger"}
 # Columns added after the first release. Existing databases gain them on open;
 # old rows keep NULL where the value was never recorded (it is not invented).
 MIGRATIONS = (
