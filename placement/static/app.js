@@ -30,7 +30,7 @@ function later(delay=600,indices=[selected]){markStale(indices);clearTimeout(tim
 
 // --- Controls ----------------------------------------------------------------
 function readControls(){if(!candidates.length)return;const c=candidates[selected];c.lat=+$('lat').value;c.lon=+$('lon').value;c.height=+$('height').value;c.resolution=$('resolution').value;c.max_range=+$('max-range').value*1000;c.smoke_height=+$('smoke-height').value;c.cameras.forEach(cam=>{cam.tilt=+$('tilt').value;cam.vfov=+$('vfov').value});}
-function showControls(){const c=candidates[selected];if(!c)return;$('lat').value=c.lat.toFixed(5);$('lon').value=c.lon.toFixed(5);$('height').value=String(c.height);$('resolution').value=c.resolution;$('max-range').value=c.max_range/1000;$('smoke-height').value=c.smoke_height;$('tilt').value=c.cameras[0].tilt;$('vfov').value=c.cameras[0].vfov;for(const id of ['settings-site','height-site'])$(id).textContent=letters[selected]+' · '+siteName(c);}
+function showControls(){const c=candidates[selected];if(!c)return;$('lat').value=c.lat.toFixed(5);$('lon').value=c.lon.toFixed(5);$('height').value=String(c.height);$('resolution').value=c.resolution;$('max-range').value=c.max_range/1000;$('smoke-height').value=c.smoke_height;$('tilt').value=c.cameras[0].tilt;$('vfov').value=c.cameras[0].vfov;for(const id of ['settings-site','height-site'])$(id).textContent='Editing '+letters[selected]+' · '+siteName(c);}
 function selectSite(i,reveal=true){if(i===selected||!candidates[i])return;readControls();selected=i;showControls();render();if(reveal)revealSite(i);}
 
 // --- Headline metric: total visible forest, or priority forest while a polygon is active.
@@ -42,7 +42,7 @@ function renderSummary(){
  const figures=$('headline-figures');figures.replaceChildren();
  candidates.forEach((c,i)=>{const r=results[i],m=r?.metrics?.[scenario],block=el('div','headline-site'+(i===selected?' selected':'')+(r&&dirty.has(i)?' stale':''));
   const b=el('button','headline-name');b.type='button';b.append(el('span','cand-letter mono',letters[i]),document.createTextNode(siteName(c)));b.setAttribute('aria-pressed',String(i===selected));b.addEventListener('click',()=>selectSite(i));block.append(b);
-  const shown=r?area(headlineValue(r),r.resolution_m):'—',n=addText(block,'div',shown,'headline-value'+(shown==='—'?' missing':''));if(shown!=='—'){addText(n,'small',' ha');localized(addText(n,'small','','simulation-label'),'Simulated','Simülasyon');}
+  const shown=r?area(headlineValue(r),r.resolution_m):'—',n=addText(block,'div',shown,'headline-value'+(shown==='—'?' missing':''));if(shown!=='—')addText(n,'small',' ha');
   if(r)localized(addText(block,'p','','headline-sub'),`${fmt(r.input.height)} m · 360°`,`${fmt(r.input.height)} m · 360°`);else localized(addText(block,'p','','headline-sub'),'Not computed','Hesaplanmadı');
   if(r&&priorityMode&&M.valid(m?.visible_forest_ha))localized(addText(block,'p','','headline-sub'),`of ${area(m.visible_forest_ha,r.resolution_m)} ha visible forest in total`,`toplam görünür orman ${area(m.visible_forest_ha,r.resolution_m)} ha`);
   if(r&&M.valid(M.share(m)))localized(addText(block,'p','','headline-sub'),`${M.percent(M.share(m),'en')} of the view is water`,`Görülen alanda su payı: ${M.percent(M.share(m),'tr')}`);
@@ -51,7 +51,6 @@ function renderSummary(){
  if(values.every(M.valid)){const winner=values[0]>=values[1]?0:1,other=1-winner,high=values[winner],low=values[other],what=priorityMode?['visible priority forest','görünür öncelikli orman']:['visible forest','görünür orman'];
   localized($('verdict'),high===low?`Both sites show the same ${what[0]}.`:low>0?`${siteName(candidates[winner])} shows ${fmt(high/low,1)}× the ${what[0]}.`:`${siteName(candidates[winner])} shows more ${what[0]}.`,high===low?`İki konumda da aynı ${what[1]} görünüyor.`:low>0?`${siteName(candidates[winner])} konumunda ${fmt(high/low,1)} kat daha fazla ${what[1]} görünüyor.`:`${siteName(candidates[winner])} konumunda daha fazla ${what[1]} görünüyor.`);
  }else localized($('verdict'),busy&&!lastError?'The comparison appears when both sites are calculated.':'No comparison yet. Recalculate both sites to compare.',busy&&!lastError?'Karşılaştırma iki konum da hesaplandığında görünür.':'Henüz karşılaştırma yok. Karşılaştırmak için iki konumu yeniden hesaplayın.');
- if(values.every(M.valid))$('verdict').append(el('span','tag tag-sim verdict-simulation',tr('Simulated','Simülasyon')));
  const smoke=r=>r?.metrics?.canopy_smoke,ranked=comparable?[0,1].filter(i=>M.valid(smoke(results[i])?.visible_forest_ha)).sort((a,b)=>(priorityMode?(smoke(results[b]).priority_visible_ha??-Infinity)-(smoke(results[a]).priority_visible_ha??-Infinity):0)||smoke(results[b]).visible_forest_ha-smoke(results[a]).visible_forest_ha):[];
  if(ranked.length===2){const order=ranked.map((i,k)=>`${k+1} ${siteName(candidates[i])}`).join(', ');localized($('ranking'),`Ranking by ${priorityMode?'visible priority forest':'total visible forest'} (smoke-target scenario): ${order}`,`Sıralama, ${priorityMode?'görünür öncelikli orman':'toplam görünür orman'} (duman hedefi senaryosu): ${order}`);}else $('ranking').textContent='';
  const stale=[...dirty].some(i=>results[i]),missing=[0,1].filter(i=>!results[i]).map(i=>siteName(candidates[i])).join(', ');document.body.classList.toggle('stale',stale);
@@ -64,8 +63,8 @@ function renderAccounting(){
  const box=$('accounting');box.replaceChildren();const rows=results.map((r,i)=>({i,r,a:r?C.accounting(r.metrics?.[scenario],M.round,M.blind,r.resolution_m):null}));const max=Math.max(1,...rows.map(x=>x.a?.total).filter(M.valid));
  rows.forEach(({i,r,a})=>{const row=el('div','acc-row'+(i===selected?' selected':''));const head=el('div','acc-head');head.append(el('span','cand-letter mono',letters[i]),el('span','acc-name',siteName(candidates[i])),el('span','acc-total mono',a?fmt(a.total):'—'));row.append(head);
   const bar=el('div','acc-bar');if(a){for(const [key,cls] of [['visible','visible'],['occluded','occluded'],['outside','outside']]){const seg=el('i',cls);seg.style.width=(a[key]/max*100)+'%';seg.title=key;bar.append(seg);}}else bar.classList.add('empty');row.append(bar);
-  const legend=el('div','acc-values');if(a){for(const [key,en,turkish] of [['visible','Visible','Görünür'],['occluded','Occluded','Perdelenmiş'],['outside','Outside FOV','Görüş dışında']]){const s=el('span');s.append(el('i','sw '+key));localized(s.appendChild(el('span')),`${en} ${fmt(a[key])}`,`${turkish} ${fmt(a[key])}`);legend.append(s);}}else localized(legend,r?'Split not available':'Not computed',r?'Ayrım yok':'Hesaplanmadı');row.append(legend);box.append(row)});
- localized(addText(box,'p','','small'),'Forest inside the range disk. Total = visible + occluded in FOV + outside FOV.','Menzil diski içindeki orman. Toplam = görünür + görüş içinde perdelenmiş + görüş dışında.');
+  const legend=el('div','acc-values');if(a){for(const [key,en,turkish] of [['visible','Visible','Görünür'],['occluded','Occluded','Perdelenmiş'],['outside','Vertical blind area','Görüş dışında']]){if(a[key]===0)continue;const s=el('span');s.append(el('i','sw '+key));localized(s.appendChild(el('span')),`${en} ${fmt(a[key])}`,`${turkish} ${fmt(a[key])}`);legend.append(s);}}else localized(legend,r?'Split not available':'Not computed',r?'Ayrım yok':'Hesaplanmadı');row.append(legend);box.append(row)});
+ localized(addText(box,'p','','small'),'Forest in range · visible and unseen','Menzil diski içindeki orman. Toplam = görünür + görüş içinde perdelenmiş + görüş dışında.');
 }
 function renderCameras(){
  const result=results[selected],box=$('camera-breakdown');box.replaceChildren();
@@ -74,7 +73,8 @@ function renderCameras(){
  for(let i=0;i<3;i++){
   const value=result?.camera_breakdown?.[i]?.metrics?.[scenario]?.visible_forest_ha;
   const row=el('div','camera-result'),head=el('div','camera-result-head');
-  head.append(el('span','',camName(i)),el('span','mono',M.valid(value)?area(value,result.resolution_m)+' ha':'—'));
+  const camera=result?.input?.cameras?.[i],label=camName(i)+(camera?' · '+fmt((result.input.heading+camera.yaw)%360)+'°':'');
+  head.append(el('span','',label),el('span','mono',M.valid(value)?area(value,result.resolution_m)+' ha':'—'));
   row.append(head);const bar=el('div','camera-result-bar'),fill=el('i','visible');
   fill.style.width=(M.valid(value)&&total>0?100*value/total:0)+'%';bar.append(fill);row.append(bar);box.append(row);
  }
@@ -82,16 +82,27 @@ function renderCameras(){
 }
 
 // --- Table and notes -----------------------------------------------------------
-function appendRow(body,label,unit,values,cls=''){const row=el('tr',cls);[label,unit,...values].forEach((v,i)=>{const td=el(i===0?'th':'td','',v);if(i===0)td.scope='row';if(i===1)td.className='unit';if(v==='—')td.title='Not computed';row.append(td)});body.append(row);}
+function appendRow(body,label,unit,values,cls=''){
+ // Hide only measured values that round to zero at both sites. Missing stays “—”.
+ if(values.every(value=>value==='0'))return;
+ const row=el('tr',cls),heading=el('th','',label);heading.scope='row';if(unit)heading.append(el('small','metric-unit',' · '+unit));row.append(heading);
+ values.forEach(value=>{const td=el('td','',value);if(value==='—')td.title='Not computed';row.append(td)});body.append(row);
+}
 function renderTable(){
- const headers=$('comparison').querySelectorAll('thead th');candidates.forEach((c,i)=>headers[i+2].textContent=letters[i]+' · '+siteName(c));const body=$('comparison').querySelector('tbody');body.replaceChildren();
+ for(const id of ['comparison','more-comparison']){const headers=$(id).querySelectorAll('thead th');candidates.forEach((c,i)=>headers[i+1].textContent=letters[i]+' · '+siteName(c));$(id).querySelector('tbody').replaceChildren();}
+ const body=$('comparison').querySelector('tbody'),more=$('more-comparison').querySelector('tbody');
  const metrics=results.map(r=>r?.metrics?.[scenario]),res=results.map(r=>r?.resolution_m),split=metrics.map((m,i)=>M.blind(m,res[i])),values=key=>metrics.map((m,i)=>fmt(M.round(m?.[key],res[i]))),other=key=>results.map(r=>fmt(M.round(key(r),r?.resolution_m)));
- localized($('precision'),res.includes(120)?'Quick 120 m figures are rounded to 10 ha; detailed 40 m to whole hectares.':'Rounded to whole hectares.',res.includes(120)?'Hızlı 120 m değerleri 10 ha’ya, ayrıntılı 40 m değerleri tam hektara yuvarlanır.':'Tam hektara yuvarlanmıştır.');
+ $('precision').textContent=res.includes(120)?'Quick figures rounded to 10 ha; detailed to whole hectares.':'Rounded to whole hectares.';
  appendRow(body,'Visible forest','ha',values('visible_forest_ha'),'main-metric');
- appendRow(body,'Blind total','ha',split.map(s=>fmt(s.total)),'band');appendRow(body,'Outside FOV','ha',split.map(s=>fmt(s.outside)),'sub');appendRow(body,'Occluded in FOV','ha',split.map(s=>fmt(s.occluded)),'sub');
- appendRow(body,'Water in view','ha',values('water_view_ha'));appendRow(body,'Water share','%',metrics.map(m=>fmt(M.share(m))));appendRow(body,'Visible priority forest','ha',other(r=>M.priorityValue(r,scenario)));
- appendRow(body,'Bare terrain · ground','ha',other(r=>r?.metrics?.bare_ground?.visible_forest_ha),'band');appendRow(body,'Canopy · ground','ha',other(r=>r?.metrics?.canopy_ground?.visible_forest_ha));
- for(let i=0;i<3;i++)appendRow(body,camName(i),'ha',other(r=>r?.camera_breakdown?.[i]?.metrics?.[scenario]?.visible_forest_ha));
+ appendRow(body,'Unseen forest','ha',split.map(s=>fmt(s.total)));
+ appendRow(body,'Water in view','ha',values('water_view_ha'));
+ appendRow(body,'Water share','%',metrics.map(m=>fmt(M.share(m))));
+ appendRow(more,'Vertical blind area','ha',split.map(s=>fmt(s.outside)));
+ appendRow(more,'Occluded','ha',split.map(s=>fmt(s.occluded)));
+ if(usePriority())appendRow(more,'Visible priority forest','ha',other(r=>M.priorityValue(r,scenario)));
+ appendRow(more,'Bare terrain · ground','ha',other(r=>r?.metrics?.bare_ground?.visible_forest_ha));
+ appendRow(more,'Canopy · ground','ha',other(r=>r?.metrics?.canopy_ground?.visible_forest_ha));
+ for(let i=0;i<3;i++)appendRow(more,camName(i),'ha',other(r=>r?.camera_breakdown?.[i]?.metrics?.[scenario]?.visible_forest_ha));
 }
 
 // Hide secondary place labels where they would collide with camera/site labels.
@@ -100,23 +111,36 @@ function arrangeLabels(){
  document.querySelectorAll('.map-label').forEach(e=>{e.style.visibility='visible';const b=e.getBoundingClientRect();if(obstacles.some(a=>b.left<a.right+4&&b.right>a.left-4&&b.top<a.bottom+4&&b.bottom>a.top-4))e.style.visibility='hidden';});
 }
 // --- Map -----------------------------------------------------------------------
+function refreshLegend(){
+ if(!map)return;
+ const metric=results[selected]?.metrics?.[scenario];
+ $('legend-occluded').hidden=!(metric?.occluded_forest_ha>0);
+ $('legend-outside').hidden=!(metric?.outside_fov_forest_ha>0);
+ $('legend-other').hidden=!results.some((r,i)=>r&&i!==selected&&map.getBounds().contains(L.latLng(r.input.lat,r.input.lon)));
+}
 function offset(lat,lon,bearing,metres){const b=bearing*Math.PI/180;return [lat+metres*Math.cos(b)/111320,lon+metres*Math.sin(b)/(111320*Math.cos(lat*Math.PI/180))];}
 function renderMap(){
  if(!map||!layers)return;layers.markers.clearLayers();layers.sectors.clearLayers();if(overlay){map.removeLayer(overlay);overlay=null;}
  const revision=++mapRenderRevision,result=results[selected];
- // The other site's field of view is deliberately dashed and unfilled: two coloured
- // coverage rasters would conceal each other where they overlap.
- results.forEach((r,index)=>{if(!r||index===selected)return;r.sectors?.forEach(s=>L.polygon(s.footprints[scenario].polygons,{color:token('--map-sector'),weight:1.5,opacity:.6,fillOpacity:.025,dashArray:'5 6',interactive:false,className:'other-footprint'}).addTo(layers.sectors));});
+ // One complete secondary perimeter; no camera seams or competing data raster.
+ results.forEach((r,index)=>{if(!r||index===selected)return;
+  const footprints=r.sectors.map(s=>s.footprints[scenario]);
+  for(let span=0;span<footprints[0].polygons.length;span++){
+   const perimeter=footprints.flatMap(f=>{const points=f.polygons[span];return points.slice(0,points.length/2)});
+   L.polygon(perimeter,{color:token('--text-2'),weight:1.25,opacity:.6,fillOpacity:0,interactive:false,className:'other-footprint'}).addTo(layers.sectors);
+  }
+ });
+ refreshLegend();
  if(result){const image=result.images?.[scenario];if(image){
    const rgb=value=>value.match(/[a-f0-9]{2}/gi).map(v=>parseInt(v,16));
    const source=Object.fromEntries(['visible','water'].map(k=>[k,rgb(token('--map-'+k))]));
    const display={visible:rgb(token('--display-visible')),water:rgb(token('--display-water'))};
-   MapDisplay.image(image.url,source,display).then(url=>{if(revision!==mapRenderRevision)return;overlay=L.imageOverlay(url,image.bounds,{opacity:1,interactive:false}).addTo(map);}).catch(()=>{if(revision!==mapRenderRevision)return;lastError='Map overlay expired. Recalculate both sites.';state(lastError,true);banner(lastError,'',true);});
+   MapDisplay.image(image.url,source,display).then(url=>{if(revision!==mapRenderRevision)return;overlay=L.imageOverlay(url,image.bounds,{opacity:.85,interactive:false,className:'coverage-map'}).addTo(map);}).catch(()=>{if(revision!==mapRenderRevision)return;lastError='Map overlay expired. Recalculate both sites.';state(lastError,true);banner(lastError,'',true);});
   }
   const input=result.input;
-  result.sectors?.forEach((s,i)=>{L.polygon(s.footprints[scenario].polygons,{color:token('--map-sector'),weight:1.5,opacity:.9,fillOpacity:0,interactive:false,className:'camera-footprint'}).addTo(layers.sectors);
+  result.sectors?.forEach((s,i)=>{L.polygon(s.footprints[scenario].polygons,{color:token('--map-sector'),weight:1.5,opacity:.95,fillOpacity:0,interactive:false,className:'camera-footprint'}).addTo(layers.sectors);
    const cam=input.cameras[i],radii=s.footprints[scenario].radii_m[0];if(!radii)return;
-   const at=offset(input.lat,input.lon,input.heading+cam.yaw,radii[0]+(radii[1]-radii[0])*.62),label=el('span','sector-label',camName(i));
+   const at=offset(input.lat,input.lon,input.heading+cam.yaw,radii[0]+(radii[1]-radii[0])*.7),label=el('span','sector-label',camName(i));
    L.marker(at,{interactive:false,keyboard:false,icon:L.divIcon({className:'sector-icon',html:label.outerHTML,iconSize:null})}).addTo(layers.sectors)});
  }
  candidates.forEach((c,i)=>{if(!Number.isFinite(c.lat)||!Number.isFinite(c.lon))return;const marker=L.circleMarker([c.lat,c.lon],{radius:i===selected?7:5,color:token('--bg-0'),weight:2,fillColor:i===selected?token('--text'):token('--text-2'),fillOpacity:1}).addTo(layers.markers);
@@ -167,7 +191,7 @@ function mapState(text){$('map-state').hidden=!text;if(text)$('map-state-text').
 async function init(){let initializingMap=null;if(ready)return;ready=true;mapState('Loading regional map…');setBusy(true);
  try{const response=await fetch('/api/config');if(!response.ok)throw Error();const config=await response.json();candidates=config.presets;dataInfo=config.data;showControls();renderSummary();if(!config.ready)throw Error();
   dataSummary();
-  const m=initializingMap=L.map('map',{attributionControl:true,zoomControl:false,zoomSnap:.5,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false});
+  const m=initializingMap=L.map('map',{attributionControl:true,zoomControl:false,zoomSnap:.25,zoomAnimation:false,fadeAnimation:false,markerZoomAnimation:false});
   layers={markers:L.layerGroup(),sectors:L.layerGroup(),draw:L.layerGroup()};
   const DrawControl=L.Control.extend({onAdd(){const controls=document.querySelector('.map-toolbar');L.DomEvent.disableClickPropagation(controls);L.DomEvent.disableScrollPropagation(controls);return controls;}});
   new DrawControl({position:'topleft'}).addTo(m);L.control.zoom({zoomInTitle:'Zoom in',zoomOutTitle:'Zoom out',position:'topleft'}).addTo(m);m.attributionControl.setPrefix(false);m.attributionControl.addAttribution('NLS 2019 · Syke 2024 · Luke 2023 | CC BY 4.0');
@@ -175,9 +199,11 @@ async function init(){let initializingMap=null;if(ready)return;ready=true;mapSta
   const interior=await MapDisplay.extent('/maps/background.png'),nw=m.project(L.latLng(mapConfig.bounds[1][0],mapConfig.bounds[0][1]),0),se=m.project(L.latLng(mapConfig.bounds[0][0],mapConfig.bounds[1][1]),0);
   const corner=(x,y)=>m.unproject(L.point(nw.x+(se.x-nw.x)*x,nw.y+(se.y-nw.y)*y),0);
   const safeBounds=L.latLngBounds(corner(interior.left,interior.bottom),corner(interior.right,interior.top));
-  function constrainView(){const minimum=Math.ceil(m.getBoundsZoom(safeBounds,true)*2)/2;m.stop();m.setMinZoom(minimum);if(Number.isFinite(m.getZoom())){if(m.getZoom()<minimum)m.setZoom(minimum,{animate:false});m.panInsideBounds(safeBounds,{animate:false});}}
+  function constrainView(){const minimum=Math.ceil(m.getBoundsZoom(safeBounds,true)*4)/4-.25;m.stop();m.setMinZoom(minimum);if(Number.isFinite(m.getZoom())){if(m.getZoom()<minimum)m.setZoom(minimum,{animate:false});m.panInsideBounds(safeBounds,{animate:false});}}
   m.options.maxBoundsViscosity=1;m.setMaxBounds(safeBounds);constrainView();
-  m.fitBounds(candidates.map(c=>[c.lat,c.lon]),{padding:[60,60],maxZoom:Math.max(m.getMinZoom(),matchMedia('(max-width:760px)').matches?9:10),animate:false});
+  const phone=matchMedia('(max-width:760px)').matches;
+  const initialBounds=phone?L.latLng(candidates[0].lat,candidates[0].lon).toBounds(2*candidates[0].max_range):L.latLngBounds(candidates.flatMap(c=>[0,90,180,270].map(bearing=>offset(c.lat,c.lon,bearing,c.max_range))));
+  m.fitBounds(initialBounds,{padding:phone?[28,28]:[44,44],maxZoom:11,animate:false});
   const background=L.imageOverlay('/maps/background.png',mapConfig.bounds,{className:'base-map'}).addTo(m);const forests=L.imageOverlay('/maps/forest.png',mapConfig.bounds,{opacity:.45}),waters=L.imageOverlay('/maps/water.png',mapConfig.bounds,{opacity:.45});
   L.control.layers({'Local terrain map':background},{'Forest highlight':forests,'Water highlight':waters},{collapsed:true,position:'topleft'}).addTo(m);L.control.scale({imperial:false,position:'bottomright'}).addTo(m);
   for(const layer of Object.values(layers))layer.addTo(m);
@@ -185,8 +211,9 @@ async function init(){let initializingMap=null;if(ready)return;ready=true;mapSta
   labels.filter(([name])=>!candidates.some(c=>siteName(c)===name)).forEach(([name,lat,lon,forest])=>L.marker([lat,lon],{interactive:false,keyboard:false,icon:L.divIcon({className:'map-label'+(forest?' forest-label':''),html:name,iconSize:[100,20]})}).addTo(m));
   m.on('click',e=>{if(drawing){drawPoints.push(e.latlng);layers.draw.clearLayers();L.polyline(drawPoints,{color:token('--accent'),weight:2}).addTo(layers.draw);drawPoints.forEach(p=>L.circleMarker(p,{radius:4,color:token('--accent'),fillColor:token('--bg-0'),fillOpacity:1}).addTo(layers.draw));return;}readControls();candidates[selected].lat=e.latlng.lat;candidates[selected].lon=e.latlng.lng;showControls();run(false)});
   m.on('dblclick',()=>{if(drawing)finishDraw()});
-  m.on('moveend zoomend',arrangeLabels);
+  m.on('moveend zoomend',()=>{arrangeLabels();refreshLegend()});
   new ResizeObserver(()=>{m.invalidateSize({pan:false});constrainView();}).observe($('map'));
+  new ResizeObserver(([entry])=>{document.documentElement.style.setProperty('--map-legend-height',Math.ceil(entry.borderBoxSize?.[0]?.blockSize||entry.contentRect.height)+'px');}).observe(document.querySelector('.legend'));
   map=m;mapState('');render();await run(true);
  }catch{ready=false;const failedMap=map||initializingMap;if(failedMap){const controls=document.querySelector('.map-toolbar');failedMap.remove();if(controls)document.querySelector('.map-shell').append(controls);}map=null;layers=null;mapState('Could not load regional map data. Use Recalculate both sites to retry.');lastError='Could not load regional map data. Use Recalculate both sites to retry.';status(lastError,true);banner(lastError,'',true);renderSummary();setBusy(false);}}
 

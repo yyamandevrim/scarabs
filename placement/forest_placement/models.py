@@ -49,6 +49,6 @@ class Candidate(BaseModel):
         return self
 
 PRESETS = [
-    Candidate(name="Coast · Haukilahti", lon=24.773, lat=60.159, heading=180),
-    Candidate(name="Inland · Nuuksio", lon=24.557, lat=60.293, heading=20),
+    Candidate(name="Forest · Sipoonkorpi", lon=25.19, lat=60.32, heading=0),
+    Candidate(name="Inland · Nuuksio", lon=24.557, lat=60.293, heading=0),
 ]

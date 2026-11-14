@@ -14,7 +14,7 @@
   <div id="map-state" role="status"><span class="loader" aria-hidden="true"></span><span id="map-state-text">Loading regional map…</span></div>
   <div class="map-toolbar"><button id="draw">Draw priority forest</button><button id="finish" class="primary" hidden>Finish area</button><button id="clear-priority" hidden>Clear area</button></div>
   <p id="draw-help" class="map-help" hidden></p>
-  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="water"></i>Water in view</span><span><i class="other-site"></i>Other site’s field of view</span></div>
+  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span id="legend-occluded"><i class="occluded"></i>Occluded</span><span id="legend-outside"><i class="outside"></i>Vertical blind area</span><span><i class="water"></i>Water in view</span><span id="legend-other"><i class="other-site"></i>Other site ring</span></div>
  </section>
  <aside id="result-summary" class="panel" aria-label="Candidate results" aria-busy="true">
   <div class="tabs" role="tablist" aria-label="Views"><button role="tab" id="tab-compare" aria-controls="view-compare" aria-selected="true">Compare</button><button role="tab" id="tab-breakdown" aria-controls="view-breakdown" aria-selected="false" tabindex="-1">Breakdown</button><button role="tab" id="tab-data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button></div>
@@ -22,7 +22,7 @@
   <div id="view-compare" class="view" role="tabpanel" aria-labelledby="tab-compare">
    <section class="answer">
     <label class="metric-picker"><span class="visually-hidden">Target shown on map</span><select id="scenario"><option value="canopy_smoke">Smoke · including canopy obstructions</option><option value="canopy_ground">Ground · including canopy obstructions</option><option value="bare_smoke">Smoke · bare-terrain comparison</option><option value="bare_ground">Ground · bare-terrain comparison</option></select></label>
-    <p id="result-title" class="answer-label">Visible forest · smoke + canopy</p>
+    <div class="answer-heading"><p id="result-title" class="answer-label">Visible forest · smoke + canopy</p><span class="simulation-label">Simulated</span></div>
     <div id="headline-figures" class="sites"><div class="site skeleton"></div><div class="site skeleton"></div></div>
     <p id="verdict" class="verdict">The comparison appears when both sites are calculated.</p>
     <p id="ranking" class="visually-hidden"></p>
@@ -55,7 +55,8 @@
    </section>
    <section class="block dense">
     <div class="block-head"><h2>Visibility breakdown · simulated ha</h2></div>
-    <div class="table-wrap"><table id="comparison" class="grid"><caption><span id="precision">Rounded to whole hectares.</span> — = not computed. Blind total = outside FOV + occluded in FOV.</caption><thead><tr><th scope="col">Metric</th><th scope="col" class="unit">Unit</th><th scope="col">Haukilahti</th><th scope="col">Nuuksio</th></tr></thead><tbody></tbody></table></div>
+    <div class="table-wrap"><table id="comparison" class="grid"><caption><span id="precision">Rounded to whole hectares.</span> — = not computed.</caption><thead><tr><th scope="col">Metric</th><th scope="col">A · Sipoonkorpi</th><th scope="col">B · Nuuksio</th></tr></thead><tbody></tbody></table></div>
+    <details class="more-metrics"><summary>More metrics</summary><div class="table-wrap"><table id="more-comparison" class="grid"><caption>Simulated hectares. Unseen forest = vertical blind area + occluded.</caption><thead><tr><th scope="col">Metric</th><th scope="col">A · Sipoonkorpi</th><th scope="col">B · Nuuksio</th></tr></thead><tbody></tbody></table></div></details>
    </section>
   </div>
 
@@ -65,7 +66,7 @@
     <p>Three cameras on the faces of a triangular housing watch the full circle. Each camera covers a 120° sector.</p>
     <p>Visibility includes terrain, canopy and Earth curvature. Smoke targets are 50 m above the canopy by default.</p>
     <p>Ring guides follow the selected vertical geometry on a level target plane through the launch point. Map cells follow the local terrain and canopy heights.</p>
-    <p>Camera 1 starts at the preset module heading; Cameras 2 and 3 are 120° apart. Bearings use EPSG:3067 grid north.</p>
+    <p>Default camera directions: Camera 1 at 0° (north), Camera 2 at 120°, Camera 3 at 240°. Bearings use EPSG:3067 grid north.</p>
     <p class="note"><span data-brand-tagline></span></p>
     <p class="note">NLS Finland / Syke / Luke · CC BY 4.0 · <span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span> · <span data-brand-challenge></span> challenge</p>
    </section>

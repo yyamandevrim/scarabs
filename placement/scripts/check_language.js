@@ -2,7 +2,7 @@
 // and requests ?lang=tr&language=tr before running this check.
 (async () => {
  const text=document.body.innerText;
- const expected=location.pathname==='/map'?'Occluded in FOV':'Watch the forest.';
+ const expected=location.pathname==='/map'?'Visible forest':'Watch the forest.';
  if(!text.includes(expected))throw Error('Missing rendered English text: '+expected);
  if(document.documentElement.lang!=='en')throw Error('Page language must be English');
  if(document.querySelector('.language'))throw Error('Language toggle remains');

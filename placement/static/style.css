@@ -35,13 +35,13 @@
 .occluded{background:var(--map-occluded)}
 .overlap{background:var(--map-overlap)}
 .water{background:var(--display-water)}
-.other-site{border:1px dashed var(--text-2);background:none}
+.other-site{border:1px solid var(--text-2);border-radius:50%!important;background:none}
 
 .drawing #map{cursor:crosshair}
 
 .leaflet-container{background:var(--map-background);font:12px var(--font)}
 
-.leaflet-container .base-map{filter:saturate(.65) contrast(1.05) brightness(.55)}
+.leaflet-container .base-map{filter:saturate(.35) contrast(.85) brightness(.32) blur(.6px);opacity:.6}
 
 .leaflet-bar,.leaflet-control-layers{border:1px solid var(--line-strong)!important;border-radius:4px!important;box-shadow:none!important;background:var(--bg-1)}
 
@@ -97,8 +97,9 @@
 
 .sites{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .site.skeleton{height:100px}
-.headline-site{min-width:0;padding:0 0 10px;border-bottom:2px solid transparent}
-.headline-site.selected{border-bottom-color:var(--text)}
+.headline-site{min-width:0;padding:0 0 8px 10px;border-left:2px solid transparent}
+.headline-site.selected{border-left-color:var(--accent)}
+.headline-site.selected .cand-letter{color:var(--accent);border-color:var(--accent)}
 
 .headline-name{justify-content:flex-start;gap:7px;min-height:30px;padding:0;border:0;background:transparent;font-size:14px}
 .headline-name:hover{background:transparent;color:var(--accent)}
@@ -137,7 +138,11 @@ label{display:flex;flex-direction:column;gap:6px;font-size:13px}
 
 .table-wrap{overflow:auto}
 table.grid{font-size:12px}
-table.grid th,table.grid td{padding:8px 5px;white-space:normal}
+table.grid th,table.grid td{padding:10px 5px;min-height:44px;height:44px;white-space:normal}
+table.grid th:first-child{width:46%}
+.metric-unit{font-size:11px;color:var(--text-2);font-weight:400}
+.more-metrics{border-top:1px solid var(--line);margin-top:16px}
+.more-metrics summary{min-height:44px;align-content:center;font-size:13px;cursor:pointer}
 table.grid td{white-space:nowrap}
 table.grid tr.main-metric td,table.grid tr.main-metric th{font-weight:600;color:var(--text)}
 table.grid tr.band>*{border-top:1px solid var(--line-strong)}
@@ -160,13 +165,16 @@ table.grid td.unit{font-family:var(--font);color:var(--text-2)}
 .sites{gap:12px}
 }
 
-@media(max-width:760px){:root{--map-legend-height:92px}
+@media(max-width:760px){:root{--map-legend-height:64px}
 .map-app{display:block;height:auto;overflow:visible}
-.shell-nav{display:none}
+.map-app .shell-nav{display:flex;margin-left:auto;gap:2px}
+.map-app .shell-nav a{padding:0 8px;min-height:44px;font-size:12px}
+.map-app .shell-bar{gap:12px;padding:0 12px}
+.map-app .shell-spacer{display:none}
 .workspace{display:flex;flex-direction:column}
-.map-shell{height:52dvh;min-height:350px}
+.map-shell{height:58dvh;min-height:480px;max-height:560px}
 #map{bottom:var(--map-legend-height)}
-.legend{min-height:92px;gap:6px 14px;font-size:11px;padding:10px 12px}
+.legend{display:grid;grid-template-columns:1fr 1fr;min-height:0;gap:6px 12px;font-size:12px;padding:10px 12px}
 .leaflet-left .leaflet-control{margin-left:12px}
 .map-toolbar button{min-height:40px}
 .panel{border-left:0}
@@ -182,8 +190,11 @@ table.grid td.unit{font-family:var(--font);color:var(--text-2)}
 .headline-name{min-height:32px}
 }
 
-.headline-value .simulation-label{display:table;width:fit-content;font-size:11px;letter-spacing:0;line-height:1.5;margin-top:6px;padding:1px 6px;border:1px dashed var(--line-strong);border-radius:3px;color:var(--text-2)}
-.verdict-simulation{display:table;margin-top:8px;letter-spacing:0;font-weight:400}
+.answer-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 14px}
+.answer-heading .answer-label{margin:0}
+.simulation-label{font-size:11px;line-height:1.5;padding:1px 6px;border:1px dashed var(--line-strong);border-radius:3px;color:var(--text-2);flex:none}
+.camera-footprint{filter:drop-shadow(0 1px 2px #090e13)}
+@media(max-width:479px){.sector-label,.map-label{display:none}.sites{gap:12px}.headline-site{padding-left:8px}}
 
 /* Fit the full camera breakdown and geometry disclosure in the desktop dock. */
 #view-compare .block{padding-top:16px;padding-bottom:16px}

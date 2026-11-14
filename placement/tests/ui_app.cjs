@@ -23,6 +23,7 @@ async function appHarness(){
    change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));},
    select(i){$('headline-figures').querySelectorAll('button')[i].click();},
    state:()=>({dirty:[...dirty],busy,pending:[...pending],heights:results.map(r=>r?.input.height)}),
+   breakdown(fixtures){results=fixtures;renderAccounting();renderTable();},
    run:()=>run(true)
   };
  })()`);

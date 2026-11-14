@@ -23,10 +23,11 @@ def test_real_sources_and_complete_grid():
             assert ((g['forest']+g['water'])<=1.00001).all()
 
 def test_presets_water_and_accounting(preset_results):
-    coast,inland=preset_results
-    assert coast['active_cameras']==[0,1,2] and inland['active_cameras']==[0,1,2]
-    assert coast['metrics']['canopy_smoke']['water_share_pct']>40
-    assert inland['metrics']['canopy_smoke']['water_share_pct']<20
+    assert [c.heading for c in PRESETS]==[0,0]
+    for result in preset_results:
+        assert result['active_cameras']==[0,1,2]
+        assert result['metrics']['canopy_smoke']['water_share_pct']<20
+        assert result['metrics']['canopy_smoke']['visible_forest_ha']>15000
     for r in preset_results:
         assert not r['range_clipped'] and r['unknown_forest_ha']==0
         assert r['unknown_elevation_in_window'] is False
