@@ -72,7 +72,7 @@
 
 .sector-icon{background:none;border:0}
 .sector-label{display:inline-block;transform:translate(-50%,-50%);padding:3px 6px;border-radius:3px;background:#090e13d9;color:var(--text);font-size:12px;white-space:nowrap}
-.sector-label.inactive{color:var(--text-2);border:1px dashed var(--line-strong)}
+
 
 .panel{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--bg-1);border-left:1px solid var(--line)}
 
@@ -119,27 +119,6 @@
 #status:empty{display:none}
 #status{font-size:11px;color:var(--text-3)}
 
-.pairs{display:flex;flex-direction:column;gap:4px}
-.pairs-axis{font-size:12px;color:var(--text-2);margin-bottom:6px}
-.pair-row{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:100%;padding:8px 10px;min-height:0;text-align:left;background:transparent;border:1px solid transparent;white-space:normal}
-.pair-row:hover{background:var(--bg-2)}
-.pair-row.chosen{border-color:var(--line-strong);background:var(--bg-2)}
-
-.pair-top{display:flex;align-items:center;gap:8px;font-size:13px}
-.pair-name{flex:1;font-weight:400;display:flex;align-items:center;gap:8px}
-.pair-top b{font-weight:500}
-.pair-bar{position:relative;display:block;height:5px;background:var(--bg-0);border-radius:2px;overflow:hidden}
-.pair-bar i{position:absolute;left:0;top:0;bottom:0}
-.pair-bar i.overlap{top:1px;bottom:1px}
-.pair-sub{display:none}
-.tag-best,.tag-current{font-size:11px;height:18px;padding:0 5px;color:var(--text-2);border:1px solid var(--line-strong)}
-.pair-gain{font-size:13px;color:var(--text-2);margin-top:10px}
-.pair-gain:empty{display:none}
-
-input[type=range]{width:100%;margin:0 0 8px;cursor:pointer}
-.figure-sm{font-size:20px}
-.sensitivity-details summary{font-size:12px;color:var(--text-2)}
-
 .disclosure summary{cursor:pointer;font-size:14px;font-weight:500;min-height:24px}
 .disclosure[open] summary{margin-bottom:16px}
 .disclosure>*+*{margin-top:12px}
@@ -149,13 +128,12 @@ label{display:flex;flex-direction:column;gap:6px;font-size:13px}
 .check{flex-direction:row;align-items:center;gap:8px;color:var(--text)}
 .input-error{font-size:12px;color:var(--fail)}
 
-.camera-table{display:grid;gap:6px;overflow-x:auto}
-.camera-row{display:grid;grid-template-columns:83px repeat(4,minmax(48px,1fr));gap:4px;align-items:center;min-width:320px}
-.camera-row input[type=number]{height:34px;padding:0 4px;text-align:right;font-size:12px}
-.camera-head span{font-size:11px;color:var(--text-2);text-align:right}
-.camera-head span:first-child{text-align:left}
-.camera-name{flex-direction:row;align-items:center;gap:5px;font-size:13px}
-.camera-row.inactive{color:var(--text-3)}
+.camera-breakdown{margin-top:10px}
+.camera-result{margin:10px 0}
+.camera-result-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:7px}
+.camera-result-bar{height:5px;background:var(--bg-0);border-radius:2px;overflow:hidden}
+.camera-result-bar i{display:block;height:100%}
+.height-block select{height:40px}
 
 .table-wrap{overflow:auto}
 table.grid{font-size:12px}
@@ -173,15 +151,6 @@ table.grid td.unit{font-family:var(--font);color:var(--text-2)}
 .acc-values{display:flex;flex-wrap:wrap;gap:6px 12px;margin:8px 0;font-size:12px;color:var(--text-2)}
 .acc-values>span{display:flex;align-items:center;gap:4px}
 .chart-empty{color:var(--text-2);padding:12px 0}
-
-.line-svg{display:block;width:100%;height:auto;margin:8px 0}
-.line-svg .grid{stroke:var(--line);stroke-dasharray:2 3}
-.line-svg .axis{fill:var(--text-2);font:11px var(--font)}
-.line-svg .series{fill:none;stroke:var(--display-visible);stroke-width:2}
-.line-svg .point{fill:var(--bg-1);stroke:var(--map-visible);stroke-width:2}
-.line-svg .point.current{fill:var(--text);stroke:var(--text)}
-.line-svg .value{fill:var(--text-2);font:11px var(--font)}
-.line-svg .value.current{fill:var(--text)}
 
 .prose p{color:var(--text-2);margin-bottom:16px;font-size:14px;line-height:1.6}
 
@@ -207,7 +176,7 @@ table.grid td.unit{font-family:var(--font);color:var(--text-2)}
 .block{padding:20px}
 .sites{gap:20px}
 .headline-value{font-size:32px}
-.camera-row input[type=number]{min-height:44px}
+
 .shell-banner{flex-wrap:wrap}
 .panel-foot{padding:16px 20px}
 .headline-name{min-height:32px}
@@ -215,3 +184,6 @@ table.grid td.unit{font-family:var(--font);color:var(--text-2)}
 
 .headline-value .simulation-label{display:table;width:fit-content;font-size:11px;letter-spacing:0;line-height:1.5;margin-top:6px;padding:1px 6px;border:1px dashed var(--line-strong);border-radius:3px;color:var(--text-2)}
 .verdict-simulation{display:table;margin-top:8px;letter-spacing:0;font-weight:400}
+
+/* Fit the full camera breakdown and geometry disclosure in the desktop dock. */
+#view-compare .block{padding-top:16px;padding-bottom:16px}

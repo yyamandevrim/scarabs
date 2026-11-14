@@ -19,12 +19,7 @@ test('rounded parts always sum to the displayed total, including real zero occlu
  }
  assert.equal(m.blind({blind_forest_ha:7335.24,outside_fov_forest_ha:7335.24,occluded_forest_ha:0}).occluded,0);
 });
-test('best pair is independent of current selection and honours priority',()=>{
- const p=[{pair:[0,1],canopy_smoke:{visible_forest_ha:770,priority_visible_ha:20}},{pair:[0,2],canopy_smoke:{visible_forest_ha:2845,priority_visible_ha:10}}];
- assert.equal(m.bestPair(p,'canopy_smoke'),p[1]);
- assert.equal(m.bestPair(p,'canopy_smoke',true),p[0]);
- assert.equal(m.bestPair([{canopy_smoke:{}}],'canopy_smoke'),null);
-});
+
 test('headline precision follows quick versus detailed resolution',()=>{
  assert.equal(m.headline(12523.56,120),'≈12,520');
  assert.equal(m.headline(12511.8,40),'12,512');
@@ -64,25 +59,9 @@ test('percent places the sign correctly in Turkish without fabricating missing v
  assert.equal(m.percent(0,'tr'),'%0');
 });
 
-test('priority pairs rounded to zero have no best pair or total-forest overlap bar',()=>{
- const pairs=[{pair:[0,1],canopy_smoke:{visible_forest_ha:770,priority_visible_ha:.1,overlap_forest_ha:500}},{pair:[0,2],canopy_smoke:{visible_forest_ha:2845,priority_visible_ha:.2,overlap_forest_ha:100}}];
- assert.equal(m.bestPair(pairs,'canopy_smoke',true,120),null);
- assert.deepEqual(m.pairBars(pairs,'canopy_smoke',true,120),[{visible:0,overlap:0},{visible:0,overlap:0}]);
-});
+
 
 test('signed display uses a mathematical minus, preserving locale formatting',()=>{
  assert.equal(m.number(-70,'en'),'−70');
  assert.equal(m.number(-70,'tr'),'−70');
-});
-
-test('equal positive priority selects higher total forest and full ties retain input order',()=>{
- const pairs=[{pair:[0,1],canopy_smoke:{priority_visible_ha:10.24,visible_forest_ha:9964.64}},{pair:[1,2],canopy_smoke:{priority_visible_ha:10.24,visible_forest_ha:10682.24}},{pair:[0,2],canopy_smoke:{priority_visible_ha:10.24,visible_forest_ha:10682.24}}];
- assert.equal(m.bestPair(pairs,'canopy_smoke',true,120),pairs[1]);
- assert.equal(m.bestPair(pairs,'canopy_smoke',true,40),pairs[1]);
- assert.deepEqual(pairs.map(p=>p.pair),[[0,1],[1,2],[0,2]]);
- assert.equal(m.bestPair([{canopy_smoke:{visible_forest_ha:1000}},{canopy_smoke:{priority_visible_ha:null,visible_forest_ha:2000}}],'canopy_smoke',true),null);
-});
-test('ranking uses computed priority before total even within one displayed rounding bucket',()=>{
- const pairs=[{canopy_smoke:{priority_visible_ha:10.1,visible_forest_ha:2000}},{canopy_smoke:{priority_visible_ha:10.2,visible_forest_ha:1000}}];
- assert.equal(m.bestPair(pairs,'canopy_smoke',true,120),pairs[1]);
 });

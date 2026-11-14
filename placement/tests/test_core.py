@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from pydantic import ValidationError
-from forest_placement.core import sightlines,frustum,summarize,rank_candidates
+from forest_placement.core import sightlines,camera_sector,footprint_radii,summarize,rank_candidates
 from forest_placement.models import Camera,Candidate,PRESETS
 
 def rays(terrain,observer=10,cell=10,smoke=50,radius=6371000,surface=None,valid=None):
@@ -44,15 +44,27 @@ def test_unknown_obstruction_invalidates_ray():
     assert not m[:,0,20].any()
     assert m[0,0,9]
 
-@pytest.mark.parametrize('dx,dy,dz,heading,tilt,hfov,vfov,answer',[
-    (0,100,0,0,0,80,50,True),(100,0,0,0,0,80,50,False),
-    (0,-100,0,0,0,160,160,False),(100,0,0,90,0,80,50,True),
-    (100,100,0,0,0,90,50,True),(101,100,0,0,0,90,50,False),
-    (0,100,-100,0,45,80,10,True),(0,100,-100,0,0,80,50,False),
-    (-1,100,0,359,0,20,50,True),
-])
-def test_frustum(dx,dy,dz,heading,tilt,hfov,vfov,answer):
-    assert bool(frustum(np.array(dx),np.array(dy),np.array(dz),heading,tilt,hfov,vfov))==answer
+@pytest.mark.parametrize('heading',[0,20,60,120,180,359.99])
+def test_sectors_tile_full_ring_without_overlap(heading):
+    angles=np.radians(np.arange(0,360,.1))
+    dx,dy=1000*np.sin(angles),1000*np.cos(angles)
+    masks=np.array([camera_sector(dx,dy,np.full_like(dx,-100),heading+yaw,10,120,50) for yaw in (0,120,240)])
+    assert np.all(masks.sum(axis=0)==1)
+    assert masks.sum()==len(angles)
+
+
+def test_vertical_geometry_and_inner_disc():
+    distance=np.array([10,100,1000,12000])
+    mask=camera_sector(np.zeros(4),distance,np.full(4,-600),0,10,120,50)
+    assert mask.tolist()==[False,False,True,True]
+    spans=footprint_radii(-600,10,50,12000,6371000)
+    assert len(spans)==1
+    inner,outer=spans[0]
+    assert inner==pytest.approx(600/np.tan(np.radians(35)),rel=.001)
+    assert outer==12000
+    # A steeper tilt produces a real outer vertical limit before maximum range.
+    inner,outer=footprint_radii(-600,45,20,12000,6371000)[0]
+    assert inner<outer<1000
 
 def test_unique_forest_overlap_and_water_exclusion():
     forest=np.array([[1,.5,0,1]],dtype=float);water=np.array([[0,.5,1,0]],dtype=float)
@@ -65,18 +77,6 @@ def test_unique_forest_overlap_and_water_exclusion():
     assert result['total_forest_ha']==2.5
     assert counts.tolist()==[[2,1,2,0]]
 
-def test_inactive_camera_has_no_influence():
-    forest=np.ones((1,3));water=np.zeros((1,3));m=np.array([[[1,0,0]],[[0,1,0]],[[0,0,1]]],bool)
-    active,_=summarize(m[:2],forest,water,np.ones((1,3),bool),10000)
-    reference,_=summarize(m,forest,water,np.ones((1,3),bool),10000)
-    assert active['visible_forest_ha']==2
-    assert active['blind_forest_ha']==1
-    assert reference['visible_forest_ha']==3
-
-def test_no_active_cameras():
-    f=np.ones((2,2));m,_=summarize([],f,np.zeros_like(f),np.ones_like(f,bool),10000)
-    assert m['visible_forest_ha']==0 and m['blind_forest_ha']==4
-
 def test_priority_mask_counts_only_visible_forest_and_ranks_first():
     forest=np.array([[1,1,0]],float);water=1-forest;priority=np.array([[True,False,True]])
     one,_=summarize(np.array([[[1,0,1]]],bool),forest,water,np.ones_like(priority),10000,priority)
@@ -85,25 +85,21 @@ def test_priority_mask_counts_only_visible_forest_and_ranks_first():
     two['visible_forest_ha']=100
     assert rank_candidates([two,one])[0] is one
 
-def test_default_pair_and_max_two_active():
+def test_default_three_camera_configuration_and_reject_old_modes():
     c=PRESETS[0]
-    assert [x.active for x in c.cameras]==[True,True,False]
-    data=c.model_dump();data['cameras'][2]['active']=True
-    with pytest.raises(ValidationError,match='At most two'):Candidate(**data)
-    data['reference']=True
-    assert sum(x.active for x in Candidate(**data).cameras)==3
+    assert [x.active for x in c.cameras]==[True]*3
+    assert [x.yaw for x in c.cameras]==[0,120,240]
+    assert [x.hfov for x in c.cameras]==[120]*3
+    for key,value in [('active',False),('yaw',70),('hfov',80)]:
+        data=c.model_dump();data['cameras'][2][key]=value
+        with pytest.raises(ValidationError,match='Three active'):Candidate(**data)
+    with pytest.raises(ValidationError):Candidate(**c.model_dump(),reference=True)
+    data=c.model_dump();data['cameras'][2]['tilt']=20
+    with pytest.raises(ValidationError,match='vertical geometry'):Candidate(**data)
 
-@pytest.mark.parametrize('camera',[dict(hfov=0),dict(vfov=180),dict(tilt=95),dict(yaw=181)])
+@pytest.mark.parametrize('camera',[dict(hfov=0),dict(vfov=180),dict(tilt=95),dict(yaw=361)])
 def test_camera_bounds(camera):
     with pytest.raises(ValidationError):Camera(**camera)
-
-def test_pair_frusta_default_gap_and_neighbour_overlap():
-    angle=np.radians(np.linspace(-180,180,3601))
-    dx,dy=1000*np.sin(angle),1000*np.cos(angle)
-    masks=[frustum(dx,dy,np.full_like(dx,-100),yaw,10,80,50) for yaw in [-70,0,70]]
-    assert (masks[0]&masks[1]).any() and (masks[1]&masks[2]).any()
-    assert not (masks[0]&masks[2]).any()
-    assert not (masks[0]|masks[2])[1800] # central direction is in the gap
 
 def test_self_intersecting_priority_rejected():
     data=PRESETS[0].model_dump();data['priority']=[[24.5,60.1],[24.7,60.3],[24.5,60.3],[24.7,60.1]]

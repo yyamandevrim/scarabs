@@ -6,7 +6,6 @@
  <nav class="shell-nav" aria-label="Sections"><a href="/">Overview</a><a href="/map" aria-current="page">Launch map</a></nav>
  <span class="shell-spacer"></span>
  <span id="data-badge" class="shell-note" hidden></span>
- <button class="language" aria-label="Switch language">Türkçe</button>
 </header>
 <div id="banner" class="shell-banner fail" role="alert" hidden><strong id="banner-title"></strong><span id="banner-text"></span><button id="retry" class="primary" hidden>Retry analysis</button></div>
 <main class="workspace">
@@ -15,7 +14,7 @@
   <div id="map-state" role="status"><span class="loader" aria-hidden="true"></span><span id="map-state-text">Loading regional map…</span></div>
   <div class="map-toolbar"><button id="draw">Draw priority forest</button><button id="finish" class="primary" hidden>Finish area</button><button id="clear-priority" hidden>Clear area</button></div>
   <p id="draw-help" class="map-help" hidden></p>
-  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="overlap"></i>Overlap ≥2</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="water"></i>Water in view</span><span><i class="other-site"></i>Other site’s field of view</span></div>
+  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span><i class="occluded"></i>Occluded in FOV</span><span><i class="outside"></i>Outside FOV</span><span><i class="water"></i>Water in view</span><span><i class="other-site"></i>Other site’s field of view</span></div>
  </section>
  <aside id="result-summary" class="panel" aria-label="Candidate results" aria-busy="true">
   <div class="tabs" role="tablist" aria-label="Views"><button role="tab" id="tab-compare" aria-controls="view-compare" aria-selected="true">Compare</button><button role="tab" id="tab-breakdown" aria-controls="view-breakdown" aria-selected="false" tabindex="-1">Breakdown</button><button role="tab" id="tab-data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button></div>
@@ -30,27 +29,20 @@
     <p id="result-state" class="note" role="status">Loading regional map…</p>
    </section>
 
-   <section class="block">
-    <div class="block-head"><h2 id="pair-title">Connected cameras</h2><span id="pair-context" class="note"></span></div>
-    <div id="pairs" class="pairs"></div>
-    <p id="pair-gain" class="pair-gain"></p>
-    <p id="pair-summary" class="visually-hidden"></p>
+   <section class="block height-block">
+    <div class="block-head"><h2>Balloon height</h2><span id="height-site" class="note"></span></div>
+    <div class="control-row"><label>Height above ground<select id="height"><option value="30">30 m</option><option value="100">100 m</option><option value="500">500 m</option><option value="600" selected>600 m</option><option value="700">700 m</option></select></label><label>Analysis detail<select id="resolution"><option value="coarse">Quick · 120 m</option><option value="detailed">Detailed · 40 m</option></select></label></div>
    </section>
 
    <section class="block">
-    <div class="block-head"><h2><label for="heading">Module heading</label></h2><output id="heading-value" class="figure-sm">—</output></div>
-    <input id="heading" type="range" min="0" max="359" value="0" aria-label="Module heading">
-    <details class="sensitivity-details"><summary id="sensitivity-title">Smoke targets with canopy · heading drift ±20°</summary><p id="sensitivity-context" class="small">Fixed smoke-target scenario with canopy obstructions, regardless of the selected scenario.</p><div id="sensitivity" class="chart sensitivity"></div></details>
+    <div class="block-head"><h2>Forest by camera</h2><span id="camera-context" class="note"></span></div>
+    <p class="note">Three cameras · 360° coverage</p>
+    <div id="camera-breakdown" class="camera-breakdown"></div>
    </section>
 
-
-   <details id="settings" class="block disclosure"><summary>Position and camera angles <span id="settings-site" class="note"></span></summary>
-        <div class="control-row"><label>Height above ground<select id="height"><option value="30">30 m</option><option value="100">100 m</option><option value="500">500 m</option><option value="600" selected>600 m</option><option value="700">700 m</option></select></label><label>Analysis detail<select id="resolution"><option value="coarse">Quick · 120 m</option><option value="detailed">Detailed · 40 m</option></select></label></div>
+   <details id="settings" class="block disclosure"><summary>Position and geometry <span id="settings-site" class="note"></span></summary>
     <div class="coordinates"><label>Latitude<input id="lat" class="mono" type="number" min="59" max="62" step="any" aria-describedby="lat-error"><span id="lat-error" class="input-error"></span></label><label>Longitude<input id="lon" class="mono" type="number" min="23" max="27" step="any" aria-describedby="lon-error"><span id="lon-error" class="input-error"></span></label></div>
-    <p class="note">At most two cameras connected. Positive tilt points down.</p>
-    <div id="camera-controls" class="camera-table"></div>
-    <p id="camera-status" class="note"></p>
-    <label class="check"><input id="reference" type="checkbox"> Three cameras, reference</label>
+    <div class="control-row"><label>Downward tilt (°)<input id="tilt" class="mono" type="number" min="-80" max="89" step="any" value="10"></label><label>Vertical field of view (°)<input id="vfov" class="mono" type="number" min="1" max="160" step="any" value="50"></label></div>
     <div class="control-row"><label>Maximum range (km)<input id="max-range" class="mono" type="number" min="1" max="15" step="any" value="12"></label><label>Smoke above canopy (m)<input id="smoke-height" class="mono" type="number" min="1" max="1000" step="any" value="50"></label></div>
     <button id="analyze">Recalculate both sites</button>
    </details>
@@ -58,11 +50,11 @@
 
   <div id="view-breakdown" class="view" role="tabpanel" aria-labelledby="tab-breakdown" hidden>
    <section id="details-results" class="block" aria-busy="true">
-    <div class="block-head"><h2>Forest in range</h2></div>
+    <div class="block-head"><h2>Forest in range · simulated ha</h2></div>
     <div id="accounting" class="chart accounting"></div>
    </section>
    <section class="block dense">
-    <div class="block-head"><h2>Visibility breakdown</h2></div>
+    <div class="block-head"><h2>Visibility breakdown · simulated ha</h2></div>
     <div class="table-wrap"><table id="comparison" class="grid"><caption><span id="precision">Rounded to whole hectares.</span> — = not computed. Blind total = outside FOV + occluded in FOV.</caption><thead><tr><th scope="col">Metric</th><th scope="col" class="unit">Unit</th><th scope="col">Haukilahti</th><th scope="col">Nuuksio</th></tr></thead><tbody></tbody></table></div>
    </section>
   </div>
@@ -70,15 +62,16 @@
   <div id="view-data" class="view" role="tabpanel" aria-labelledby="tab-data" hidden>
    <section class="block prose">
     <p id="data-summary"></p>
-    <div id="uncertainty"></div>
-    <p>Ground below opaque canopy is hidden. Bare-terrain rows remove canopy occlusion. Water adds no forest target area; sightlines can cross water.</p>
-    <p>Access, shadow, site use and flight permissions require field checks.</p>
+    <p>Three cameras on the faces of a triangular housing watch the full circle. Each camera covers a 120° sector.</p>
+    <p>Visibility includes terrain, canopy and Earth curvature. Smoke targets are 50 m above the canopy by default.</p>
+    <p>Ring guides follow the selected vertical geometry on a level target plane through the launch point. Map cells follow the local terrain and canopy heights.</p>
+    <p>Camera 1 starts at the preset module heading; Cameras 2 and 3 are 120° apart. Bearings use EPSG:3067 grid north.</p>
     <p class="note"><span data-brand-tagline></span></p>
     <p class="note">NLS Finland / Syke / Luke · CC BY 4.0 · <span data-brand-name></span> · built by team <span data-brand-team></span> · <span data-brand-event></span> · <span data-brand-challenge></span> challenge</p>
    </section>
   </div>
 
-  <footer class="panel-foot"><span>Simulated geometric visibility, not a detection range.</span><span id="status" role="status" aria-live="polite">Starting…</span></footer>
+  <footer class="panel-foot"><span>Three cameras · full-circle observation</span><span id="status" role="status" aria-live="polite">Starting…</span></footer>
  </aside>
 </main>
 </body></html>

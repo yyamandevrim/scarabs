@@ -4,14 +4,14 @@ from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 class Camera(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-    yaw: float = Field(0, ge=-180, le=180)
+    yaw: float = Field(0, ge=-180, le=360)
     tilt: float = Field(10, ge=-80, le=89, description="Positive tilts down")
-    hfov: float = Field(80, ge=1, le=160)
+    hfov: float = Field(120, ge=1, le=160)
     vfov: float = Field(50, ge=1, le=160)
     active: bool = True
 
 def default_cameras():
-    return [Camera(yaw=-70), Camera(yaw=0), Camera(yaw=70, active=False)]
+    return [Camera(yaw=yaw) for yaw in (0, 120, 240)]
 
 class Candidate(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
@@ -26,12 +26,13 @@ class Candidate(BaseModel):
     smoke_height: float = Field(50, ge=1, le=1000)
     earth_radius: float = Field(6371000, ge=6000000, le=9000000)
     priority: list[list[float]] | None = Field(None, max_length=100)
-    reference: bool = False
 
     @model_validator(mode="after")
     def validate_cameras(self):
-        if not self.reference and sum(c.active for c in self.cameras) > 2:
-            raise ValueError("At most two cameras can be connected; select reference mode for three cameras.")
+        if any(not c.active or c.yaw != yaw or c.hfov != 120 for c, yaw in zip(self.cameras, (0, 120, 240))):
+            raise ValueError("Three active cameras at 0°, 120° and 240°, each covering 120°, are required.")
+        if len({(c.tilt, c.vfov) for c in self.cameras}) != 1:
+            raise ValueError("All cameras must share the same vertical geometry.")
         if self.priority is not None:
             from shapely.geometry import Polygon
             if len(self.priority) < 3 or any(len(p) != 2 for p in self.priority):

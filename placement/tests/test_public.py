@@ -32,8 +32,8 @@ def test_real_height_sensitivity_and_split():
         assert hm['occluded_forest_ha']<1
         assert lm['occluded_forest_ha']>250
         for r in (high,low):
-            metrics=list(r['metrics'].values())+list(r['reference']['metrics'].values())+r['heading_sensitivity']
-            for p in r['pair_comparison']:metrics.extend(p[s] for s in r['metrics'])
+            metrics=list(r['metrics'].values())
+            for c in r['camera_breakdown']:metrics.extend(c['metrics'].values())
             for m in metrics:assert m['outside_fov_forest_ha']+m['occluded_forest_ha']==pytest.approx(m['blind_forest_ha'],abs=.003)
 
 @pytest.mark.parametrize('update',[
@@ -110,19 +110,17 @@ def test_identity_is_single_source(tmp_path,monkeypatch):
         assert 'data-brand-name' in html and 'data-brand-logo' in html and 'data-brand-tagline' in html
         assert original['name'] not in html and original['logo'] not in html
     js=(root/'static/i18n.js').read_text()
-    assert "fetch('/api/brand')" in js and 'brand.logo' in js and 'brand.tagline[lang]' in js
+    assert "fetch('/api/brand')" in js and 'brand.logo' in js and 'brand.tagline.en' in js
 
-def test_language_assets_cover_landing_and_map():
+def test_language_assets_force_english_on_landing_and_map():
     with TestClient(api.app) as client:
-        for page in ('/','/map'):
+        for page in ('/?lang=tr','/map?lang=tr'):
             html=client.get(page).text
-            assert 'lang="en"' in html and 'class="language"' in html and '/static/i18n.js' in html
-        translations=client.get('/static/translations.json').json()
-        assert translations['Open the launch point map']=='Kalkış noktası haritasını aç'
-        assert translations['Outside FOV']=='Görüş dışında'
-        assert translations['Occluded in FOV']=='Görüş içinde perdelenmiş'
+            assert 'lang="en"' in html and 'class="language"' not in html and '/static/i18n.js' in html
         js=client.get('/static/i18n.js').text
-        assert "lang==='en'?'tr':'en'" in js and "localStorage.setItem('language',lang)" in js
+        assert "document.documentElement.lang='en'" in js
+        assert "localStorage.setItem('language','en')" in js
+        assert 'translations.json' not in js
 
 def test_warmup_compiles_production_array_layout():
     from forest_placement.warmup import warmup

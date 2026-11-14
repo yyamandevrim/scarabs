@@ -54,13 +54,39 @@ def sightlines(terrain, surface, valid, ox, oy, observer_z, cell, max_range, smo
             out[3,row,col] = smoke_slope >= max_surface-1e-9
     return out
 
-def frustum(dx, dy, dz, heading, tilt, hfov, vfov):
-    """Rectilinear camera frustum. dx east, dy north; positive tilt is down."""
-    yaw, pitch = np.radians(heading), np.radians(tilt)
-    forward = dx*np.sin(yaw)*np.cos(pitch)+dy*np.cos(yaw)*np.cos(pitch)-dz*np.sin(pitch)
-    right = dx*np.cos(yaw)-dy*np.sin(yaw)
-    up = dx*np.sin(yaw)*np.sin(pitch)+dy*np.cos(yaw)*np.sin(pitch)+dz*np.cos(pitch)
-    return (forward > 0) & (np.abs(right) <= forward*np.tan(np.radians(hfov/2))+1e-8) & (np.abs(up) <= forward*np.tan(np.radians(vfov/2))+1e-8)
+def camera_sector(dx, dy, dz, heading, tilt, hfov, vfov):
+    """Product horizontal sector, with the existing tilted vertical field of view.
+
+    The triangular housing is modelled as three adjoining 120° azimuth sectors,
+    not three rectilinear lenses. Half-open seams assign each ray exactly once.
+    Vertical geometry is evaluated in the ray's radial plane, independently of
+    the horizontal seam. LOS, curvature, terrain and target heights are unchanged.
+    """
+    azimuth = np.degrees(np.arctan2(dx, dy)) % 360
+    relative = np.round(azimuth - heading + hfov / 2, 10) % 360
+    elevation = np.degrees(np.arctan2(dz, np.hypot(dx, dy)))
+    return (relative < hfov) & (elevation >= -tilt-vfov/2) & (elevation <= -tilt+vfov/2)
+
+
+def footprint_radii(dz, tilt, vfov, max_range, radius):
+    """Annular guide on a level target plane through the launch cell.
+
+    Solve elevation boundaries with the same curvature correction as the masks.
+    Terrain-dependent boundaries are represented by the analysis raster itself.
+    """
+    cuts = [0., float(max_range)]
+    for angle in (-tilt-vfov/2, -tilt+vfov/2):
+        if -90 < angle < 90:
+            roots = np.roots([1/(2*radius), np.tan(np.radians(angle)), -dz])
+            cuts.extend(float(r.real) for r in roots if abs(r.imag) < 1e-8 and 0 < r.real < max_range)
+    cuts = sorted(cuts)
+    spans = []
+    for lo, hi in zip(cuts, cuts[1:]):
+        d = (lo+hi)/2
+        elevation = np.degrees(np.arctan2(dz-d*d/(2*radius), d))
+        if -tilt-vfov/2 <= elevation <= -tilt+vfov/2:
+            spans.append((lo, hi))
+    return spans
 
 def summarize(camera_masks, forest, water, eligible, cell_area, priority=None, fov_masks=None):
     """Each forest fraction counted once in the union, regardless of camera count."""

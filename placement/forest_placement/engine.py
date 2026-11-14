@@ -11,7 +11,7 @@ import numpy as np
 from pyproj import Transformer
 from shapely import contains_xy
 from shapely.geometry import Polygon
-from .core import frustum, sightlines, summarize
+from .core import camera_sector, footprint_radii, sightlines, summarize
 from .models import Candidate
 from .maps import write_overlay
 from .palette import map_color
@@ -21,7 +21,7 @@ PREP=Path(os.environ.get('PLACEMENT_PREPARED', ROOT/'data/prepared'))
 CACHE=Path(os.environ.get('PLACEMENT_CACHE', ROOT/'data/results'))
 TO_METRIC=Transformer.from_crs(4326,3067,always_xy=True)
 TO_LONLAT=Transformer.from_crs(3067,4326,always_xy=True)
-ALGORITHM='opaque-ray-half-cell-v7-unknown-elevation-warning-en'
+ALGORITHM='opaque-ray-half-cell-v8-360-sectors-en'
 SCENARIOS=('bare_ground','bare_smoke','canopy_ground','canopy_smoke')
 
 @lru_cache(maxsize=2)
@@ -45,13 +45,16 @@ def priority_mask(points,x,y):
     polygon=Polygon([TO_METRIC.transform(*p) for p in points])
     return contains_xy(polygon,x,y)
 
-def sector(candidate,camera,x,y):
-    # Horizontal sector guide only; analytical masks use the full 3D frustum.
-    angles=np.radians(np.linspace(candidate.heading+camera.yaw-camera.hfov/2,candidate.heading+camera.yaw+camera.hfov/2,45))
-    xx=[x]+(x+candidate.max_range*np.sin(angles)).tolist()+[x]
-    yy=[y]+(y+candidate.max_range*np.cos(angles)).tolist()+[y]
-    lon,lat=TO_LONLAT.transform(xx,yy)
-    return [[a,b] for a,b in zip(lat,lon)]
+def sector(candidate,camera,x,y,dz):
+    spans=footprint_radii(dz,camera.tilt,camera.vfov,candidate.max_range,candidate.earth_radius)
+    polygons=[]
+    angles=np.radians(np.linspace(candidate.heading+camera.yaw-60,candidate.heading+camera.yaw+60,61))
+    for inner,outer in spans:
+        xx=np.concatenate((x+outer*np.sin(angles),x+inner*np.sin(angles[::-1])))
+        yy=np.concatenate((y+outer*np.cos(angles),y+inner*np.cos(angles[::-1])))
+        lon,lat=TO_LONLAT.transform(xx,yy)
+        polygons.append([[a,b] for a,b in zip(lat,lon)])
+    return dict(polygons=polygons,radii_m=spans)
 
 def analyze(candidate:Candidate,use_cache=True):
     started=time.perf_counter();meta=metadata()
@@ -83,7 +86,7 @@ def analyze(candidate:Candidate,use_cache=True):
     masks=[]; fovs=[]
     for i in range(4):
         dz=ground_dz if i%2==0 else smoke_dz
-        fovs.append(np.array([frustum(dx,dy,dz,candidate.heading+cam.yaw,cam.tilt,cam.hfov,cam.vfov)&eligible for cam in candidate.cameras]))
+        fovs.append(np.array([camera_sector(dx,dy,dz,candidate.heading+cam.yaw,cam.tilt,cam.hfov,cam.vfov)&eligible for cam in candidate.cameras]))
         masks.append(fovs[-1]&los[i])
     active=[i for i,c in enumerate(candidate.cameras) if c.active]
     def metrics(i,indices):
@@ -98,15 +101,10 @@ def analyze(candidate:Candidate,use_cache=True):
         imagefile=CACHE/(key+'_'+name+'.png')
         llbounds=write_overlay(rgba,localbounds,imagefile,cell)
         images[name]=dict(url='/results/'+imagefile.name,bounds=llbounds)
-    pairs=[]
-    for indices,label in [([0,1],'Left + center'),([1,2],'Center + right'),([0,2],'Left + right')]:
-        pairs.append(dict(pair=indices,label=label,**{name:metrics(i,indices)[0] for i,name in enumerate(SCENARIOS)}))
-    sensitivity=[]
-    for delta in [-20,-10,0,10,20]:
-        fs=[frustum(dx,dy,smoke_dz,candidate.heading+delta+candidate.cameras[i].yaw,candidate.cameras[i].tilt,candidate.cameras[i].hfov,candidate.cameras[i].vfov)&eligible for i in active]
-        cs=[f&los[3] for f in fs]
-        values,_=summarize(cs,data['forest'],data['water'],eligible,cell*cell,priority,fs)
-        sensitivity.append(dict(drift=delta,heading=(candidate.heading+delta)%360,**values))
+    cameras=[dict(camera=i+1,label=f'Camera {i+1}',metrics={name:metrics(j,[i])[0] for j,name in enumerate(SCENARIOS)}) for i in range(3)]
+    local_r=fullrow-r0;local_c=fullcol-c0
+    target_dz=[float(data['terrain'][local_r,local_c]-observer_z),float(data['surface'][local_r,local_c]+candidate.smoke_height-observer_z)]
+    sectors=[dict(label=f'Camera {i+1}',active=True,footprints={name:sector(candidate,c,x,y,target_dz[j%2]) for j,name in enumerate(SCENARIOS)}) for i,c in enumerate(candidate.cameras)]
     clipped=bool(min(x-bounds[0],bounds[2]-x,y-bounds[1],bounds[3]-y)<candidate.max_range)
     unknown=round(float(np.sum(data['forest']*eligible*~data['valid'])*cell*cell/10000),3)
     # Conservative provenance, not an affected-ray mask or hectare estimate. Include
@@ -123,10 +121,8 @@ def analyze(candidate:Candidate,use_cache=True):
     if unknown:notes.append(f'{unknown} ha of forest with missing elevation is included in the blind area; visibility could not be verified.')
     if unknown_elevation:notes.append('Unknown elevation in the analysis window: crossing sightlines remain unverified and blind. In-view blind area may include these rays as well as physical obstruction; affected area has not been quantified.')
     result=dict(id=key,input=candidate.model_dump(),resolution_m=cell,observer_elevation_m=round(observer_z,2),
-        active_cameras=active,mode='three cameras, reference' if candidate.reference else 'two-input module',
-        metrics=results,pair_comparison=pairs,reference=dict(label='three cameras, reference',metrics={name:metrics(i,[0,1,2])[0] for i,name in enumerate(SCENARIOS)}),
-        heading_sensitivity=sensitivity,images=images,
-        sectors=[dict(active=c.active,label=['Left','Center','Right'][i]+('' if c.active else ' · disconnected'),points=sector(candidate,c,x,y)) for i,c in enumerate(candidate.cameras)],
+        active_cameras=active,mode='360° · three cameras',
+        metrics=results,camera_breakdown=cameras,images=images,sectors=sectors,
         uncertainty=notes,range_clipped=clipped,unknown_forest_ha=unknown,unknown_elevation_in_window=unknown_elevation,
         field_checks=dict(road_access='to be verified in the field',shadow='to be verified in the field',site_constraints='to be verified in the field'),
         computed_seconds=round(time.perf_counter()-started,4),cached=False,data_prepared_at=meta['prepared_at'],algorithm=ALGORITHM)

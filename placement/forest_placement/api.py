@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from html import escape
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict
@@ -63,6 +63,8 @@ def branded_page(filename):
     page=(ROOT/'static'/filename).read_text()
     assets=sorted(p for p in (ROOT/'static').iterdir() if p.suffix in ('.js','.css','.json','.svg'))
     revision=hashlib.sha256(b''.join(p.read_bytes() for p in assets)).hexdigest()[:12]
+    # English-only public shell, including legacy Overview markup.
+    page=re.sub(r'<button\b[^>]*class="language"[^>]*>.*?</button>', '', page, flags=re.S)
     page=page.replace('<body','<body data-asset-version="'+revision+'"',1)
     page=re.sub(r'(/static/[^"?]+\.(?:js|css|png))"',lambda match:match.group(1)+'?v='+revision+'"',page)
     page=page.replace('data-brand-logo', 'data-brand-logo src="'+escape(identity['logo'],quote=True)+'"')
@@ -78,6 +80,9 @@ def index():return branded_page('landing.html')
 
 @app.get('/map')
 def map_page():return branded_page('index.html')
+
+@app.get('/favicon.ico', include_in_schema=False)
+def favicon():return Response(status_code=204)
 
 @app.get('/api/brand')
 def brand():return json.loads((ROOT/'brand.json').read_text())
@@ -125,8 +130,6 @@ def compare(request:Comparison):
     first=request.candidates[0]
     target=Polygon(first.priority) if first.priority is not None else None
     for candidate in request.candidates[1:]:
-        if candidate.reference!=first.reference:
-            raise HTTPException(422,'Comparison requires the same camera mode (connected cameras or reference).')
         if ((candidate.priority is None)!=(target is None) or
             (target is not None and not target.equals(Polygon(candidate.priority)))):
             raise HTTPException(422,'Comparison requires the same priority area for every candidate, or none for all.')

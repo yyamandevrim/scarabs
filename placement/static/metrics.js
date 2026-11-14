@@ -21,21 +21,7 @@
   const a=round(outside,resolution),b=round(occluded,resolution);
   return {total:a+b,outside:a,occluded:b};
  }
- function bestPair(pairs,scenario,priority=false,resolution=40){
-  const key=priority?'priority_visible_ha':'visible_forest_ha';
-  const total=p=>valid(p[scenario]?.visible_forest_ha)?p[scenario].visible_forest_ha:-Infinity;
-  // Display precision gates the badge; computed values decide priority then total.
-  return pairs.filter(p=>valid(p[scenario]?.[key])&&round(p[scenario][key],resolution)>0)
-   .sort((a,b)=>priority?(b[scenario][key]-a[scenario][key]||total(b)-total(a)):
-    round(b[scenario][key],resolution)-round(a[scenario][key],resolution))[0]||null;
- }
- function pairBars(pairs,scenario,priority=false,resolution=40){
-  const key=priority?'priority_visible_ha':'visible_forest_ha',values=pairs.map(p=>round(p[scenario]?.[key],resolution));
-  const max=Math.max(0,...values.filter(valid));
-  return pairs.map((p,i)=>({visible:max>0&&valid(values[i])?Math.max(0,values[i])/max*100:0,
-   overlap:!priority&&max>0&&valid(p[scenario]?.overlap_forest_ha)?Math.min(100,Math.max(0,round(p[scenario].overlap_forest_ha,resolution))/max*100):0}));
- }
  function priorityValue(result,scenario){return result?.input?.priority?result.metrics?.[scenario]?.priority_visible_ha:null;}
- const api={valid,number,percent,headline,round,share,blind,bestPair,pairBars,priorityValue};root.PlacementMetrics=api;
+ const api={valid,number,percent,headline,round,share,blind,priorityValue};root.PlacementMetrics=api;
  if(typeof module!=='undefined')module.exports=api;
 })(globalThis);
