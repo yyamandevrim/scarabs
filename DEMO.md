@@ -152,6 +152,11 @@ rm "$ACORN_COOKIE_JAR"
 
 Expected: a separately labelled local short-range sensor trigger and simulated LED state. Ground receives it at a legal slot, not necessarily within two seconds. If 401 occurs, repeat login after a station restart; 429 means wait five minutes after failed logins; 409 means the station uses real/router or off mode and simulation is deliberately unavailable.
 
+### Real radio (Meshtastic), only after a bench test
+
+- The jury demo stays on the simulated LoRa transport unless the Meshtastic bench test in [station/LORA_HARDWARE.md](station/LORA_HARDWARE.md) passed that day with two radios. The Meshtastic transport is implemented and tested against a fake interface only; it has never run on hardware.
+- With two radios, plug in the ground node and show the label change from "radio absent" to "radio connected", then one smoke suspicion arriving. Say that range and reliability were not measured.
+
 ### Collect full evidence when in range
 
 On a received **smoke** alert, press **Collect evidence over Wi-Fi**. Its saved-evidence marker becomes visible on the alert, even with imagery off. **View saved evidence · Wi-Fi** selects it and enables the bounded viewing area; the evidence names its alert time and UUID. Reload restores the newest collected alert. Flame alerts have no direction/media buttons. Collection fetches only that received event UUID, checks station identity and saves locally. Stop the station: saved JPEG/WebM remain accessible with the demo view enabled, while live Wi-Fi feeds fail honestly.
