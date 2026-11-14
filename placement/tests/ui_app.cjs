@@ -9,16 +9,16 @@ async function appHarness(){
  window.document.write(fs.readFileSync(path.join(root,'static/index.html'),'utf8').replace(/<script[^>]*>[\s\S]*?<\/script>/g,''));
  window.matchMedia=()=>({matches:false});window.structuredClone=structuredClone;
  const timers=new Map();let id=0;
- window.setTimeout=fn=>{timers.set(++id,fn);return id;};window.clearTimeout=i=>timers.delete(i);
+ window.setTimeout=(fn,delay=0)=>{timers.set(++id,{fn,delay});return id;};window.clearTimeout=i=>timers.delete(i);
  for(const file of ['metrics.js','charts.js'])window.eval(fs.readFileSync(path.join(root,'static',file),'utf8'));
  const source=fs.readFileSync(path.join(root,'static/app.js'),'utf8').replace(/init\(\);\s*$/,'');
  const api=window.eval(source+`
  (()=>{
   const preset={name:'A',lat:60.293,lon:24.557,height:600,heading:20,resolution:'coarse',max_range:12000,smoke_height:50,cameras:[{yaw:0,tilt:10,hfov:120,vfov:50,active:true},{yaw:120,tilt:10,hfov:120,vfov:50,active:true},{yaw:240,tilt:10,hfov:120,vfov:50,active:true}]};
-  candidates=[structuredClone(preset),{...structuredClone(preset),name:'B'}];dirty.clear();map={};
-  render=()=>renderSummary();revealSite=()=>{};
-  showControls();renderSummary();
+  const config={ready:true,presets:[structuredClone(preset),{...structuredClone(preset),name:'B'}],data:{files:{synthetic:'v1'},assumed_canopy_forest_pct:0}};
+  render=()=>renderSummary();revealSite=()=>{};applyConfig(config);dirty.clear();map={};renderSummary();
   return {
+   config:()=>structuredClone(config),
    edit(height){$('height').value=String(height);$('height').dispatchEvent(new Event('change'));},
    change(id,value){$(id).value=value;$(id).dispatchEvent(new Event('change'));},
    select(i){$('headline-figures').querySelectorAll('button')[i].click();},
@@ -28,6 +28,7 @@ async function appHarness(){
   };
  })()`);
  const state=api.state;api.state=()=>JSON.parse(JSON.stringify(state()));
- return {window,api,flush(){const tasks=[...timers.values()];timers.clear();return Promise.all(tasks.map(fn=>fn()));},async close(){await window.happyDOM.close();}};
+ api.retryDelays=()=>[...timers.values()].map(t=>t.delay).filter(d=>d>=1000&&d<15000);
+ return {window,api,flush(maxDelay=300){const tasks=[...timers.entries()].filter(([,t])=>t.delay<=maxDelay);tasks.forEach(([i])=>timers.delete(i));return Promise.all(tasks.map(([,t])=>t.fn()));},async close(){await window.happyDOM.close();}};
 }
 module.exports={appHarness};

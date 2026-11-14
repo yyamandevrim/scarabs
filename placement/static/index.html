@@ -14,7 +14,7 @@
   <div id="map-state" role="status"><span class="loader" aria-hidden="true"></span><span id="map-state-text">Loading regional map…</span></div>
   <div class="map-toolbar"><button id="draw">Draw priority forest</button><button id="finish" class="primary" hidden>Finish area</button><button id="clear-priority" hidden>Clear area</button></div>
   <p id="draw-help" class="map-help" hidden></p>
-  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span id="legend-occluded"><i class="occluded"></i>Occluded</span><span id="legend-outside"><i class="outside"></i>Vertical blind area</span><span><i class="water"></i>Water in view</span><span id="legend-other"><i class="other-site"></i>Other site ring</span></div>
+  <div class="legend" aria-label="Map legend"><span><i class="visible"></i>Visible forest</span><span id="legend-occluded"><i class="occluded"></i>Occluded</span><span id="legend-outside"><i class="outside"></i>Vertical blind area</span><span><i class="water"></i>Water in view</span><span id="legend-other"><i class="other-site"></i>Other site coverage</span></div>
  </section>
  <aside id="result-summary" class="panel" aria-label="Candidate results" aria-busy="true">
   <div class="tabs" role="tablist" aria-label="Views"><button role="tab" id="tab-compare" aria-controls="view-compare" aria-selected="true">Compare</button><button role="tab" id="tab-breakdown" aria-controls="view-breakdown" aria-selected="false" tabindex="-1">Breakdown</button><button role="tab" id="tab-data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button></div>
@@ -30,8 +30,9 @@
    </section>
 
    <section class="block height-block">
-    <div class="block-head"><h2>Balloon height</h2><span id="height-site" class="note"></span></div>
+    <div class="block-head"><h2>Balloon height</h2><span id="height-site" class="note">Both sites</span></div>
     <div class="control-row"><label>Height above ground<select id="height"><option value="30">30 m</option><option value="100">100 m</option><option value="500">500 m</option><option value="600" selected>600 m</option><option value="700">700 m</option></select></label><label>Analysis detail<select id="resolution"><option value="coarse">Quick · 120 m</option><option value="detailed">Detailed · 40 m</option></select></label></div>
+    <details id="height-comparison" class="height-comparison"><summary>Compare heights</summary><div id="height-results"></div></details>
    </section>
 
    <section class="block">
@@ -40,7 +41,7 @@
     <div id="camera-breakdown" class="camera-breakdown"></div>
    </section>
 
-   <details id="settings" class="block disclosure"><summary>Position and geometry <span id="settings-site" class="note"></span></summary>
+   <details id="settings" class="block disclosure"><summary><span>Position and geometry</span><span id="settings-site" class="note"></span></summary>
     <div class="coordinates"><label>Latitude<input id="lat" class="mono" type="number" min="59" max="62" step="any" aria-describedby="lat-error"><span id="lat-error" class="input-error"></span></label><label>Longitude<input id="lon" class="mono" type="number" min="23" max="27" step="any" aria-describedby="lon-error"><span id="lon-error" class="input-error"></span></label></div>
     <div class="control-row"><label>Downward tilt (°)<input id="tilt" class="mono" type="number" min="-80" max="89" step="any" value="10"></label><label>Vertical field of view (°)<input id="vfov" class="mono" type="number" min="1" max="160" step="any" value="50"></label></div>
     <div class="control-row"><label>Maximum range (km)<input id="max-range" class="mono" type="number" min="1" max="15" step="any" value="12"></label><label>Smoke above canopy (m)<input id="smoke-height" class="mono" type="number" min="1" max="1000" step="any" value="50"></label></div>
@@ -72,7 +73,7 @@
    </section>
   </div>
 
-  <footer class="panel-foot"><span>Three cameras · full-circle observation</span><span id="status" role="status" aria-live="polite">Starting…</span></footer>
+  <span id="status" class="visually-hidden" role="status" aria-live="polite">Starting…</span>
  </aside>
 </main>
 </body></html>
