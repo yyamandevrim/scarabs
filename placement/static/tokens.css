@@ -113,10 +113,14 @@ label{font-size:var(--type-small);color:var(--text-2)}
 .dot.fail{background:var(--fail)}
 .dot.off{background:transparent;border:1px solid var(--text-3)}
 
+/* Supplied ACORN artwork: keep intrinsic proportions and native stacked size. */
+.brand-wordmark{display:block;width:80px;height:auto;flex:none}
+.brand-stacked{display:block;width:255px;max-width:100%;height:auto}
+
 /* Application shell */
 .shell-bar{position:sticky;top:0;z-index:1000;height:var(--bar);display:flex;align-items:center;gap:var(--space-6);padding:0 var(--space-5);background:var(--bg-1);border-bottom:1px solid var(--line)}
 .shell-brand{display:flex;align-items:center;gap:var(--space-2);color:var(--text);text-decoration:none;font-weight:600;font-size:var(--type-title);letter-spacing:.04em;flex:none}
-.shell-brand img{display:block;width:24px;height:24px;object-fit:contain}
+.shell-brand img{display:block;width:80px;height:auto}
 .shell-module{display:flex;align-items:center;gap:var(--space-3);padding-left:var(--space-4);border-left:1px solid var(--line);color:var(--text-2);font-size:var(--type-ui);white-space:nowrap;min-width:0}
 .shell-nav{display:flex;align-self:stretch;gap:var(--space-1)}
 .shell-nav a{display:flex;align-items:center;padding:0 var(--space-3);color:var(--text-2);text-decoration:none;font-size:var(--type-ui);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px}

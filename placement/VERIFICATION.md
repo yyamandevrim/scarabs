@@ -74,7 +74,7 @@ A design review saw a 7,335 ha blind total next to 0 outside FOV and 0 occluded.
 
 ## Implementation and checks
 
-- Landing at `/`, live bilingual map at `/map`; config-driven project name/tagline/logo/favicon and team credit. English default, Turkish toggle with persistent choice. No station-feed proxy or fabricated panel screenshot.
+- Landing at `/`, live bilingual map at `/map`; config-driven project name/tagline/logos and team credit. English default, Turkish toggle with persistent choice. No station-feed proxy or fabricated panel screenshot.
 - Blind split and distinct grey/rust overlays; all existing scenario, pair, reference, priority and heading functionality retained. The numeric algorithm did not need a height fix. Numba releases the GIL; warm-up compiles the strided production signature, with numeric normalization to avoid request-time specialization.
 - API caps, 12/client/min and 60/global/min budgets, single concurrent analysis, bounded result cache, request body limits, finite inputs, polygon validation and explicit file routes. Tests cover rejection paths and original real-data outputs.
 - Modal SDK 1.6.4 app import and CLI help pass offline. The same ASGI app was started in production mode locally. Volume read-only mount, scale-to-zero and image build steps are declared but not cloud-executed.
@@ -100,6 +100,6 @@ Full scenario/pair/reference/sensitivity values: [blind-audit.json](blind-audit.
 
 - No Modal account access, Linux image build, deployment, Volume upload, public IP forwarding test, scale-to-zero/resume or cloud latency measurement. Owner commands are in [DEPLOYMENT.md](DEPLOYMENT.md).
 - No IronShard upload/download, endpoint compatibility or judge bucket-read policy tested. AGPL model licence and upstream editable-weight/training-source links provided; a complete corresponding-source archive was not independently audited. Fog is deliberately excluded pending provenance review.
-- The name is ACORN; the logo remains an explicit replaceable placeholder in `brand.json`. Roadmap mission modes are proposed, not implemented.
+- The name is ACORN; supplied wordmark and stacked artwork are configured in `brand.json` and bundled locally in `static/brand/`. Roadmap mission modes are proposed, not implemented.
 - Existing physical limits remain: no USB/tether/field validation of this placement model (the station’s recorded-clip/MCU/KY-026/on-board LED run on a real UNO Q is separate); no optical detection range, weather, calibration or smoke dynamics. No building heights; 5.47% of forest canopy values assumed; real NLS 2019 / CORINE 2024 / Luke 2023 vintages differ. No ecological impact quantities are claimed.
 - Station code, root README and root .gitignore were not edited. No git state-changing commands were run. No physical Wi-Fi-disconnection test. Station screenshots were optional and were not added.

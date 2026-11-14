@@ -62,9 +62,13 @@ def test_api_and_locally_served_assets(config):
             assert response.status_code==200
             assert 'lang="tr"' in response.text
             assert f'<title>{identity.NAME}</title>' in response.text
-            assert f'>{identity.NAME.partition(" — ")[0]}</h1>' in response.text
+            assert f'aria-label="{identity.NAME}"' in response.text
+            assert 'src="/static/brand/acorn-wordmark-white.png"' in response.text
             assert 'rel="icon"' not in response.text
             assert "default-src 'self'" in response.headers['content-security-policy']
+            for variant in ('wordmark', 'stacked'):
+                asset=client.get(f'/static/brand/acorn-{variant}-white.png')
+                assert asset.status_code==200 and asset.headers['content-type']=='image/png'
             for asset in ('/static/app.js','/static/style.css'):
                 r=client.get(asset);assert r.status_code==200
                 assert not re.search(r'https?://|@import|fonts.googleapis|cdn\.',r.text)
@@ -89,7 +93,7 @@ def test_identity_is_rendered_from_one_definition(config, monkeypatch):
         with TestClient(app) as client:
             markup=client.get('/').text
             assert '<title>Test node — Field &lt;observation&gt;</title>' in markup
-            assert '>Test node</h1>' in markup
+            assert 'aria-label="Test node — Field &lt;observation&gt;"' in markup
             assert '{{station_' not in markup
             assert app.title==identity.NAME
     finally:station.stop();station.store.shutdown()

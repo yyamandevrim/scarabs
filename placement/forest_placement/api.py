@@ -54,8 +54,8 @@ def branded_page(filename):
     revision=hashlib.sha256(b''.join(p.read_bytes() for p in assets)).hexdigest()[:12]
     page=page.replace('<body','<body data-asset-version="'+revision+'"',1)
     page=re.sub(r'(/static/[^"?]+\.(?:js|css|png))"',lambda match:match.group(1)+'?v='+revision+'"',page)
-    page=page.replace('data-brand-icon href="data:,"','data-brand-icon href="'+escape(identity['logo'],quote=True)+'"')
     page=page.replace('data-brand-logo', 'data-brand-logo src="'+escape(identity['logo'],quote=True)+'"')
+    page=page.replace('data-brand-stacked', 'data-brand-stacked src="'+escape(identity.get('stacked_logo',identity['logo']),quote=True)+'"')
     page=re.sub(r'<title>([^<]*)</title>',lambda match:'<title>'+escape(identity['name'])+' · '+match.group(1)+'</title>',page,count=1)
     for field,key in [('name','name'),('team','team'),('expansion','expansion'),('event','event'),('challenge','challenge')]:
         page=page.replace('<span data-brand-'+field+'></span>', '<span data-brand-'+field+'>'+escape(identity.get(key,''))+'</span>')

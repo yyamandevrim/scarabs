@@ -24,6 +24,10 @@ def test_server_renders_config_identity_before_javascript():
             assert 'data-brand-logo src="'+brand['logo']+'"' in page
             assert brand['name'] in page
             assert client.get(brand['logo']).status_code==200
+            assert 'rel="icon"' not in page
+            if path=='/':
+                assert 'data-brand-stacked src="'+brand['stacked_logo']+'"' in page
+                assert client.get(brand['stacked_logo']).status_code==200
 
 
 def test_asset_revision_prevents_mixed_frontend_versions(tmp_path,monkeypatch):

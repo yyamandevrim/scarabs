@@ -40,7 +40,7 @@
      document.querySelectorAll('[data-brand-team]').forEach(e=>e.textContent=brand.team);
      for(const key of ['expansion','event','challenge'])document.querySelectorAll('[data-brand-'+key+']').forEach(e=>e.textContent=brand[key]||'');
      document.querySelectorAll('[data-brand-logo]').forEach(e=>{if(e.getAttribute('src')!==brand.logo)e.src=brand.logo});
-     document.querySelectorAll('[data-brand-icon]').forEach(e=>{if(e.getAttribute('href')!==brand.logo)e.href=brand.logo});
+     document.querySelectorAll('[data-brand-stacked]').forEach(e=>{const path=brand.stacked_logo||brand.logo;if(e.getAttribute('src')!==path)e.src=path});
      const pageTitle=document.body.dataset.pageTitle||'';
      document.title=brand.name+(pageTitle?' · '+(lang==='en'?pageTitle:translate(pageTitle,'tr')):'');
    }

@@ -91,7 +91,7 @@ def test_identity_is_single_source(tmp_path,monkeypatch):
     with TestClient(api.app) as client:assert client.get('/api/brand').json()==brand
     root=Path(__file__).resolve().parents[1]
     original=json.loads((root/'brand.json').read_text())
-    assert original['placeholder'] and original['team']=='Scarabs'
+    assert not original['placeholder'] and original['team']=='Scarabs'
     for page in ('landing.html','index.html'):
         html=(root/'static'/page).read_text()
         assert 'data-brand-name' in html and 'data-brand-logo' in html and 'data-brand-tagline' in html
