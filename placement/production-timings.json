@@ -1,125 +1,125 @@
 [
   {
     "phase": "empty-jit-cache",
-    "startup_seconds": 0.7957,
+    "startup_seconds": 0.7284,
     "requests": [
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "coarse",
         "cached": false,
-        "http_seconds": 0.1816,
-        "compute_seconds": 0.1709
+        "http_seconds": 0.1058,
+        "compute_seconds": 0.1012
       },
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "coarse",
         "cached": true,
-        "http_seconds": 0.0134,
-        "compute_seconds": 0.1709
-      },
-      {
-        "preset": "Inland \u00b7 Nuuksio",
-        "resolution": "coarse",
-        "cached": false,
-        "http_seconds": 0.1066,
+        "http_seconds": 0.0036,
         "compute_seconds": 0.1012
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "coarse",
-        "cached": true,
-        "http_seconds": 0.0043,
-        "compute_seconds": 0.1012
+        "cached": false,
+        "http_seconds": 0.0703,
+        "compute_seconds": 0.066
       },
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Inland \u00b7 Nuuksio",
+        "resolution": "coarse",
+        "cached": true,
+        "http_seconds": 0.0036,
+        "compute_seconds": 0.066
+      },
+      {
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "detailed",
         "cached": false,
-        "http_seconds": 0.5517,
-        "compute_seconds": 0.5457
+        "http_seconds": 0.4532,
+        "compute_seconds": 0.4491
       },
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "detailed",
         "cached": true,
-        "http_seconds": 0.0051,
-        "compute_seconds": 0.5457
+        "http_seconds": 0.0035,
+        "compute_seconds": 0.4491
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "detailed",
         "cached": false,
-        "http_seconds": 0.7459,
-        "compute_seconds": 0.7397
+        "http_seconds": 0.4486,
+        "compute_seconds": 0.4444
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "detailed",
         "cached": true,
-        "http_seconds": 0.0083,
-        "compute_seconds": 0.7397
+        "http_seconds": 0.0034,
+        "compute_seconds": 0.4444
       }
     ]
   },
   {
     "phase": "image-like-jit-cache",
-    "startup_seconds": 0.6632,
+    "startup_seconds": 0.4376,
     "requests": [
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "coarse",
         "cached": false,
-        "http_seconds": 0.1604,
-        "compute_seconds": 0.1516
+        "http_seconds": 0.0924,
+        "compute_seconds": 0.0877
       },
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "coarse",
         "cached": true,
-        "http_seconds": 0.0062,
-        "compute_seconds": 0.1516
+        "http_seconds": 0.0038,
+        "compute_seconds": 0.0877
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "coarse",
         "cached": false,
-        "http_seconds": 0.131,
-        "compute_seconds": 0.1224
+        "http_seconds": 0.0715,
+        "compute_seconds": 0.0672
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "coarse",
         "cached": true,
-        "http_seconds": 0.0049,
-        "compute_seconds": 0.1224
+        "http_seconds": 0.0037,
+        "compute_seconds": 0.0672
       },
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "detailed",
         "cached": false,
-        "http_seconds": 0.7122,
-        "compute_seconds": 0.7061
+        "http_seconds": 0.4558,
+        "compute_seconds": 0.4516
       },
       {
-        "preset": "Coast \u00b7 Haukilahti",
+        "preset": "Forest \u00b7 Sipoonkorpi",
         "resolution": "detailed",
         "cached": true,
-        "http_seconds": 0.0062,
-        "compute_seconds": 0.7061
+        "http_seconds": 0.0034,
+        "compute_seconds": 0.4516
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "detailed",
         "cached": false,
-        "http_seconds": 0.6351,
-        "compute_seconds": 0.6289
+        "http_seconds": 0.4539,
+        "compute_seconds": 0.4496
       },
       {
         "preset": "Inland \u00b7 Nuuksio",
         "resolution": "detailed",
         "cached": true,
-        "http_seconds": 0.0062,
-        "compute_seconds": 0.6289
+        "http_seconds": 0.0036,
+        "compute_seconds": 0.4496
       }
     ]
   }

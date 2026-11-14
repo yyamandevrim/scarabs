@@ -1,91 +1,96 @@
 {
-  "date": "2026-11-14",
-  "model": "360° three active 120° sectors",
-  "browser": "Chromium 1255 via Playwright",
-  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/map",
-  "checks": [
-    {
-      "name": "desktop-default",
-      "page": "/map",
-      "width": 1440,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "desktop-breakdown",
-      "page": "/map",
-      "width": 1440,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "desktop-data",
-      "page": "/map",
-      "width": 1440,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "desktop-site-b",
-      "page": "/map",
-      "width": 1440,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "desktop-height-100",
-      "page": "/map",
-      "width": 1440,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "phone-top",
-      "page": "/map",
-      "width": 393,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "phone-scrolled",
-      "page": "/map",
-      "width": 393,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "phone-breakdown",
-      "page": "/map",
-      "width": 393,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    },
-    {
-      "name": "phone-data",
-      "page": "/map",
-      "width": 393,
-      "language": "en",
-      "toggle": false,
-      "overflow": false,
-      "externalResources": 0
-    }
-  ],
-  "consoleErrors": [],
-  "externalRequests": []
+  "status": "superseded",
+  "superseded_by": "map-polish-verification.json",
+  "reason": "Prior UI and Haukilahti default; current defaults are Sipoonkorpi/Nuuksio.",
+  "historical_evidence": {
+    "date": "2026-11-14",
+    "model": "360\u00b0 three active 120\u00b0 sectors",
+    "browser": "Chromium 1255 via Playwright",
+    "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/map",
+    "checks": [
+      {
+        "name": "desktop-default",
+        "page": "/map",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "desktop-breakdown",
+        "page": "/map",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "desktop-data",
+        "page": "/map",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "desktop-site-b",
+        "page": "/map",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "desktop-height-100",
+        "page": "/map",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "phone-top",
+        "page": "/map",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "phone-scrolled",
+        "page": "/map",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "phone-breakdown",
+        "page": "/map",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "name": "phone-data",
+        "page": "/map",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      }
+    ],
+    "consoleErrors": [],
+    "externalRequests": []
+  }
 }

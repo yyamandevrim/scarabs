@@ -13,7 +13,7 @@ Coverage is simulated geometric visibility, not optical smoke-detection range or
 The Overview at `/` lets visitors turn the real CAD with realistic materials, inspect Camera 1/2/3 and their combined 360° view, and separate the six identified assemblies. Its interactive LoRa demo shows 40-byte status and 42-byte smoke reports arriving at the main centre, followed by explicit Wi-Fi evidence collection. A phone walkthrough shows the camera view, saved evidence and human decision. The map section uses responsive WebP captures of the new 360° default map, with desktop and phone sources and lazy loading. Runtime assets are local and rendering stops at rest; a poster remains as fallback. Overview is English only. Shared English-only shell changes were committed early in `b79b999`; the unused dictionary remains on disk. Build, provenance and browser checks are documented in [`static/vendor/README.md`](static/vendor/README.md) and [`../assets/hardware/README.md`](../assets/hardware/README.md). Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The header uses Yaman’s original vector wordmark (`logo`); the landing hero uses the complete stacked vector lockup (`stacked_logo`). Both are bundled under `static/brand/` for offline and deployed use. See [asset provenance and usage](../assets/brand/README.md). **Scarabs is the team**, not the product.
  Identity comes from `brand.json` and local vector artwork. Both pages force English regardless of stored language preference or URL parameters. `i18n.js` no longer loads a translation dictionary; the map control is removed, and the server also strips any legacy language button.
 
-Compare owns the two site totals, verdict, selected site's balloon height and per-camera visible forest. Breakdown owns area accounting and scenario tables. Data retains concise provenance, the actual assumed-canopy fraction and required CC BY 4.0 attribution. Public limitations copy removed for owner review is recorded verbatim in the external scratchpad `overview/claims-for-owner-map.md`; engineering limitations remain below and in API uncertainty metadata.
+Compare owns the two site totals, verdict, selected site's balloon height and per-camera visible forest. Breakdown owns area accounting and scenario tables. Breakdown uses three columns with units in metric labels and secondary rows behind More metrics. Shared measured zeros are omitted at the displayed precision; unknowns remain uncomputed. Data retains concise provenance, the actual assumed-canopy fraction and required CC BY 4.0 attribution. Public limitations copy removed for owner review is recorded verbatim in the external scratchpad `overview/claims-for-owner-map.md`; engineering limitations remain below and in API uncertainty metadata.
 
 See [`DEPLOYMENT.md`](DEPLOYMENT.md) for deployment and [`../tools/README.md`](../tools/README.md) for artifact handling. Neither deployment nor upload is part of this update. Current height/scenario/camera results are in [`blind-audit.json`](blind-audit.json), HTTP benchmarks in [`benchmark-results.json`](benchmark-results.json), and checks in [`VERIFICATION.md`](VERIFICATION.md).
 
@@ -108,15 +108,15 @@ The prepared **75.12 km × 75.12 km** rectangle is `(345000, 6650000, 420120, 67
 ```sh
 curl -s http://127.0.0.1:8787/api/analyze \
   -H 'Content-Type: application/json' \
-  -d '{"name":"Haukilahti","lon":24.773,"lat":60.159,"height":600,"resolution":"detailed"}'
+  -d '{"name":"Sipoonkorpi","lon":25.19,"lat":60.32,"height":600,"resolution":"detailed"}'
 ```
 
 Explicit `cameras` must have yaw 0/120/240, HFOV 120 and `active:true`, with identical tilt/VFOV across all three. Invalid/self-crossing priorities, out-of-region locations and mostly-water launch cells return 422.
 
 ## Demo sequence
 
-1. Open `/map`: **Haukilahti** `(60.159, 24.773)` and **Nuuksio** `(60.293, 24.557)`, both 600 m. Three cameras watch the full circle.
-2. The quick default canopy-smoke view shows approximately **8,070** and **26,850 simulated ha**, with **43%** and **8%** water share. Select either site to show its own raster and per-camera breakdown.
+1. Open `/map`: **Sipoonkorpi** `(60.320, 25.190)` and **Nuuksio** `(60.293, 24.557)`, both 600 m. Three cameras watch the full circle. Both presets use heading 0°, matching the Overview camera directions.
+2. The quick default canopy-smoke view shows approximately **19,460** and **26,850 simulated ha**, with **6%** and **8%** water share. Select either site to show its own raster and per-camera breakdown.
 3. Change the selected site's height, then use Detailed · 40 m if needed. Shared tilt/VFOV, position, range and smoke elevation are in Position and geometry. Ground/bare scenarios remain available.
 4. Draw a priority forest polygon to compare visible priority forest; Clear area restores the total-forest comparison. Clicking the map moves the selected site.
 5. Access, tether/ground suitability and flight permission require field assessment. These are not computed launch authorizations.
@@ -149,3 +149,5 @@ Checks cover full-circle tiling, exact seam ownership, unchanged totals under he
 - Python 3.11/3.13 and other operating systems were not run; verified runtime is this Mac on Python 3.12.
 
 Board status: the station has run on a real UNO Q using recorded clips, the MCU bridge, KY-026 and on-board status LED. This does not validate placement visibility or field detection range. Board inference performance for the demo, USB cameras, AP mode, external RGB LED and real LoRa radio remain unverified; see [BOARD_NOTES.md](../firmware/BOARD_NOTES.md) for ongoing bring-up work.
+
+See [`MAP-POLISH.md`](MAP-POLISH.md) for the map review findings, presentation changes, refreshed presets and round-two evidence. The numeric algorithm is unchanged.

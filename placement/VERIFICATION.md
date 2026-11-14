@@ -6,11 +6,11 @@ Verified 2026-11-14 on macOS, Python 3.12.10. **85 placement pytest tests pass**
 
 Three simultaneously active cameras on the faces of a triangular housing, yaw **0° / 120° / 240°**. Each camera is modelled as a **120° horizontal sector by product decision**, not a measured lens calibration. Half-open seams give every eligible azimuth exactly one camera. Common tilt and VFOV are evaluated in the radial vertical plane: heading rotates ownership without changing the union. The old rectilinear horizontal/vertical coupling, forward fan, pair/reference modes and heading sensitivity are superseded. Terrain/canopy LOS, target heights, curvature and raster weighting are unchanged.
 
-Cache algorithm: `opaque-ray-half-cell-v8-360-sectors-en`. Tests reject old v7 cache entries and retired public camera modes. Default geometry is 600 m AGL, 10° down, 50° VFOV, 12 km maximum range and smoke 50 m above the local canopy/surface. Coast: 60.159 / 24.773, seam heading 180°; inland: 60.293 / 24.557, seam heading 20°. No priority polygon.
+Cache algorithm: `opaque-ray-half-cell-v8-360-sectors-en`. Tests reject old v7 cache entries and retired public camera modes. Default geometry is 600 m AGL, 10° down, 50° VFOV, 12 km maximum range and smoke 50 m above the local canopy/surface. Default A is Sipoonkorpi at 60.320 / 25.190; B is Nuuksio at 60.293 / 24.557. Both use heading 0°. No priority polygon.
 
 The annular guides solve the vertical boundaries, including curvature, on a level target plane through the launch cell. The inner blind disc is not filled by a camera wedge. Actual visibility masks use the local terrain/canopy target at every cell. Steeper settings can also reduce the outer guide radius below maximum range.
 
-## Default sanity check against the retired three-camera reference
+## Historical sanity check against the retired three-camera reference
 
 All values below are **simulated hectares** at 600 m. Historical values were read from the pre-change committed blind-audit.json before regeneration. The old reference used yaw −70°/0°/+70° and 80° rectilinear HFOV (nominal ~220° horizontal union; the task calls it the ~210° fan).
 
@@ -21,7 +21,7 @@ All values below are **simulated hectares** at 600 m. Historical values were rea
 | Haukilahti | 40 m | 3,088.80 | 8,072.92 |
 | Nuuksio | 40 m | 17,298.84 | 26,856.96 |
 
-Both sites increase. Default quick headlines round to ≈8,070 and ≈26,850 simulated ha; water share is 43% and 8%. The 360° model still has a vertical blind disc, terrain/canopy occlusion and raster sampling effects. A larger height can reduce visible forest because the inner blind region grows; no monotonic-height claim is made.
+Both historical sites increase. The round-two defaults are Sipoonkorpi (≈19,460 simulated ha; 6% water) and Nuuksio (≈26,850 simulated ha; 8% water). The 360° model still has a vertical blind disc, terrain/canopy occlusion and raster sampling effects. A larger height can reduce visible forest because the inner blind region grows; no monotonic-height claim is made.
 
 ## Height audit
 
@@ -31,11 +31,11 @@ Both sites increase. Default quick headlines round to ≈8,070 and ≈26,850 sim
 
 | Site | AGL m | Visible | Outside vertical FOV | Occluded | Blind total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Coast · Haukilahti | 30 | 3,229.36 | 0.92 | 4,874.52 | 4,875.44 |
-| Coast · Haukilahti | 100 | 8,100.56 | 0.12 | 4.12 | 4.24 |
-| Coast · Haukilahti | 500 | 8,083.68 | 21.12 | 0.00 | 21.12 |
-| Coast · Haukilahti | 600 | 8,072.24 | 32.56 | 0.00 | 32.56 |
-| Coast · Haukilahti | 700 | 8,064.68 | 40.12 | 0.00 | 40.12 |
+| Forest · Sipoonkorpi | 30 | 8,863.52 | 5.24 | 10,763.84 | 10,769.08 |
+| Forest · Sipoonkorpi | 100 | 19,630.92 | 1.16 | 0.52 | 1.68 |
+| Forest · Sipoonkorpi | 500 | 19,518.32 | 114.28 | 0.00 | 114.28 |
+| Forest · Sipoonkorpi | 600 | 19,461.96 | 170.64 | 0.00 | 170.64 |
+| Forest · Sipoonkorpi | 700 | 19,399.36 | 233.24 | 0.00 | 233.24 |
 | Inland · Nuuksio | 30 | 5,319.20 | 0.64 | 21,614.36 | 21,615.00 |
 | Inland · Nuuksio | 100 | 26,889.28 | 0.08 | 44.84 | 44.92 |
 | Inland · Nuuksio | 500 | 26,885.76 | 48.44 | 0.00 | 48.44 |
@@ -46,11 +46,11 @@ Both sites increase. Default quick headlines round to ≈8,070 and ≈26,850 sim
 
 | Site | AGL m | Visible | Outside vertical FOV | Occluded | Blind total |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Coast · Haukilahti | 30 | 4,544.32 | 0.68 | 3,560.60 | 3,561.28 |
-| Coast · Haukilahti | 100 | 8,098.36 | 0.00 | 7.24 | 7.24 |
-| Coast · Haukilahti | 500 | 8,084.20 | 21.36 | 0.04 | 21.40 |
-| Coast · Haukilahti | 600 | 8,072.92 | 32.68 | 0.00 | 32.68 |
-| Coast · Haukilahti | 700 | 8,064.52 | 41.08 | 0.00 | 41.08 |
+| Forest · Sipoonkorpi | 30 | 7,473.88 | 4.40 | 12,153.36 | 12,157.76 |
+| Forest · Sipoonkorpi | 100 | 19,627.32 | 0.96 | 3.36 | 4.32 |
+| Forest · Sipoonkorpi | 500 | 19,517.84 | 113.80 | 0.00 | 113.80 |
+| Forest · Sipoonkorpi | 600 | 19,458.84 | 172.80 | 0.00 | 172.80 |
+| Forest · Sipoonkorpi | 700 | 19,398.76 | 232.88 | 0.00 | 232.88 |
 | Inland · Nuuksio | 30 | 4,931.28 | 1.08 | 22,011.48 | 22,012.56 |
 | Inland · Nuuksio | 100 | 26,815.40 | 0.20 | 128.24 | 128.44 |
 | Inland · Nuuksio | 500 | 26,894.44 | 48.76 | 0.64 | 49.40 |
@@ -90,8 +90,18 @@ The complete `scripts/check_overview.mjs` interaction suite was rerun after inte
 
 Measured initial transfer: **1,050,571 B**; full scroll + phone walkthrough: **1,241,968 B**. The previous full-scroll baseline was 1,184,230 B. The increase is **57,738 B**, within the requested ~150 KB budget. These CDP development-server measurements include HTTP headers and exclude later explicit evidence collection.
 
-Preview assets: desktop 1280×800 / 119,632 B; phone 393×852 / 41,208 B; WebP quality 78, method 6. Only the matching responsive source loads, lazily, with declared dimensions. The retired source was 61,062 B. The map-section layout and style are retained.
+Initial integration preview assets (superseded by the round-two refresh): desktop 1280×800 / 119,632 B; phone 393×852 / 41,208 B; WebP quality 78, method 6. Only the matching responsive source loads, lazily, with declared dimensions. The retired source was 61,062 B. The map-section layout and style are retained.
 
 Fresh `/` and `/map` desktop/393px checks pass with zero console errors, external requests, failed responses or horizontal overflow, and English despite Turkish storage/URL preferences. Screenshots and measurements: `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/merged/`. Overview implementation/build methods remain documented in `static/vendor/README.md`.
 
 Reproduce the full Overview suite from the repository root by copying `placement/scripts/check_overview.mjs` into the temporary npm directory and running `node TEMP/check_overview.mjs BASE_URL CHROMIUM_BINARY SCREENSHOT_DIRECTORY`. It evaluates `check_language.js` in the browser; that file is not a standalone Node CLI.
+
+## Round-two map polish
+
+All compatible map findings from the GPT and Opus reviews were addressed. See `MAP-POLISH.md` for the per-finding decisions and `map-polish-verification.json` for desktop/393px checks and current preset metrics. This is presentation and preset selection only: camera-sector physics, LOS, numeric rasters and algorithm version remain unchanged.
+
+The desktop view shows both complete ring perimeters; the selected raster is mint over a quieter basemap. Mobile keeps navigation and uses A/B labels on a larger canvas. The active site has an accent rule and explicit Editing label. One simulation label covers the comparison group. Breakdown has three columns, 44 px rows, More metrics and no shared measured-zero rows. Vertical exclusion is called Vertical blind area.
+
+The height audit, live benchmark and production timings were regenerated for Sipoonkorpi and Nuuksio. The 600 m default is retained; the zero high-altitude smoke occlusion is expected from the unchanged model, and low-height controls still show strong occlusion. No numbers were invented and no new public caveats were added.
+
+The Overview preview sources were re-exported at the same 1280×800 / 393×852 dimensions and filenames. Overview templates, scripts and styles were not edited during this polish round. Evidence screenshots are under `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round2-map/`.

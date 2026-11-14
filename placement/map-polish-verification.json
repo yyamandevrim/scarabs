@@ -1,0 +1,328 @@
+{
+  "checks": [
+    {
+      "name": "desktop-default",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-breakdown",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-more-metrics",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-data",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-site-b",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-height-100",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-top",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-scrolled",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-breakdown",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-more-metrics",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-data",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-site-b",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-height-100",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    }
+  ],
+  "errors": [],
+  "external": [],
+  "failed": [],
+  "presetMetrics": [
+    {
+      "input": {
+        "name": "Forest \u00b7 Sipoonkorpi",
+        "lon": 25.19,
+        "lat": 60.32,
+        "height": 600,
+        "heading": 0,
+        "cameras": [
+          {
+            "yaw": 0,
+            "tilt": 10,
+            "hfov": 120,
+            "vfov": 50,
+            "active": true
+          },
+          {
+            "yaw": 120,
+            "tilt": 10,
+            "hfov": 120,
+            "vfov": 50,
+            "active": true
+          },
+          {
+            "yaw": 240,
+            "tilt": 10,
+            "hfov": 120,
+            "vfov": 50,
+            "active": true
+          }
+        ],
+        "resolution": "coarse",
+        "max_range": 12000,
+        "smoke_height": 50,
+        "earth_radius": 6371000,
+        "priority": null
+      },
+      "metrics": {
+        "bare_ground": {
+          "visible_forest_ha": 18817.32,
+          "blind_forest_ha": 815.28,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 2326.36,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 19632.6,
+          "viewed_area_ha": 42878.88,
+          "outside_fov_forest_ha": 212.48,
+          "occluded_forest_ha": 602.8,
+          "water_share_pct": 5.425
+        },
+        "bare_smoke": {
+          "visible_forest_ha": 19461.96,
+          "blind_forest_ha": 170.64,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 2568.56,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 19632.6,
+          "viewed_area_ha": 45057.6,
+          "outside_fov_forest_ha": 170.64,
+          "occluded_forest_ha": 0,
+          "water_share_pct": 5.701
+        },
+        "canopy_ground": {
+          "visible_forest_ha": 1.16,
+          "blind_forest_ha": 19631.44,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 781.6,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 19632.6,
+          "viewed_area_ha": 3343.68,
+          "outside_fov_forest_ha": 212.48,
+          "occluded_forest_ha": 19418.96,
+          "water_share_pct": 23.375
+        },
+        "canopy_smoke": {
+          "visible_forest_ha": 19461.96,
+          "blind_forest_ha": 170.64,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 2568.56,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 19632.6,
+          "viewed_area_ha": 45057.6,
+          "outside_fov_forest_ha": 170.64,
+          "occluded_forest_ha": 0,
+          "water_share_pct": 5.701
+        }
+      },
+      "algorithm": "opaque-ray-half-cell-v8-360-sectors-en"
+    },
+    {
+      "input": {
+        "name": "Inland \u00b7 Nuuksio",
+        "lon": 24.557,
+        "lat": 60.293,
+        "height": 600,
+        "heading": 0,
+        "cameras": [
+          {
+            "yaw": 0,
+            "tilt": 10,
+            "hfov": 120,
+            "vfov": 50,
+            "active": true
+          },
+          {
+            "yaw": 120,
+            "tilt": 10,
+            "hfov": 120,
+            "vfov": 50,
+            "active": true
+          },
+          {
+            "yaw": 240,
+            "tilt": 10,
+            "hfov": 120,
+            "vfov": 50,
+            "active": true
+          }
+        ],
+        "resolution": "coarse",
+        "max_range": 12000,
+        "smoke_height": 50,
+        "earth_radius": 6371000,
+        "priority": null
+      },
+      "metrics": {
+        "bare_ground": {
+          "visible_forest_ha": 24763.68,
+          "blind_forest_ha": 2170.52,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 3032.64,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 26934.2,
+          "viewed_area_ha": 39991.68,
+          "outside_fov_forest_ha": 120.16,
+          "occluded_forest_ha": 2050.36,
+          "water_share_pct": 7.583
+        },
+        "bare_smoke": {
+          "visible_forest_ha": 26849.84,
+          "blind_forest_ha": 84.36,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 3682.28,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 26934.2,
+          "viewed_area_ha": 45054.72,
+          "outside_fov_forest_ha": 84.36,
+          "occluded_forest_ha": 0,
+          "water_share_pct": 8.173
+        },
+        "canopy_ground": {
+          "visible_forest_ha": 1.48,
+          "blind_forest_ha": 26932.72,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 758.08,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 26934.2,
+          "viewed_area_ha": 1550.88,
+          "outside_fov_forest_ha": 120.16,
+          "occluded_forest_ha": 26812.56,
+          "water_share_pct": 48.881
+        },
+        "canopy_smoke": {
+          "visible_forest_ha": 26849.84,
+          "blind_forest_ha": 84.36,
+          "overlap_forest_ha": 0,
+          "water_view_ha": 3676.36,
+          "priority_visible_ha": 0,
+          "total_forest_ha": 26934.2,
+          "viewed_area_ha": 45046.08,
+          "outside_fov_forest_ha": 84.36,
+          "occluded_forest_ha": 0,
+          "water_share_pct": 8.161
+        }
+      },
+      "algorithm": "opaque-ray-half-cell-v8-360-sectors-en"
+    }
+  ],
+  "date": "2026-11-14",
+  "scope": "Round-two map polish",
+  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round2-map",
+  "previewAssets": {
+    "desktop": {
+      "file": "static/demo/map-360-desktop.webp",
+      "dimensions": [
+        1280,
+        800
+      ],
+      "bytes": 69620
+    },
+    "phone": {
+      "file": "static/demo/map-360-phone.webp",
+      "dimensions": [
+        393,
+        852
+      ],
+      "bytes": 39150
+    }
+  },
+  "physics": "unchanged; same v8 algorithm and raster datasets",
+  "reviewSources": [
+    "review-gpt/REVIEW.md map section",
+    "review-opus/REVIEW.md map section"
+  ]
+}
