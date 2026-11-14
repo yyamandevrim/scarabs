@@ -9,6 +9,8 @@ Investors and a hackathon jury experiencing the module, its link to the main cen
 ## Product Purpose
 Let visitors handle the real three-camera module in 3D, understand its 360° observation model, see status and smoke reports travel home over LoRa, and review imagery over close-range Wi-Fi. The launch planner compares simulated visible forest over Finnish terrain. Its three simultaneously active cameras are modelled as adjoining 120° horizontal sectors by product decision, at yaw 0°/120°/240°. Height changes the vertical footprint; heading rotates sector ownership only.
 
+The Overview leads with the finished suspended module, then a report travelling to the centre and a person reviewing its evidence. Camera selection changes the report direction while one real source event remains intact; no synthetic event identities are created.
+
 ## Brand Personality
 Precise, calm, candid. The product is ACORN (Aerial Canopy Observation and Reporting Node); identity and the supplied vector wordmark come only from brand.json, and Scarabs is the team.
 

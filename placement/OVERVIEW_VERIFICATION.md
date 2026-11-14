@@ -1,50 +1,44 @@
-# Overview verification — improvement round 2
+# Overview verification — improvement round 3
 
-Verified 14 November 2026 against the existing server on `http://127.0.0.1:18787`, after integrating main `1ce0131`. Implementation commits: `8d184a9` and `d2ef429`. No map runtime/engine, API, shell, tokens or i18n changes were made during this round. The map agent's Sipoonkorpi/Nuuksio exports were retained; the Overview alt text now names Sipoonkorpi.
+Verified 14–15 November 2026 against the existing server on `http://127.0.0.1:18787`. Implementation is committed in `6330898`. Main advanced to the map agent's `be92393` during this round; the Overview desktop teaser was captured again after that integration. The map runtime/engine, API, shell, tokens and i18n were not edited. The only shared-test adjustment is the Overview branch of the identity test: one shell wordmark plus the station panel's real wordmark.
 
-## Findings addressed
+## Review disposition
 
-All three P0s and nine P1s in the Opus review, and the GPT Overview findings, were addressed. The page uses a plain quantized GLB, a full-bleed physical module stage, explicit product explanation, focusable camera selection with automatic facing, 360° graded observation sectors and a complete reset. The report journey is the main radio picture; packet inspection is secondary. Evidence opens in a dialog and the phone's decisions are working local DOM controls around one source case. Native crops remove conflicting legacy annotations without painting over pixels. A still from one second into the same clip makes smoke immediately legible.
+All remaining Overview P1s were addressed. Existing CAD surfaces now have finished rear caps, opaque charcoal mounts, stronger baked contact AO, matching shallow optical stacks, curved lens normals and a printed supplied wordmark. Selected parts receive a thin outline rather than a material wash. Callouts use hairlines/dots and ray-tested visibility; all five phone parts remain visible. The module stays level, with rope endpoints at the actual openings. Nine viewpoints at both widths cover every camera front/rear, three-quarter, top and underside.
 
-Take-apart was removed, as permitted by the design lead: the CAD has no useful internal mechanism to reveal. There is no empty-shell board reveal. Cheap P2 fixes include occluded leaders, larger labels/compass type, visible disabled states, fixed control widths, a single evidence player, a secondary snapshot, responsive map exports and a quiet poster/part-guide fallback.
+Every camera choice retains the single real event UUID, timestamp, score and associated media. This follows the owner's choice to keep three bearing options rather than the review's proposed restriction to Camera 3. False station-camera attribution was replaced with neutral visible-pixel descriptions and “Evidence clip”. A smoke press pre-empts status immediately; the travelling packet, compass and receipt form one arrival beat. The compass caption is outside its labels, and its ray was tested against every text bounding box for all three bearings at both widths.
 
-The detailed per-finding disposition, owner claim log, 79 PNG screenshots, seven named inspection contact sheets and JSON measurements are delivered in the external `overview/round2/` output directory. An independent re-score has not been performed.
+Cheap P2s are addressed: fixed phone geometry, moving video → saved frame → decision, distinct outcomes, station section names/wordmark, visible touch hint, five equal part targets, pointer/keyboard focus handling, bounded zoom, flat 120° observation sectors, no forest/caption collision, aligned closing, proper title and native-sized map/media. The desktop preview is 1312×820 without letterboxing, phone preview is full-width, and evidence video never exceeds 640px. No public disclaimer was added.
+
+The startup P2 is **partly fixed**: studio filtering is offline (14,517 B, 32px cube faces and roughness mips), with asynchronous shader warm-up. The suggested 200ms maximum main-thread task is **not met** under SwiftShader: the acceptance run recorded [790, 857] ms. Separate profiling measured roughly 0.67s in native context creation and substantial shader diagnostics. Settled/off-screen rendering is zero. No claim is made that physical-device startup has the same cost.
 
 ## Measurements
 
-Chromium 159.0.8154.6, 1440×900, fresh context, local development server without gzip. CDP transferred bytes include HTTP headers. JS heap is measured after full garbage collection and excludes GPU/native memory.
+Chromium 159.0.8154.6 at 1440×900, normal motion, fresh context, development server without gzip. CDP encoded transfer includes HTTP headers; heap is after full GC and excludes GPU/native allocations.
 
 | Measure | Result |
 | --- | ---: |
-| Final-layout initial transfer, reduced motion | 1,223,000 B |
-| Final-layout JS heap after load + GC | 5,382,256 B |
-| Full acceptance initial transfer, normal motion | 1,223,834 B |
-| Full acceptance JS heap after load + GC | 5,469,324 B |
-| Full interaction journey, including reloads and evidence | 1,494,543 B |
-| Quantized GLB, no meshopt/WASM | 355,344 B |
-| 3D module bundle | 654,281 B raw / 167,547 B gzip (zlib default level 6) |
-| Source event clip, H.264 15fps | 144,586 B |
-| Settled and off-screen rendering | 0 draws/s |
-| DPR cap | 2 |
+| Initial transfer | 1,238,314 B |
+| Complete interaction journey | 1,485,837 B |
+| JS heap after load + GC | 5,705,020 B |
+| GLB (quantized, no WASM/meshopt) | 346,008 B |
+| 3D JS | 656,156 B raw / 168,539 B gzip (level 6) |
+| Offline studio | 14,517 B |
+| Click → next animation frame | 13.5–15.6 ms |
+| Complete arrival beat | 1951.6–1953.9 ms |
+| Settled / off-screen draws | 0/s |
+| Initial / entire-journey CLS | 0.01440 / 0.03275 |
 
-The full acceptance run preceded the final fallback-only CSS adjustment; its interaction transfer is retained as measured. A fresh load and both fallback layouts were checked again afterward. SwiftShader's software-rendered load had main-thread long tasks of 704, 817 and 85 ms. These are software-renderer load costs, not hardware-browser frame-rate measurements. Posters remain visible until the first completed render. There is no perpetual animation, shadow map or post-processing chain.
+The initial transfer and heap were sampled again after the final hover-only refinement; the full journey and long-task trace come from the preceding complete acceptance run. Hover inspection restores the committed selection without turning the model. Click timing uses the input capture handler and the next frame after the transmitting class is applied; it is not a physical RF latency measurement. Timing checks include consecutive camera choices and a status report pre-empted by smoke. Reduced motion has immediate equivalents. DPR is capped at two; no shadow map, post chain or perpetual animation is used.
 
-## Browser and interaction evidence
+## Verification
 
-- Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2: actual WebGL rendering at 1440×900 and 393×852, ordinary served CSP, no bypass. Poster hidden, renderer calls positive and substantial non-background model pixels verified in every canvas capture.
-- Additional stricter `script-src 'self'` load renders without a decoder policy exception.
-- All three cameras reachable by focus and turn towards the visitor. Reset clears selection and sectors. Fields of view form the complete observation ring.
-- Real touch scrolling inside the stage and ordinary wheel scrolling work. No 393px horizontal overflow. DPR 3 test devices still allocate at most DPR 2 canvases.
-- Status begins with zero pending suspicions, schedules on 12-second slots, and smoke reports arrive at both 0° and 240° with the corresponding compass sector and queue entry. Payloads decode with the real station codec: status 40 B, smoke 42 B.
-- Evidence dialog focuses in view; all phone steps, Confirm/Reject/Review again, media playback and off-screen pause pass. Local play/pause and keyboard seek pass independently in all three engines. Local controls avoid WebKit's CSP-blocked native media blob icons.
-- Context loss/recovery and no-WebGL poster/guide pass. Final fallback caption/list overlap was fixed and re-captured.
-- English passes with a stored Turkish preference and URL parameter. The current `/map` header was checked and captured without editing its code.
-- Zero console errors, external requests and failed HTTP responses in the complete acceptance run and supplemental media tests.
+- **85 pytest tests passed**, one upstream Starlette/httpx deprecation warning. Real station codec decodes the 40/42-byte payloads, one UUID and 0°/120°/240° bearings. Gzip/GLB budgets pass.
+- Chromium 159.0.8154.6, Firefox 159.0 and WebKit 27.2 render real canvas output at 1440×900 and 393×852 under the served CSP. A stricter self-only CSP also renders. Posters are hidden, renderer calls are positive and actual model pixels were checked in all six canvases.
+- The screenshot harness now explicitly waits for a new model draw after toggling FOV: an early WebKit capture had raced its next frame. The targeted six-context render pass was repeated and all actual sector captures inspected.
+- All camera/focus/reset/zoom controls, vertical touch and wheel escape, context recovery and no-WebGL fallback pass. No horizontal overflow, console errors, failed HTTP responses or external requests were observed in the final runs.
+- First phone view is moving video without event metadata, second is a paused saved frame, third reuses the clip with decisions. Play/pause/seek pass in every engine. Phone position and compass position stay fixed across their states.
+- All three report bearings, repeated immediate sends, inspector, evidence modal and local Confirm/Reject/Review again pass. Compass rays intersect no text boxes. Six final evidence-dialog captures verify native media size.
+- English passes despite stored Turkish preference and URL parameters. The current map header was captured without editing map code.
 
-Firefox on macOS 27 uses a temporary `CFFIXED_USER_HOME` application-data directory to avoid runner TCC restrictions. This does not bypass CSP or alter HOME. Browser packages and build tools live outside the repository. Reproduction commands are in `static/vendor/README.md`.
-
-## Automated checks
-
-`cd placement && uv run --offline --frozen pytest`: **85 passed**, one upstream Starlette/httpx deprecation warning. Both Playwright scripts passed. `scripts/check_language.js` passed as a browser expression. JavaScript syntax and `git diff --check` passed.
-
-Camera choices parameterize one local walkthrough and have distinct case IDs; one archived record supplies the media and real opening score/time. They are not separate physical detections. No live radio deployment, measured optical calibration or physical station integration was newly tested. These engineering details remain in the owner report rather than being added as public caveats.
+The external `overview/round3/` delivery contains 106 final PNGs, nine inspection contact sheets, the per-finding report and raw measurements. All were inspected individually or on named sheets; important optics, zoom, phone and radio states were opened at full size. The owner claim log was updated. No independent re-score was run. Build and verification commands are in `static/vendor/README.md`; the prior round is archived in commit `7e40420`.
