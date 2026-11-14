@@ -44,17 +44,20 @@ class DutyBudget:
     def __init__(self, fraction=.01, window=3600, path=None):
         if not 0 < fraction <= .1 or window <= 0:
             raise ValueError('Invalid duty budget')
+        self.fraction = fraction
         self.capacity = fraction*window
         self.window = window
         self.path = Path(path) if path else None
         self.entries = []
         self.last_time = 0
+        self.not_before = 0
         self.blocked_until = 0
         if self.path and self.path.exists():
             try:
                 state = json.loads(self.path.read_text())
                 self.entries = [tuple(x) for x in state['entries']]
                 self.last_time = state['last_time']
+                self.not_before = state.get('not_before', 0)
             except (ValueError, KeyError, TypeError):
                 # Corrupt accounting fails closed; one full quiet hour required.
                 import time
@@ -66,14 +69,32 @@ class DutyBudget:
         self.entries = [(end, duration) for end, duration in self.entries if end > now-self.window]
         return max(0., self.capacity-sum(duration for _, duration in self.entries))
 
-    def reserve(self, duration, now):
+    def available_at(self, duration, now):
+        """Earliest legal reservation, also for pre-pacing ledgers already exhausted."""
+        if duration > self.capacity:
+            raise ValueError('One packet exceeds the entire duty-cycle allowance')
+        now = max(now, self.last_time, self.blocked_until)
+        # Forecast without pruning the live ledger at a future time.
+        entries = [(end,used) for end,used in self.entries if end > now-self.window]
+        remaining = max(0., self.capacity-sum(used for _,used in entries))
+        if remaining+1e-9 >= duration:
+            return now
+        for end, used in sorted(entries):
+            remaining += used
+            if remaining+1e-9 >= duration:
+                return max(now, end+self.window)
+        return now+self.window
+
+    def reserve(self, duration, now, not_before=None):
         if duration <= 0 or duration > self.remaining(now)+1e-9:
             return False
         self.entries.append((now+duration, duration))
         self.last_time = now
+        if not_before is not None:
+            self.not_before = not_before
         if self.path:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             temporary = self.path.with_suffix('.tmp')
-            temporary.write_text(json.dumps(dict(entries=self.entries, last_time=now)))
+            temporary.write_text(json.dumps(dict(entries=self.entries, last_time=now, not_before=self.not_before)))
             temporary.replace(self.path)
         return True

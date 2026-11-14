@@ -1,111 +1,119 @@
-# ACORN point-to-point packet format, version 1
+# ACORN point-to-point packets — version 2
 
-This is raw LoRa, **not LoRaWAN**. The current implementation is **LoRa link (simulated transport)** over UDP. No radio, range, RSSI, SNR, antenna, positioning or power measurements have been made. The same complete byte string is the radio adapter's payload later. All assets and both applications run offline after initial `uv sync` and model/media preparation.
+Current transport: **LoRa link (simulated transport)** over UDP, not LoRaWAN. A radio adapter later sends the identical payload. No images, image URLs, distance, fire coordinates, battery percentage, RSSI or SNR are carried. Version 2 adds a calculated next-contact window so a receiver can distinguish scheduled duty-cycle silence from a missed contact. The decoder continues to read version-1 packets and existing ground journals; a version-1-only receiver must be upgraded with the sender.
 
-## Envelope
+## Binary layout
 
-Network byte order (big endian). Fixed 16-byte header, type-specific body, two-byte application CRC. Maximum accepted payload: **48 bytes**; current packets: **35–40 bytes**. No fragment, image, image URL, coordinates or text field is present. IDs are configured numeric station IDs, displayed directly without an invented station name. Assign unique IDs within a deployment.
+Network byte order. Maximum application payload **48 bytes**. Version-2 header **18 bytes**, body below, application CRC **2 bytes**. All CRC, length, version and semantic checks apply before journal insertion.
 
-| Offset | Bytes | Field |
+| Offset | Bytes | Header field |
 |---|---:|---|
 | 0 | 1 | Magic `AC` hex |
-| 1 | 1 | Version in high nibble (`1`), kind in low nibble (`1` smoke, `2` flame, `3` decision, `4` status) |
-| 2 | 2 | Configured unsigned station ID, 1–65535 |
-| 4 | 4 | Random boot/session ID; not a secret |
-| 8 | 2 | Unsigned transmission sequence, wraps at 65536; each physical attempt, including a repeat, gets a new number |
-| 10 | 4 | Unix UTC seconds from the station clock: event opening, decision time, or status creation time; no GPS/time synchronisation is claimed |
-| 14 | 2 | Sender's **calculated** remaining duty budget after reserving this TX, centiseconds; floored, saturates at 655.35 seconds |
-| 16 | variable | Body below |
-| final 2 | 2 | CRC-16/CCITT-FALSE over header and body, polynomial `1021`, initial `FFFF`, no reflection, no final XOR |
+| 1 | 1 | Version high nibble `2`, kind low nibble: 1 smoke, 2 flame, 3 decision, 4 status |
+| 2 | 2 | Configured unsigned station ID 1–65535 |
+| 4 | 4 | Random boot ID; not a secret |
+| 8 | 2 | Unsigned physical-attempt sequence; wraps at 65536, each repeat gets a fresh number |
+| 10 | 4 | UTC Unix seconds: event opening / decision / status creation from station clock |
+| 14 | 2 | Sender-calculated remaining budget **after this TX reservation**, floored centiseconds, saturating at 65535 |
+| 16 | 2 | Low 15 bits: calculated next-contact seconds, 0 unannounced. High bit: duty pacing (1), requested heartbeat schedule (0) sets the interval |
+| 18 | variable | Body |
+| final 2 | 2 | CRC-16/CCITT-FALSE over header + body: polynomial `1021`, initial `FFFF`, no reflection/final XOR |
 
-Unknown versions/types, wrong lengths, out-of-range fields and CRC corruption are rejected. PHY CRC is enabled separately in the airtime calculation. Application CRC detects accidental corruption; it provides **no encryption, sender authentication or replay protection**. The UDP simulator is loopback by default. Do not treat CRC as a security boundary or expose the simulator on an untrusted network. A selected real modem must address field link security before deployment.
+Version 1 uses the same first 16 header bytes and bodies, omitting the next-contact field. Its total lengths are 40/35/35/38 bytes. The new total lengths are **42/37/37/40 bytes**. A version-1 packet supplies no schedule: its receiver uses configured receipt-age thresholds and can only show a low-budget hint, never invent a current sender state.
 
-### Smoke suspicion: 22-byte body, 40 bytes total
+CRC detects accidental corruption; it provides **no encryption, authentication or replay protection**. UDP defaults to loopback. Radio security, frequency/power/antenna compliance and actual modem framing remain integration work. A modem-added envelope must be included in the actual PHY airtime before transmission.
+
+### Smoke suspicion — 22-byte body, 42 bytes total
 
 | Offset | Bytes | Field |
 |---|---:|---|
-| 16 | 16 | Complete original event UUID, binary (the 32 lowercase hex characters in the station store) |
-| 32 | 1 | Camera in bits 0–1 (`0` left, `1` centre, `2` right); bit 7 = recorded file source; bits 2–6 reserved zero |
-| 33 | 2 | Approximate bearing, unsigned centidegrees clockwise from configured north, 0–35999 |
-| 35 | 1 | Normalised bounding-box width × 255, rounded |
-| 36 | 1 | Normalised bounding-box height × 255, rounded |
-| 37 | 1 | Model confidence × 100, rounded, 0–100 |
+| 18 | 16 | Full original event UUID in binary; exact match to station evidence |
+| 34 | 1 | Camera 0 left / 1 centre / 2 right in bits 0–1; bit 7 recorded-source marker; other bits zero |
+| 35 | 2 | Approximate bearing clockwise from configured north, centidegrees 0–35999 |
+| 37 | 1 | Normalised box width ×255, rounded |
+| 38 | 1 | Normalised box height ×255, rounded |
+| 39 | 1 | Model confidence ×100, rounded 0–100 |
+| 40 | 2 | CRC |
+
+The horizontal centre of the original-image normalised box is `u=(x1+x2)/2`:
+
+`bearing = (configured_heading + camera_yaw + degrees(atan((2*u-1)*tan(radians(hfov/2))))) mod 360`.
+
+Assumptions: rectilinear lens, correct mounting and configured heading/FOV, `0 < hfov < 180`. This is neither a live compass reading nor calibrated angular accuracy. Balloon movement, tilt, lens distortion and mounting error add unknown uncertainty. Ground displays **whole approximate degrees**, with the configuration warning adjacent. Compass radius is illustrative, never a distance or fire location. Confidence is a model score, not fire probability. Contents are captured when queued; repeated detector extensions are not streamed.
+
+### Local flame-sensor trigger — 17-byte body, 37 bytes total
+
+Offsets 18–33 UUID, 34 source (`0` hardware, `1` simulated, `255` unknown), 35–36 CRC. No camera, bearing, image or model confidence is invented. This is a local short-range infrared trigger; it never confirms camera smoke suspicion.
+
+### Station operator decision — 17-byte body, 37 bytes total
+
+Offsets 18–33 UUID, 34 decision (`1` operator confirmed suspicion, `2` operator rejected suspicion), 35–36 CRC. It is a human annotation, not confirmed fire. Corrections supersede queued old decisions/repeats. Ground acknowledgements remain local and create no radio traffic.
+
+### Status — 20-byte body, 40 bytes total
+
+| Offset | Bytes | Field |
+|---|---:|---|
+| 18 | 1 | Active camera mask, left/centre/right bits 0/1/2 |
+| 19 | 1 | Lost mask, subset of active |
+| 20 | 2 | Pending smoke + flame count, saturated |
+| 22 | 4 | Process uptime seconds, saturated |
+| 26 | 1 | Battery `255` = **not measured** |
+| 27 | 2 | Configured module heading, unsigned centidegrees |
+| 29 | 6 | Three signed int16 camera yaws, centidegrees |
+| 35 | 3 | Three configured horizontal FOVs, rounded whole degrees |
 | 38 | 2 | CRC |
 
-Bearing uses the horizontal centre `u = (x1+x2)/2` of the normalized original-image box and a pinhole projection:
-
-`bearing = (configured_module_heading + camera_yaw + atan((2*u-1)*tan(hfov/2))) mod 360`.
-
-Angles are converted to radians for trig and back to degrees. A centre box at heading 10°, yaw −70° points approximately 300°; a right-edge point with 80° horizontal FOV is +40° from the optical axis. This assumes a rectilinear lens, correct mounting, heading and FOV; distortion, balloon rotation, tilt and inaccurate calibration add unquantified error. No compass sensor or stabilized heading is claimed. Use `0 < hfov < 180`; configured yaw and heading are not live telemetry. The displayed decimal precision is wire resolution, **not angular accuracy**. The compass radial position is illustrative; it is never a fire location or distance.
-
-Alert content is captured once when the bridge enqueues the event; later detector extensions are not a stream of radio updates. The source marker labels recorded footage even with demo imagery off. Confidence is a model score, not the probability of a fire.
-
-### Local flame sensor: 17-byte body, 35 bytes total
-
-Offsets 16–31: event UUID. Offset 32: source `0` hardware, `1` simulated, `255` unknown. Offsets 33–34: CRC. This is explicitly a **local short-range infrared sensor trigger**, with no camera slot, bearing or model confidence. It does not confirm camera smoke suspicion. The source flag preserves honest simulation labelling independently of transport simulation.
-
-### Station operator decision: 17-byte body, 35 bytes total
-
-Offsets 16–31: event UUID. Offset 32: `1` operator confirmed the suspicion, `2` operator rejected it. Offsets 33–34: CRC. It is a human review state, not a confirmed-fire message. Decision updates originate at the station's authenticated ranger panel. Ground acknowledgements stay locally on the laptop and create **no radio traffic**. The receiver can apply a decision arriving before its alert.
-
-### Periodic status: 20-byte body, 38 bytes total
-
-| Offset | Bytes | Field |
-|---|---:|---|
-| 16 | 1 | Active camera mask: left bit 0, centre bit 1, right bit 2 |
-| 17 | 1 | Lost camera mask (subset of active) |
-| 18 | 2 | Pending smoke + flame events, saturated at 65535 |
-| 20 | 4 | Process uptime seconds, saturated |
-| 24 | 1 | Battery sentinel `255` = **not measured**; no battery sensor exists |
-| 25 | 2 | Configured module heading, unsigned centidegrees |
-| 27 | 6 | Three configured yaws: left, centre, right, signed int16 centidegrees |
-| 33 | 3 | Three configured horizontal FOVs, rounded unsigned whole degrees |
-| 36 | 2 | CRC |
-
-The camera sectors come exclusively from this packet. Before receiving status, the compass says camera configuration is unknown. Camera state and pending/uptime are last-reported values; a stale link does not establish current camera health. Coordinates, camera imagery, machine specifications and battery percentages cannot be inferred from these bytes.
+These sectors and camera states are last-reported configuration/status, not proof of present camera health. Before status arrives, ground marks configuration unknown. No live calibration or geographic position is implied.
 
 ## Airtime
 
-Calculated using the standard Semtech LoRa packet equation (AN1200.13 §4). See [Semtech's calculator](https://www.semtech.com/design-support/lora-calculator) and [Semtech AN1200.86, Fig. 6](https://www.semtech.com/uploads/technology/LoRa/lora-and-lorawan.pdf). Unit tests compare the lower-SF 11-byte rounded reference times from that figure (.04/.14/.29 seconds) and exact independently calculated vectors. The figure does not specify all CRC/LDRO assumptions; its SF12 rounded value is not used as a CRC-enabled reference.
+Standard Semtech LoRa equation ([Semtech calculator](https://www.semtech.com/design-support/lora-calculator), [AN1200.86 Fig. 6](https://www.semtech.com/uploads/technology/LoRa/lora-and-lorawan.pdf)):
 
-`Tsym = 2^SF / BW`
+`Tsym=2^SF/BW`
 
-`Npayload = 8 + max(ceil((8*PL - 4*SF + 28 + 16*CRC - 20*IH)/(4*(SF-2*DE))) * (CR+4), 0)`
+`Npayload=8+max(ceil((8*PL-4*SF+28+16*CRC-20*IH)/(4*(SF-2*DE)))*(CR+4),0)`
 
-`ToA = (preamble + 4.25 + Npayload) * Tsym`
+`ToA=(preamble+4.25+Npayload)*Tsym`
 
-`IH=0` (explicit header), `CRC=1`, preamble=8, CR=1 means 4/5; CR=2/3/4 means 4/6, 4/7, 4/8. Low-data-rate optimisation `DE=1` when symbol time ≥16 ms. SF7–12 and BW125/250/500 kHz are configurable; the full occupied bandwidth must fit within the selected sub-band. No LoRaWAN MAC overhead is added because this is raw point-to-point LoRa. A modem that adds an envelope needs its actual PHY payload airtime accounted for before use.
+Explicit header `IH=0`, PHY `CRC=1`, preamble 8, CR1 = 4/5 (2/3/4 mean 4/6, 4/7, 4/8), DE enabled for symbol time ≥16 ms. SF7–12 and BW125/250/500 kHz are configurable. Tests compare published lower-SF rounded 11-byte figures and independent exact vectors; no measured hardware airtime is claimed.
 
-| Packet | Bytes | SF10, BW125, CR4/5 | SF12, BW125, CR4/5 |
+| Version-2 packet | Bytes | SF7/BW125/CR4/5 demo | SF10/BW125/CR4/5 | SF12/BW125/CR4/5 |
+|---|---:|---:|---:|---:|
+| Smoke suspicion | 42 | 87.296 ms | 534.528 ms | 2138.112 ms |
+| Flame / decision | 37 | 82.176 ms | 493.568 ms | 1974.272 ms |
+| Status | 40 | 82.176 ms | 534.528 ms | 1974.272 ms |
+
+## EU 868 MHz budget
+
+Primary source: [CEPT ERC/REC 70-03](https://docdb.cept.org/document/845), [current PDF Annex 1 h1.5–h1.9, page 8](https://docdb.cept.org/download/5013), checked 2026-11-14. The document is amended October 2026; the relevant table page retains its October 2025 edition. These harmonisation recommendations still require national implementation/conformity checks for actual deployment. This code uses the **duty-cycle path**, not LBT+AFA.
+
+| Non-specific SRD sub-band | Max e.r.p. | Selected duty limit | Airtime/hour |
 |---|---:|---:|---:|
-| Suspected smoke | 40 | 534.528 ms | 1974.272 ms |
-| Flame-sensor trigger | 35 | 493.568 ms | 1810.432 ms |
-| Operator decision | 35 | 493.568 ms | 1810.432 ms |
-| Status | 38 | 493.568 ms | 1974.272 ms |
+| 868.0–868.6 MHz | 25 mW | 1% | 36 s |
+| 868.7–869.2 MHz | 25 mW | 0.1% | 3.6 s |
+| 869.4–869.65 MHz | 500 mW | 10% | 360 s |
+| 869.7–870 MHz | 25 mW | 1% | 36 s |
 
-## EU 868 MHz duty cycle and scheduling
+The separate Annex 7 alarm-only bands and the 5 mW no-duty option are not implemented. The entire occupied bandwidth must fit the selected sub-band. No simulator output power is set or measured.
 
-Primary regulatory source checked 2026-11-14: [CEPT ERC/REC 70-03, current document](https://docdb.cept.org/document/845), [PDF Annex 1, h1.5–h1.9, page 8](https://docdb.cept.org/download/5013). The current document is amended October 2026; the relevant Annex 1 table retains its October 2025 page edition. These are harmonisation recommendations; national implementation/restrictions and final radio conformity still need checking for the actual deployment. This software chooses the **duty-cycle path**, not the alternative LBT+AFA path.
+`DutyBudget` reserves complete airtime at TX start and conservatively frees it one hour after TX end. Loss and uncertain modem I/O consume the allowance. The JSON ledger persists usage **and pacing**; backwards clock movement blocks transmission, corrupt accounting blocks for an hour. Do not erase the ledger, or change the transmitter/sub-band behind its back, to gain airtime.
 
-| Non-specific SRD sub-band | Max e.r.p. | Duty cycle chosen by this implementation | Airtime/hour |
-|---|---:|---:|---:|
-| 868.0–868.6 MHz (h1.5) | 25 mW | ≤1% | 36 s |
-| 868.7–869.2 MHz (h1.6) | 25 mW | ≤0.1% | 3.6 s |
-| 869.4–869.65 MHz (h1.7) | 500 mW | ≤10% | 360 s |
-| 869.7–870 MHz (h1.9) | 25 mW | ≤1% | 36 s |
+### Sustained scheduling, not an hourly burst
 
-Annex 1 also has a 5 mW no-duty-requirement option for 869.7–870 MHz (h1.8); it is not implemented. The separate alarm-only bands in Annex 7 are **not** selected: they have their own application, bandwidth and power requirements. An alert application does not automatically entitle a 125 kHz LoRa modem to use those alarm channels. No output power is set by this simulator; the serial adapter must implement and validate e.r.p. including antenna gain.
+The pre-rehearsal sender legally spent 36 seconds in about 4.5 minutes with a requested four-second heartbeat; it then had to wait for the rolling hour. Accounting did refill, and restart/archive correctly retained it. The fix spreads use over time, rather than clearing the ledger or bypassing duty limits in simulation.
 
-`DutyBudget` reserves complete packet airtime against a rolling hour. It conservatively retains that reservation until one hour after TX completion, then frees it. Every attempt, including simulated packet loss and an uncertain serial I/O error, consumes budget. `data/lora-duty.json` persists the ledger; do not delete it to recover budget. Backwards clock movement blocks transmission until the previous time is reached. A corrupt ledger blocks for one hour. Use a correct, stable system clock; do not share the same sub-band among unaccounted transmitters on this device. This is a software budget calculation, not certification.
+Each legal slot is the larger of `ceil(ToA(48)/duty_fraction + ToA(48) + 2)` and `ceil((window + ToA(48) + 2)/floor(capacity/ToA(48)))` seconds. The integer packet-count bound prevents an extra packet near the rolling-hour boundary. Using the maximum frame plus a completion/polling margin bounds every rolling hour, even as packet sizes vary. At 1% this is **12 s SF7, 61 s SF10, 241 s SF12**. The next slot survives restart. The rolling ledger remains a second independent enforcement check. An already-exhausted old ledger recovers automatically at its earliest legal release, exposed in authenticated `/api/communication`; a software upgrade cannot legally reclaim already-used airtime.
 
-The queue holds at most 256 messages: new smoke/flame alerts first, operator decisions next, due repeats next, heartbeat last. A new alert evicts a queued repeat if full; if it still cannot fit it remains eligible for the next scan and overflow is counted. There are at most two repeats by default (configurable 0–3), 30 seconds apart, with at least one second quiet time after each packet. A delayed heartbeat is replaced by a fresh one; it never builds a backlog. Heartbeats yield while alert/decision work remains queued and retain airtime for one maximum-size new alert. If the rolling budget is exhausted, even an urgent alert waits: there is no illegal emergency override and delivery is never guaranteed. Outbox errors are logged without stopping camera processing.
+Queue order remains new alerts, decisions, due repeats, replaceable heartbeat. Alerts always beat a queued heartbeat at the next legal slot. Repeats are limited (default two, configurable 0–3), never an unbounded retransmission loop; new alerts can evict queued repeats under pressure. A future repeat no longer blocks an otherwise eligible heartbeat. New alerts take priority at the next legal slot. No emergency override circumvents legality. Inference/evidence do not wait for a radio slot.
 
-At SF10, six smoke suspicions/hour with two repeats each use **9.622 s**. Six decision updates repeated similarly use **8.884 s**. Twelve 5-minute heartbeats use **5.923 s**: total **24.429 s/hour**, below the default 36 s (1%) allowance. This leaves 11.571 s for other alerts; clusters can still queue. At SF12 the same load requires **91.816 s/hour**, so it cannot fit 1%; messages wait and heartbeats yield. Even one repeated smoke + decision/hour plus twelve heartbeats costs **35.045 s**, leaving little margin. Configure longer heartbeat intervals/stale thresholds or a legally available sub-band after selecting and validating the actual hardware; never promise both a fast heartbeat and an arbitrary alert rate at SF12.
+Every transmitted packet announces `ceil(max(next_legal_TX-now, requested_heartbeat_seconds)+3)` seconds to the next expected contact. Normally next legal TX is one paced slot away; a partially exhausted legacy ledger can require a longer window, calculated without pruning or refilling live accounting early. The receiver derives its effective stale threshold as the larger of its configured minimum and that advertised window +5 s; lost follows after its configured stale-to-lost grace. Silence within the advertised window is labelled **calculated duty-cycle wait** when its reason bit says duty pacing; a deliberately slower heartbeat is labelled **scheduled contact wait** instead. Neither is proof the station is lost. Missed deadlines still become stale/lost, including after station shutdown. Packet loss, hardware failure, clock error and overload cannot guarantee delivery; no inferred battery or RF value is substituted. The receiver cannot establish a holdoff reason from missing legacy packets alone.
 
-## Integration and limitations
+A continuously looping clip can generate more distinct alerts than a long-range link can carry promptly. Those original alerts queue; repeats and heartbeats yield. SF12/1% cannot carry a two-second message every ten seconds. Use the clearly labelled SF7 recorded-footage demo config for sustainable stage responsiveness, or accept the calculated long-range contact window and backlog. Three-hour tests at SF7/SF10/SF12 simulate four-second heartbeat requests and a new suspicion every 55 seconds, check **every rolling hour**, ongoing contacts, priorities, legacy-ledger recovery and pacing across restart. `ground/traffic-verification.json` records the computed run figures.
 
-`Link.send(payload, airtime)`, `receive()` and `close()` are the adapter boundary. `SimulatedLink` sends precisely the codec output in one UDP datagram, with optional packet loss, payload cap and airtime delay. Sender duty refusal is always enforced, independently of simulated delay/loss. Seeded loss is reproducible; the OS network adds no simulated RSSI. Sender/receiver must use identical PHY settings for calculated airtime; those settings are local configuration, not a fictitious measurement.
+## Transport and prototype limits
 
-`SerialModem` deliberately raises `NotImplementedError`: **unimplemented and untested**. Select a modem and determine raw vs AT framing, serial baud/flow control, radio parameters/frequency/e.r.p., TX-complete and RX framing, packet limits, timeout/error handling and added envelope overhead. Return only original packet bytes to `Receiver.ingest`; the codec and dashboards must not change. Validate integration against golden codec vectors and actual airtime before enabling transmission.
+`Link.send(payload, airtime)`, `receive()` and `close()` are the boundary. `SimulatedLink` carries exactly one encoded packet per UDP datagram, with optional payload cap, airtime delay and seeded loss. All senders, including simulation, obey the same duty/pacing policy. Ground PHY settings must match for its calculated airtime; they are configuration, not radio measurement.
 
-The bridge currently scans up to 10,000 recent events and transmits events opened during the current process session. Historical events are not replayed on restart; pending outbox work is in memory and can be lost on shutdown. The receiver journals packets/acknowledgements in its own SQLite database and de-duplicates alerts by `(station ID, full UUID)` across boots/repeats. Missing sequence numbers are provisional (late arrivals repair gaps within a 4096-number window); sequence loss across more than half the 16-bit range is ambiguous. Lost packets before the first received sequence or after the last cannot be counted. Long-range delivery reliability, persistence of unsent work across station restarts, authenticated radio packets and automated receiver retention remain future field-hardening work, explicitly not demonstrated capabilities.
+`SerialModem` raises `NotImplementedError` deliberately: **unimplemented / untested**. Choose a modem, specify serial baud/flow control/AT or raw framing, frequency, power including antenna gain, TX-complete and RX framing, overhead, limits and errors; validate against codec vectors and actual airtime. Preserve bytes and the receiver interface, with no dashboard format workaround.
+
+The bridge scans up to 10,000 recent events opened in its current session; historical events are not replayed at startup. Unsent queue entries remain in memory and can be lost at shutdown. Queue size is bounded at 256. Receiver journals persist independently; alert deduplication uses `(station ID, full UUID)`. Sequence gaps are provisional and late arrivals repair within a 4096-number window; half-range wrap ambiguity and loss before first/after last receipt remain unknowable. Automatic ground retention and authenticated radio framing remain field-hardening work.

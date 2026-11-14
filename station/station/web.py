@@ -92,7 +92,10 @@ def create_app(station, manage_lifecycle=True):
                 "link": {"enabled": sender is not None, "transport": link.link.label if sender else "disabled",
                          "sent": sender.sent if sender else 0, "duty_refusals": sender.refused if sender else 0,
                          "queued": len(sender.queue) if sender else 0, "queue_drops": sender.dropped if sender else 0,
-                         "error": link.error}}
+                         "error": link.error,
+                         "calculated_next_tx_at": sender.next_tx_at(time.time()) if sender else None,
+                         "calculated_min_spacing_seconds": sender.slot_seconds if sender else None,
+                         "requested_heartbeat_seconds": station.config.lora.heartbeat_seconds}}
 
     @app.get("/api/events/{event_id}")
     def event(event_id: str):

@@ -1,0 +1,84 @@
+# Recorded-footage demo: LoRa link (simulated transport), SF7, paced 1% duty.
+# All packets are real binary frames; radio range/airtime are not measured.
+[station]
+model = "models/smoke.onnx"
+data_dir = "data/stage"
+analysis_hz = 1.0
+input_size = 640
+confidence = 0.35
+similarity_iou = 0.25
+nms_iou = 0.45
+event_timeout = 12.0
+retry_seconds = 2.0
+stale_seconds = 3.0
+retention_days = 7.0
+pre_seconds = 4.0
+post_seconds = 4.0
+clip_fps = 5.0
+clip_width = 640
+ort_threads = 2
+# Optional Linux LED brightness path; absent means no-op.
+# led_path = "/sys/class/leds/YOUR_LED/brightness"
+
+[mcu]
+# UNO Q microcontroller (KY-026 local flame sensor + status LED), see firmware/README.md.
+# "simulated": in-process model of the sketch for this Mac demo; the API marks it simulated.
+# "router": the real board via arduino-router. "off": no microcontroller.
+mode = "simulated"
+
+[cameras.left]
+active = true
+kind = "file"
+source = "media/smoke.ogv"
+yaw = -70.0
+tilt = 0.0
+hfov = 80.0
+vfov = 50.0
+width = 1280
+height = 720
+loop = true
+
+[cameras.centre]
+active = true
+kind = "file"
+source = "media/fog.webm"
+yaw = 0.0
+tilt = 0.0
+hfov = 80.0
+vfov = 50.0
+width = 1280
+height = 720
+loop = true
+
+[cameras.right]
+active = false
+kind = "file"
+source = "media/cloud.webm"
+yaw = 70.0
+tilt = 0.0
+hfov = 80.0
+vfov = 50.0
+width = 1280
+height = 720
+loop = true
+
+[lora]
+# Opt-in; UDP carries the unchanged binary packets until a modem is selected.
+# LoRa link (simulated transport). No imagery is sent on this link.
+enabled = true
+transport = "simulated"
+station_id = 1
+heading = 0.0  # configured, not measured; set module's actual heading before use
+peer_host = "127.0.0.1"
+peer_port = 9901
+sf = 7
+bandwidth = 125000
+coding_rate = 1  # 4/5
+sub_band = "868.0-868.6"
+frequency = 868.3
+duty_fraction = 0.01
+heartbeat_seconds = 4
+repeats = 2  # two repeats after the original, all charged to the budget
+repeat_seconds = 5
+loss = 0.0
+airtime_delay = true

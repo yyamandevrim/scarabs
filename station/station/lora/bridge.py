@@ -40,7 +40,7 @@ class LoraConfig:
             raise ValueError('Duty fraction exceeds selected sub-band limit')
         if not 1 <= self.station_id <= 65535 or not math.isfinite(self.heading) or not 0 <= self.heading < 360:
             raise ValueError('Invalid station ID or configured heading')
-        if self.heartbeat_seconds < 2 or not 0 <= self.loss <= 1 or not 0 <= self.repeats <= 3 or self.repeat_seconds < 1 or not 40 <= self.payload_limit <= 48:
+        if self.heartbeat_seconds < 2 or not 0 <= self.loss <= 1 or not 0 <= self.repeats <= 3 or self.repeat_seconds < 1 or not 42 <= self.payload_limit <= 48:
             raise ValueError('Invalid LoRa queue/link configuration')
         if self.transport not in ('simulated', 'serial'):
             raise ValueError('Unknown LoRa transport')
@@ -58,13 +58,14 @@ class LoraBridge:
         self.seen = set()
         self.decisions = {}
         self.error = None
+        self.next_heartbeat = 0
         if not c.enabled:
             self.sender = None
             return
         self.link = SimulatedLink(peer=(c.peer_host, c.peer_port), loss=c.loss, delay=c.airtime_delay, payload_limit=c.payload_limit, seed=c.seed) if c.transport == 'simulated' else SerialModem(c.serial_port, sf=c.sf, bandwidth=c.bandwidth, coding_rate=c.coding_rate, frequency=c.frequency)
         self.sender = Sender(self.link, Radio(c.sf, c.bandwidth, c.coding_rate),
                              DutyBudget(c.duty_fraction, path=station.config.data_dir/'lora-duty.json'),
-                             c.repeats, c.repeat_seconds)
+                             c.repeats, c.repeat_seconds, heartbeat_seconds=c.heartbeat_seconds)
 
     def packet(self, kind, now, data):
         return Packet(kind, self.config.station_id, self.boot, 0, int(now), data=data)
@@ -107,16 +108,21 @@ class LoraBridge:
         self.thread = Thread(target=self.run, name='lora-outbox', daemon=True)
         self.thread.start()
 
+    def step(self, now):
+        self.poll(now)
+        if now >= self.next_heartbeat:
+            self.heartbeat(now)
+            self.next_heartbeat = now+self.config.heartbeat_seconds
+        elif self.sender.heartbeat is not None and now >= self.sender.next_tx_at(now):
+            # Refresh an already due but deferred heartbeat, without shortening a
+            # deliberately slow requested interval.
+            self.heartbeat(now)
+        return self.sender.tick(now)
+
     def run(self):
-        next_heartbeat = 0
         while not self.stop_event.is_set():
             try:
-                now = time.time()
-                self.poll(now)
-                if now >= next_heartbeat:
-                    self.heartbeat(now)
-                    next_heartbeat = now+self.config.heartbeat_seconds
-                self.sender.tick(now)
+                self.step(time.time())
                 self.error = None
             except Exception as exc:
                 self.error = str(exc)

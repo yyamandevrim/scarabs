@@ -1,4 +1,4 @@
-"""Version 1, network byte order, CRC-16/CCITT-FALSE. See PACKETS.md."""
+"""Version 2 (version 1 receive compatibility), network byte order, CRC-16/CCITT-FALSE. See PACKETS.md."""
 from dataclasses import dataclass, field
 from enum import IntEnum
 import binascii
@@ -8,7 +8,8 @@ import uuid
 
 SLOTS = ('left', 'centre', 'right')
 MAX_PAYLOAD = 48
-HEADER = struct.Struct('>BBHIHIH')
+HEADER_V1 = struct.Struct('>BBHIHIH')
+HEADER = struct.Struct('>BBHIHIHH')
 FORMATS = {1: struct.Struct('>16sBHBBB'), 2: struct.Struct('>16sB'),
            3: struct.Struct('>16sB'), 4: struct.Struct('>BBHIBHhhhBBB')}
 
@@ -27,6 +28,8 @@ class Packet:
     timestamp: int
     remaining_cs: int = 0
     data: dict = field(default_factory=dict)
+    contact_after: int = 0  # low 15 bits: calculated seconds, 0 = unannounced
+    duty_hold: bool = False  # high bit: pacing, rather than requested heartbeat, sets interval
 
 
 def bearing(heading, yaw, box, hfov):
@@ -42,6 +45,8 @@ def bearing(heading, yaw, box, hfov):
 
 def encode(p):
     d = p.data
+    if not 0 <= p.contact_after <= 32767:
+        raise ValueError('Contact window must fit 15 bits')
     try:
         if p.kind == Kind.SMOKE:
             values = (uuid.UUID(d['event_id']).bytes, d['camera'] | (128 if d.get('recorded', False) else 0), d['bearing_cd'], d['width'], d['height'], d['confidence'])
@@ -53,7 +58,7 @@ def encode(p):
             values = (d['active'], d['lost'], d['pending'], d['uptime'], 255, d['heading_cd'], *d['yaw'], *d['hfov'])
         else:
             raise ValueError('Unknown packet kind')
-        body = HEADER.pack(0xAC, 0x10 | int(p.kind), p.station, p.boot, p.sequence, p.timestamp, p.remaining_cs)
+        body = HEADER.pack(0xAC, 0x20 | int(p.kind), p.station, p.boot, p.sequence, p.timestamp, p.remaining_cs, p.contact_after | (0x8000 if p.duty_hold else 0))
         body += FORMATS[int(p.kind)].pack(*values)
         raw = body + struct.pack('>H', binascii.crc_hqx(body, 0xFFFF))
         # Decode also validates semantic ranges, so encoding cannot emit invalid values.
@@ -64,18 +69,24 @@ def encode(p):
 
 
 def decode(raw):
-    if not isinstance(raw, bytes) or not HEADER.size+2 <= len(raw) <= MAX_PAYLOAD:
+    if not isinstance(raw, bytes) or not HEADER_V1.size+2 <= len(raw) <= MAX_PAYLOAD:
         raise ValueError('Invalid packet size')
     if binascii.crc_hqx(raw[:-2], 0xFFFF) != int.from_bytes(raw[-2:], 'big'):
         raise ValueError('CRC mismatch')
-    magic, vt, station, boot, sequence, timestamp, remaining = HEADER.unpack(raw[:HEADER.size])
+    header = HEADER if raw[1] >> 4 == 2 else HEADER_V1
+    if len(raw) < header.size+2:
+        raise ValueError('Truncated header')
+    values = header.unpack(raw[:header.size])
+    magic, vt, station, boot, sequence, timestamp, remaining = values[:7]
+    window = values[7] if len(values) == 8 else 0
+    contact_after, duty_hold = window & 0x7fff, bool(window & 0x8000)
     kind = vt & 15
-    if station == 0 or magic != 0xAC or vt >> 4 != 1 or kind not in FORMATS:
+    if station == 0 or magic != 0xAC or vt >> 4 not in (1, 2) or kind not in FORMATS:
         raise ValueError('Unknown magic, version or kind')
     fmt = FORMATS[kind]
-    if len(raw) != HEADER.size+fmt.size+2:
+    if len(raw) != header.size+fmt.size+2:
         raise ValueError('Wrong packet length')
-    v = fmt.unpack(raw[HEADER.size:-2])
+    v = fmt.unpack(raw[header.size:-2])
     if kind == Kind.SMOKE:
         d = dict(event_id=v[0].hex(), camera=v[1] & 3, recorded=bool(v[1] & 128), bearing_cd=v[2], width=v[3], height=v[4], confidence=v[5])
         if v[1] & 124 or d['camera'] > 2 or d['bearing_cd'] >= 36000 or d['confidence'] > 100:
@@ -93,4 +104,4 @@ def decode(raw):
                  heading_cd=v[5], yaw=list(v[6:9]), hfov=list(v[9:12]))
         if v[4] != 255 or d['active'] > 7 or d['active'].bit_count() > 2 or any(not -18000 <= y < 18000 for y in d['yaw']) or d['lost'] & ~d['active'] or d['heading_cd'] >= 36000 or any(not 0 < f < 180 for f in d['hfov']):
             raise ValueError('Invalid status fields')
-    return Packet(Kind(kind), station, boot, sequence, timestamp, remaining, d)
+    return Packet(Kind(kind), station, boot, sequence, timestamp, remaining, d, contact_after, duty_hold)
