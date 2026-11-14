@@ -28,9 +28,9 @@ def test_server_renders_config_identity_before_javascript():
             assert 'rel="icon" href="/static/favicon.svg"' in page
             assert client.get('/static/favicon.svg').status_code==200
             if path=='/':
-                assert 'data-brand-stacked src="'+brand['stacked_logo']+'"' in page
-                assert client.get(brand['stacked_logo']).headers['content-type']=='image/svg+xml'
-                assert '<span data-brand-expansion>'+brand['expansion']+'</span>' in page
+                assert page.count('data-brand-logo src=')==1
+                assert 'data-brand-stacked' not in page
+
 
 
 def test_asset_revision_prevents_mixed_frontend_versions(tmp_path,monkeypatch):

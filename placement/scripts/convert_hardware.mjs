@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {Document, NodeIO} from '@gltf-transform/core';
 import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
-import {dedup, weld, meshopt} from '@gltf-transform/functions';
+import {dedup, weld, quantize} from '@gltf-transform/functions';
 import {MeshoptEncoder} from 'meshoptimizer';
 import {BufferGeometry, Float32BufferAttribute,Vector3,Ray,DoubleSide} from 'three';
 import {MeshBVH} from 'three-mesh-bvh';
@@ -38,6 +38,7 @@ function ambientColours(geo){const colours=new Float32Array(geo.attributes.posit
  }return colours;}
 const doc=new Document(),buffer=doc.createBuffer(),scene=doc.createScene();
 const body=doc.createMaterial('Matte body').setBaseColorFactor([.64,.68,.70,1]).setMetallicFactor(0).setRoughnessFactor(1);
+const arm=doc.createMaterial('Secondary plastic').setBaseColorFactor([.35,.4,.43,1]).setRoughnessFactor(.55);
 const face=doc.createMaterial('Camera face').setBaseColorFactor([.10,.14,.17,1]).setMetallicFactor(0).setRoughnessFactor(1);
 function primitive(parts,material){
  const positions=[];
@@ -52,11 +53,13 @@ function primitive(parts,material){
 }
 for(const [name,parts]of Object.entries(groups)){
  const mesh=doc.createMesh(name),dark=parts.filter(([id])=>[0,147,165].includes(id)),light=parts.filter(([id])=>![0,147,165].includes(id));
- if(light.length)mesh.addPrimitive(primitive(light,body));if(dark.length)mesh.addPrimitive(primitive(dark,face));
+ const armSurfaces=light.filter(([id])=>(id>=4&&id<=16)||(id>=131&&id<=144&&id!==139)||(id>=149&&id<=162&&id!==157));
+ const shell=light.filter(item=>!armSurfaces.includes(item));
+ if(shell.length)mesh.addPrimitive(primitive(shell,body));if(armSurfaces.length)mesh.addPrimitive(primitive(armSurfaces,arm));if(dark.length)mesh.addPrimitive(primitive(dark,face));
  scene.addChild(doc.createNode(name).setMesh(mesh));
 }
 await MeshoptEncoder.ready;
-await doc.transform(weld(),dedup(),meshopt({encoder:MeshoptEncoder,level:'high',quantizePosition:14,quantizeNormal:10}));
+await doc.transform(weld(),dedup(),quantize({quantizePosition:14,quantizeNormal:10,quantizeColor:8}));
 const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.encoder':MeshoptEncoder});
 const out=path.join(repo,'placement/static/hardware/acorn.glb');await io.write(out,doc);
 console.log(JSON.stringify({vertices:vertices.length,fragments:fragments.size,logicalParts:Object.keys(groups),bytes:fs.statSync(out).size}));

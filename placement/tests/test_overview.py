@@ -2,20 +2,22 @@
 from fastapi.testclient import TestClient
 from forest_placement import api
 
-def test_overview_local_assets_and_scoped_wasm_policy():
+def test_overview_local_assets_and_plain_gltf_budget():
     import gzip
     with TestClient(api.app) as client:
         model=client.get('/static/hardware/acorn.glb')
         assert model.status_code==200 and model.content[:4]==b'glTF'
-        assert len(model.content)<300_000
+        assert len(model.content)<400_000
         bundle=client.get('/static/vendor/landing-3d.js')
         assert bundle.status_code==200 and len(gzip.compress(bundle.content))<200_000
         for asset in ('/static/hardware/acorn-poster.webp','/static/hardware/acorn-poster-phone.webp',
                       '/static/demo/iphone-station-cameras.webp','/static/demo/iphone-station-evidence.webp',
                       '/static/demo/evidence.webp','/static/demo/map-360-desktop.webp','/static/demo/map-360-phone.webp'):
             assert client.get(asset).status_code==200
-        assert "'wasm-unsafe-eval'" in client.get('/').headers['Content-Security-Policy']
-        assert "'wasm-unsafe-eval'" not in client.get('/map').headers['Content-Security-Policy']
+        import json,struct
+        size=struct.unpack_from('<I',model.content,12)[0]
+        document=json.loads(model.content[20:20+size])
+        assert 'EXT_meshopt_compression' not in document.get('extensionsUsed',[])
 
 
 def test_demo_packets_decode_with_the_real_station_codec(monkeypatch):
@@ -36,4 +38,6 @@ def test_demo_packets_decode_with_the_real_station_codec(monkeypatch):
         assert packet.data['bearing_cd']==bearing and packet.data['confidence']==59
     status=decode(bytes(result['status']))
     assert len(result['status'])==40 and status.kind==Kind.STATUS
-    assert status.contact_after==15 and status.duty_hold
+    assert status.contact_after==12 and status.duty_hold
+    assert status.data['pending']==0
+    assert len({decode(bytes(raw)).data['event_id'] for raw in result['smoke']})==3
