@@ -8,7 +8,7 @@ Coverage is **simulated geometric visibility**, not optical smoke-detection rang
 
 ## Public website and artifact handoff
 
-The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The logo is a dashed placeholder mark (`static/mark.svg`) until one is chosen; change the `logo` path to swap it. **Scarabs is the team**, not the product.
+The landing page is now `/`; the existing live map is `/map`. Both use the same local/public backend. Identity (name, expansion, tagline, logo, team, event, challenge) is configured only in [`brand.json`](brand.json); the server renders it into both pages and `/api/brand`. The name stays English in Turkish. The header uses a plain wordmark while the logo is undecided. The hidden logo binding and `static/mark.svg` placeholder remain swappable through the `logo` path in `brand.json`. **Scarabs is the team**, not the product.
 
 See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the exact Modal token → one-time data load → deploy commands, public API limits, storage/JIT decisions and account-free checks. See [`../tools/README.md`](../tools/README.md) for the checksum-pinned IronShard dry-run/upload/restore workflow and redistribution notices. **No deployment or upload was performed.**
 

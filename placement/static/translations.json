@@ -216,7 +216,7 @@
  "Inference": "Çıkarım",
  "57.7 ms mean · 65.6 ms p95": "ortalama 57,7 ms · p95 65,6 ms",
  "Measured on": "Ölçüm yeri",
- "Apple M5 Mac, 640 px input. Not measured on the Arduino UNO Q.": "Apple M5 Mac, 640 px giriş. Arduino UNO Q üzerinde ölçülmedi.",
+ "Apple M5 Mac benchmark, 640 px input. These figures are not UNO Q measurements.": "Apple M5 Mac kıyaslaması, 640 px giriş. Bu değerler UNO Q ölçümleri değildir.",
  "Recorded wildfire clip, 54 analyses, 2026-11-13. Source: station README.": "Kayıtlı orman yangını klibi, 54 analiz, 13.11.2026. Kaynak: istasyon README.",
  "Smoke suspicions are not confirmed fires: the station only flags them, and an operator decides.": "Duman şüphesi doğrulanmış yangın değildir: istasyon yalnızca işaretler, kararı operatör verir.",
  "Data in use": "Kullanılan veriler",

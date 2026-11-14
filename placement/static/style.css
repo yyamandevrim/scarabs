@@ -105,7 +105,7 @@
 
 .cand-letter{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid var(--line-strong);border-radius:3px;font-size:11px;color:var(--text-2)}
 
-.headline-value{font-size:32px;font-weight:600;line-height:1.2;letter-spacing:-.04em;white-space:nowrap;margin:6px 0}
+.headline-value{font-size:32px;font-weight:600;line-height:1.2;letter-spacing:-.04em;margin:6px 0}
 .headline-value small{font-size:13px;font-weight:400;letter-spacing:0;color:var(--text-2)}
 .headline-value.missing{color:var(--text-3)}
 .headline-sub{font-size:12px;color:var(--text-2);line-height:1.5;margin-top:3px}
@@ -212,3 +212,6 @@ table.grid td.unit{font-family:var(--font);color:var(--text-2)}
 .panel-foot{padding:16px 20px}
 .headline-name{min-height:32px}
 }
+
+.headline-value .simulation-label{display:table;width:fit-content;font-size:11px;letter-spacing:0;line-height:1.5;margin-top:6px;padding:1px 6px;border:1px dashed var(--line-strong);border-radius:3px;color:var(--text-2)}
+.verdict-simulation{display:table;margin-top:8px;letter-spacing:0;font-weight:400}

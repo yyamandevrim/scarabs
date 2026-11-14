@@ -21,6 +21,7 @@ const text = (tag, value, className) => {
 };
 const num = (value, digits = 1) => Number.isFinite(value)
   ? value.toLocaleString('tr-TR', {minimumFractionDigits: digits, maximumFractionDigits: digits}).replace('-', '−') : '—';
+const parameter = value => Number.isFinite(value) ? value.toLocaleString('tr-TR', {maximumFractionDigits: 3}) : '—';
 const time = value => value ? new Date(value * 1000).toLocaleTimeString('tr-TR') : '—';
 const dateTime = value => new Date(value * 1000).toLocaleString('tr-TR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
 async function json(url, options = {}) {
@@ -95,7 +96,7 @@ function updateCamera(camera, requestFrame = true) {
     for (const value of [
       `Analiz ${num(measured ? camera.analysis_ms : null)} ms`,
       `çıkarım ${num(measured ? camera.inference_ms : null)} ms`,
-      `${num(measured ? camera.analysis_hz : null, 2)} analiz/sn`,
+      `${num(camera.analyses > 1 ? camera.analysis_hz : null, 2)} analiz/sn`,
       `${num(camera.capture_fps)} kare/sn`
     ]) values.append(text('span', value));
     item.info.append(values);
@@ -136,10 +137,23 @@ function renderStatus(status) {
   }
   $('#cameras').setAttribute('aria-busy', 'false');
   $('#inactive-cameras').replaceChildren(...status.cameras.filter(camera => !camera.active)
-    .map(camera => text('p', `${labels[camera.name]} · ${num(camera.yaw, 0)}° · takılı, bağlı değil`)));
+    .map(camera => {
+      const tile = text('article', '', 'camera inactive');
+      tile.append(text('h3', `${labels[camera.name]} · ${num(camera.yaw, 0)}°`),
+        text('p', 'takılı, bağlı değil'), text('span', 'Üçüncü kamera · iki etkin giriş', 'inactive-note'));
+      return tile;
+    }));
   $('#geometry').replaceChildren(...status.cameras.map(camera => text('p',
     `${labels[camera.name]}: eğim ${num(camera.tilt, 0)}° · yatay/dikey görüş ${num(camera.hfov, 0)}° / ${num(camera.vfov, 0)}°`)));
-  $('#settings').textContent = `Yapılandırılan hedef: ${num(status.target_analysis_hz, 0)} analiz/sn/kamera · model girişi ${status.input_size}px. Giriş çifti yapılandırmadan seçilir.`;
+  $('#settings').textContent = `Yapılandırılan hedef: ${num(status.target_analysis_hz, 2)} analiz/sn/kamera · model girişi ${status.input_size}px. Giriş çifti yapılandırmadan seçilir.`;
+  const profile = status.analysis_profile;
+  $('#analysis-profile').textContent = profile ? profile.name === 'demo'
+    ? 'Demo profili · Yakındaki dumana ayarlı; küçük, uzak dumanı kaçırabilir.'
+    : 'Saha profili · Küçük ve uzak duman için daha büyük model girişi, daha yavaş analiz.'
+    : 'Analiz profili bilgisi alınamadı';
+  $('#profile-parameters').textContent = profile
+    ? `Model ${profile.input_size}px · güven eşiği %${parameter(profile.confidence * 100)} · hedef ${parameter(profile.interval_seconds)} sn/kamera · olay zaman aşımı ${parameter(profile.event_timeout_seconds)} sn`
+    : '';
   renderModule(status.mcu);
   $('#measured-on').textContent = status.measured_on?.label || 'Ölçüm cihazı bilgisi alınamadı';
   updateCoverage();
@@ -147,11 +161,13 @@ function renderStatus(status) {
 function renderModule(mcu) {
   const sensor = mcu?.flame_sensor;
   const state = $('#flame-status');
+  $('#mcu-mode').hidden = !mcu?.simulated && mcu?.mode !== 'off';
   $('#mcu-mode').textContent = mcu?.simulated ? 'Simülasyon' : mcu?.mode === 'off' ? 'Yapılandırılmamış' : '';
   state.textContent = sensor?.status_text || 'Alev sensörü durumu bilinmiyor';
   state.className = sensor?.triggered ? 'triggered' : sensor?.configured && !sensor.connected ? 'lost' : '';
   $('#flame-note').textContent = sensor?.note || 'Modüldeki kısa menzilli kızılötesi sensör. Kamera duman şüphesini doğrulamaz.';
   const shown = mcu?.led?.shown;
+  $('#led-swatch').dataset.colour = shown?.colour || 'unknown';
   const colours = {green: 'Yeşil', amber: 'Kehribar', blue: 'Mavi', red: 'Kırmızı', 'red→green→blue': 'Kırmızı → yeşil → mavi'};
   const patterns = {steady: 'sabit', 'double blink every 1.2 s': '1,2 sn’de çift yanıp sönme', 'slow blink, 1 s on / 1 s off': '1 sn açık / 1 sn kapalı', 'fast blink, 5 per second': 'saniyede 5 kez yanıp sönme', 'short flash every 2 s': '2 sn’de kısa yanıp sönme', 'one 0.75 s lamp test at power-up': 'başlangıçta 0,75 sn lamba testi'};
   $('#led-status').textContent = shown ? `Durum LED’i: ${colours[shown.colour] || shown.colour || '—'} · ${patterns[shown.pattern] || shown.pattern || '—'} · ${shown.text}` : 'Durum LED’i: okunamıyor';
@@ -197,7 +213,9 @@ function eventRow(event) {
   clipBar.append(clipLabel, clip);
   const clipStatus = text('p', '', 'event-detail clip-status');
   const actions = text('div', '', 'actions');
-  summary.append(title, meta);
+  const disclosure = text('span', 'Kaydı aç', 'event-disclosure');
+  row.addEventListener('toggle', () => {disclosure.textContent = row.open ? 'Kaydı daralt' : 'Kaydı aç';});
+  summary.append(title, meta, disclosure);
   const body = text('div', '', 'event-body');
   body.append(player, evidence, noImage, clipBar, clipStatus, detail, actions);
   row.append(body);
@@ -285,6 +303,7 @@ function renderActions(item, event) {
 }
 let queuePointerInside = false;
 let queuedEvents = null;
+let nextReviewId = null;
 const queuePanel = $('#event-panel');
 function queueIsEngaged() { return queuePointerInside || queuePanel.contains(document.activeElement); }
 function flushQueue() {
@@ -305,6 +324,11 @@ function renderEvents(events, deliberate=false) {
   $('#queue-arrivals').hidden=true;
   const pending = events.filter(event => event.decision === 'pending').sort((a,b)=>b.opened_at-a.opened_at);
   const history = events.filter(event => event.decision !== 'pending');
+  if (nextReviewId) {
+    const next = eventElements.get(nextReviewId);
+    if (next && pending.some(event => event.id === nextReviewId)) next.row.open = true;
+    nextReviewId = null;
+  }
   $('#event-count').textContent = `${pending.length} karar bekliyor`;
   $('#event-count').classList.toggle('has-pending', pending.length > 0);
   $('#pending-summary').textContent = 'Kayıtları incele';
@@ -378,7 +402,10 @@ async function decide(id, decision) {
     editing.delete(id);
     item.row.open = true;
     const nextPending=currentEvents.find(event=>event.id!==id&&event.decision==='pending');
-    if(nextPending&&eventElements.has(nextPending.id)&&!queueIsEngaged())eventElements.get(nextPending.id).row.open=true;
+    if(nextPending&&eventElements.has(nextPending.id)){
+      if(queueIsEngaged())nextReviewId=nextPending.id;
+      else eventElements.get(nextPending.id).row.open=true;
+    }
     item.savedUntil = Date.now() + 4000;
     // A successful write is authoritative even if the next polling request fails.
     currentEvents = currentEvents.map(event => event.id === id ? {...event, decision, decided_at: Date.now() / 1000} : event);
@@ -414,6 +441,9 @@ function serverLost() {
     text('span', lastUpdate ? `Son veri ${time(lastUpdate)}. Görüntü, ölçüm ve karar listesi güncel değil.` : 'Görüntü, ölçüm ve karar listesi alınamıyor.'));
   $('#coverage').textContent = 'Giriş durumları bilinmiyor';
   $('#measured-on').textContent = 'Ölçüm cihazı bilgisi alınamıyor';
+  $('#analysis-profile').textContent = 'Analiz profili bilinmiyor · istasyon bağlantısı yok';
+  $('#profile-parameters').textContent = '';
+  $('#led-swatch').dataset.colour = 'unknown';
   renderModule(null);
   for (const item of cameraElements.values()) updateCamera(item.camera, false);
   $('#cameras').setAttribute('aria-busy', 'true');

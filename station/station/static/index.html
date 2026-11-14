@@ -11,7 +11,7 @@
 <body>
 <header class="station-bar">
   <h1 title="{{station_title}}" aria-label="{{station_title}}">{{station_wordmark}}</h1>
-  <span class="station-section">Korucu · yakın mesafe Wi-Fi</span>
+  <span class="station-section">İstasyon · yakın mesafe Wi-Fi</span>
   <p id="connection" role="status">İstasyona bağlanılıyor…</p>
   <a id="pending-summary" href="#event-panel">Kayıtları incele</a>
 </header>
@@ -28,19 +28,21 @@
   </section>
   <section class="observation" aria-labelledby="feed-title">
     <div class="section-heading"><h2 id="feed-title">Kamera görüntüleri</h2><p id="coverage">Giriş bilgileri yükleniyor…</p></div>
+    <div class="analysis-profile"><p id="analysis-profile">Analiz profili yükleniyor…</p><p id="profile-parameters"></p></div>
     <div id="cameras" class="cameras" aria-busy="true">
       <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
       <div class="camera loading"><div class="image-wrap skeleton"><p>Görüntü bekleniyor…</p></div></div>
     </div>
     <p id="measured-on" class="measured-on">Ölçüm cihazı bekleniyor…</p>
-    <div id="inactive-cameras" class="inactive-cameras"></div>
+    <div class="hardware-strip"><div id="inactive-cameras" class="inactive-cameras"></div>
     <section class="module-state" aria-labelledby="module-title">
-      <div class="section-heading"><h2 id="module-title">Modüldeki sensör ve LED</h2><span id="mcu-mode"></span></div>
+      <div class="section-heading"><h2 id="module-title">Modüldeki sensör ve LED</h2><span id="mcu-mode" class="tag tag-sim"></span></div>
       <div id="flame-status" role="status">Alev sensörü verisi bekleniyor…</div>
-      <p id="led-status">Durum LED’i: —</p>
+      <div class="led-reading"><span id="led-swatch" aria-hidden="true"></span><p id="led-status">Durum LED’i: —</p></div>
       <p class="sensor-scope">Modüldeki kısa menzilli kızılötesi sensör; kamera duman şüphesini doğrulamaz.</p>
       <details class="sensor-details"><summary>Yerel sensörün kapsamı</summary><p id="flame-note">Modüldeki kısa menzilli kızılötesi sensör. Kamera duman şüphesini doğrulamaz.</p><p id="sensor-reading"></p><p id="led-requested"></p></details>
     </section>
+    </div>
     <details class="configuration"><summary>Kamera yapılandırması</summary><div id="geometry">Yapılandırma yükleniyor…</div><p id="settings"></p></details>
   </section>
 </main>

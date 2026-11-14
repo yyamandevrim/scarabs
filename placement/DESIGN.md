@@ -6,7 +6,7 @@ The planner answers “which launch point sees more forest?” The station answe
 
 Dark mineral surfaces: canvas #090e13, panel #0f161d, grouped controls #151e27, selected surface #1c2733. Primary text #e3e9ee, secondary #a7b4bf, quiet text #8697a5. Soft blue #8fc3e3 is the sole interaction accent, used for focus and links. Main actions are neutral. Amber #f2a93b means suspected smoke; red #f0594e means unavailable or failed. The local flame sensor is labelled explicitly; its physical LED colours are reported as data, not adopted as interface decoration.
 
-IBM Plex Sans, locally vendored under the SIL Open Font License (static/fonts/OFL-IBM-Plex-Sans.txt and OFL-IBM-Plex-Mono.txt). Proportional labels in sentence case; 12–14 px supporting text, 15–20 px headings, 32 px result figures, 52 px landing headline. IBM Plex Mono is reserved for coordinates, identifiers and dense numeric tables. Tabular figures throughout. No clock in the planner, tracked capitals, ornamental engine indicators or repeated simulation badges.
+IBM Plex Sans, locally vendored under the SIL Open Font License (static/fonts/OFL-IBM-Plex-Sans.txt and OFL-IBM-Plex-Mono.txt). Proportional labels in sentence case; 12–14 px supporting text, 15–20 px headings, 32 px result figures, 52 px landing headline. IBM Plex Mono is reserved for coordinates, identifiers and dense numeric tables. Tabular figures throughout. No clock in the planner, tracked capitals or ornamental engine indicators. Small simulation labels stay attached to headline figures and the verdict so isolated screenshots retain their meaning.
 
 ## Planner
 
@@ -22,4 +22,12 @@ At desktop width, two larger complete feed frames stack beside their measurement
 
 ## Verification
 
-Desktop and phone screenshots must cover loaded, partial, loading and failure states. Inspect contrast, clipping, queue accumulation and media fallback. Run placement Python tests, station Python tests and station JS panel tests; inspect browser diagnostics for external requests and console errors. Font provenance is recorded in static/fonts/README.md. Brand names and the undecided placeholder remain sourced from brand.json and station/identity.py.
+Desktop and phone screenshots must cover loaded, partial, loading and failure states. Inspect contrast, clipping, queue accumulation and media fallback. Run placement Python tests, station Python tests and station JS panel tests; inspect browser diagnostics for external requests and console errors. Font provenance is recorded in static/fonts/README.md. Brand names remain sourced from brand.json and station/identity.py. The undecided logo binding is retained but hidden; use the plain wordmark until the owner selects a mark.
+
+## Shared product shell and Ground
+
+All three applications serve the same token stylesheet and local IBM Plex weights (SIL OFL). The 48 px desktop shell uses the plain wordmark, a proportional module label, a quiet connection or navigation context, and the same 32 px controls. Phone headers wrap to preserve readable status and touch targets. Applications stay independently runnable; copy tokens to all three static directories together.
+
+Ground gives the azimuth compass the calm canvas and the received-alert queue a 400 px panel, matching the placement division of attention. Five-degree ticks, cardinal directions and restrained camera sectors support the selected approximate bearing. The short white arrow is explicitly labelled as configured module heading. There are no distance rings or claims of measured position. The selected alert stays first as new packets arrive, keeping its compass and evidence context steady. Alert status has one chip; packet IDs and box dimensions sit behind a disclosure. When the Wi-Fi demo is enabled on desktop, the selected alert's collected clip appears beside the compass, with the snapshot and live feeds available on demand. Live frame requests run only while their disclosure is open. Media is always labelled Wi-Fi-only; the packet link carries neither imagery nor an analysis profile.
+
+Station retains large complete frames, with effective profile parameters next to the measurements, a mounted inactive-camera tile and a static swatch of the LED state actually returned by the API. Simulated MCU data carries an explicit badge. Labelled event disclosures replace glyphs. Polling preserves queue targets while pointer or focus is inside; leaving applies deferred arrivals and opens the next pending record after a decision. No animated LED, fabricated telemetry or profile switch is added.

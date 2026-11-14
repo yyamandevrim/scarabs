@@ -31,7 +31,7 @@ async function panel(events = [], options = {}) {
       if (state.postFail) throw new Error('write failed');
       const decision = JSON.parse(init.body).decision;
       state.posts.push({url, decision});
-      state.events = state.events.map(item => ({...item, decision, decided_at: Date.now() / 1000}));
+      state.events = state.events.map(item => url === `/api/events/${item.id}/decision` ? {...item, decision, decided_at: Date.now() / 1000} : item);
       return {ok: true, json: async () => ({ok: true, decision})};
     }
     return {ok: true, json: async () => structuredClone(url === '/api/status' ? state.status : state.events)};
@@ -400,4 +400,58 @@ test('keyboard focus defers new cards, then leaving applies arrivals with a noti
   p.$('#pending-summary').focus();await flush();
   assert.equal(p.$('#events').firstElementChild.dataset.eventId,'keyboard-arrival');
   assert.equal(p.$('#queue-arrivals').hidden,true);
+});
+
+test('profile explains its intended smoke scale and effective configuration beside measured timings', async () => {
+  const p = await panel();
+  p.state.status.analysis_profile = {name:'field',input_size:640,confidence:.25,analysis_hz:1/6,interval_seconds:6,event_timeout_seconds:36,required_detections:3,window_analyses:5};
+  await p.refresh();
+  assert.match(p.$('#analysis-profile').textContent, /Saha profili/);
+  assert.match(p.$('#analysis-profile').textContent, /küçük.*uzak/i);
+  assert.match(p.$('#profile-parameters').textContent, /640.*%25.*6 sn.*36 sn/);
+  p.state.status.analysis_profile = {...p.state.status.analysis_profile,name:'demo',input_size:192,confidence:.35,interval_seconds:1,event_timeout_seconds:12};
+  await p.refresh();
+  assert.match(p.$('#analysis-profile').textContent, /Demo profili.*yakın/i);
+  assert.match(p.$('#profile-parameters').textContent, /192.*%35.*1 sn/);
+  p.state.fail = true; await p.refresh();
+  assert.match(p.$('#analysis-profile').textContent, /bilinmiyor/);
+});
+
+test('mounted inactive camera is a tile without a frame request and LED state uses a static swatch', async () => {
+  const p = await panel();
+  const tile = p.$('#inactive-cameras .camera');
+  assert.match(tile.textContent, /Sağ.*takılı, bağlı değil/);
+  assert.equal(tile.querySelector('img'), null);
+  p.state.status.mcu = {simulated:true,flame_sensor:{status_text:'Alev sensörü normal'},led:{shown:{colour:'amber',pattern:'steady',text:'Duman şüphesi operatör kararı bekliyor'}}};
+  await p.refresh();
+  assert.match(p.$('#mcu-mode').textContent, /Simülasyon/);
+  assert.equal(p.$('#led-swatch').dataset.colour, 'amber');
+});
+
+test('after a decision, leaving the queue opens the next pending record without moving the clicked target', async () => {
+  const first = event({id:'first',opened_at:1700000010});
+  const second = event({id:'second',opened_at:1700000000});
+  const p = await panel([first,second]);
+  p.$('#event-panel').dispatchEvent(new p.window.Event('pointerenter'));
+  const clicked = p.$('[data-event-id="first"] .confirm');
+  clicked.click(); await flush();
+  assert.ok(p.$('[data-event-id="first"]').contains(clicked) || p.$('[data-event-id="first"] .decision'));
+  assert.equal(p.$('[data-event-id="second"]').open,false);
+  p.$('#event-panel').dispatchEvent(new p.window.Event('pointerleave'));
+  p.window.document.activeElement?.blur(); await flush();
+  assert.equal(p.$('[data-event-id="second"]').open,true);
+  assert.match(p.$('[data-event-id="second"] summary').textContent,/Kaydı daralt/);
+});
+
+test('one completed analysis reports its time but waits for a second analysis before showing a measured rate', async () => {
+  const p = await panel();
+  p.state.status.cameras[0].analyses = 1;
+  p.state.status.cameras[0].analysis_hz = 0;
+  await p.refresh();
+  assert.match(p.$('.camera-info').textContent,/54,8 ms/);
+  assert.match(p.$('.camera-info').textContent,/— analiz\/sn/);
+  p.state.status.cameras[0].analyses = 2;
+  p.state.status.cameras[0].analysis_hz = 1/6;
+  await p.refresh();
+  assert.match(p.$('.camera-info').textContent,/0,17 analiz\/sn/);
 });
