@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ACORN — Ground</title><link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ACORN — Ground</title><link rel="stylesheet" href="/static/style.css"><script src="/static/presentation.js" defer></script><script src="/static/app.js" defer></script></head>
 <body>
 <header><div><h1>ACORN <span data-i18n="ground">Ground</span></h1><p id="transport-label">{{transport_label}}</p></div><button id="language" aria-label="Change language">Türkçe</button></header>
 <main>
-<div class="topline"><div><h2 data-i18n="observation">Remote observation</h2><p id="station-state" aria-live="polite">Waiting for a LoRa packet…</p></div><label class="demo-toggle"><input type="checkbox" id="demo-toggle"><span data-i18n="enableDemo">Show Wi-Fi demo</span></label></div>
+<div class="topline"><div><h2 data-i18n="observation">Remote observation</h2><p id="station-state" data-i18n="waiting" aria-live="polite">Waiting for a LoRa packet…</p></div><label class="demo-toggle"><input type="checkbox" id="demo-toggle"><span data-i18n="enableDemo">Show Wi-Fi demo</span></label></div>
 <section class="workspace" aria-label="LoRa observations">
 <div class="direction"><div class="section-title"><h3 data-i18n="directions">Approximate directions</h3><select id="station-select" aria-label="Station"></select></div><canvas id="compass" width="640" height="560" role="img" aria-label="Station camera sectors and approximate smoke bearing"></canvas><p class="direction-note" data-i18n="directionNote">Direction from configured heading and camera field of view. No distance or fire location is measured.</p><div id="camera-status" class="camera-status"></div></div>
 <div class="queue"><div class="section-title"><h3 data-i18n="alerts">Received alerts</h3><span id="alert-count"></span></div><div id="alerts" aria-live="polite"></div></div>

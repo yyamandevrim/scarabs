@@ -65,7 +65,7 @@ def test_status_and_budget_are_only_packet_fields(tmp_path):
         r.ingest(encode(packet(Kind.STATUS)),100)
         s=r.snapshot(101)['stations'][0]
         assert s['status']['battery'] is None and s['status']['lost']==2
-        assert s['remaining']==35 and s['airtime']==pytest.approx(Radio().airtime(38))
+        assert s['remaining']==35 and s['airtime']==pytest.approx(Radio().airtime(40))
         assert all('snapshot' not in a and 'clip' not in a for a in r.snapshot()['alerts'])
     finally:r.close()
 
@@ -161,3 +161,52 @@ def test_ground_restarts_with_demo_off_even_after_enabled(tmp_path):
     other=Wifi('http://station.test',None,tmp_path)
     try:assert other.enabled is False
     finally:other.client.close()
+
+def test_announced_duty_wait_has_bounded_stale_and_lost_deadline(tmp_path):
+    r=Receiver(tmp_path,Radio(),10,20)
+    try:
+        r.ingest(encode(replace(packet(),contact_after=64,duty_hold=True)),100)
+        s=r.snapshot(130)['stations'][0]
+        assert s['state']=='holding' and s['next_contact_in']==34
+        assert s['effective_stale_after']==69
+        assert r.snapshot(166)['stations'][0]['state']=='holding'
+        assert r.snapshot(170)['stations'][0]['state']=='stale'
+        assert r.snapshot(180)['stations'][0]['state']=='lost'
+        r.ingest(encode(replace(packet(seq=1),contact_after=64)),161)
+        assert r.snapshot(162)['stations'][0]['state']=='online'
+    finally:r.close()
+
+
+def test_collected_evidence_availability_is_visible_without_wifi_or_demo(ground):
+    c,r,w,calls=ground;r.ingest(encode(packet()))
+    c.post(f'/api/evidence/1/{EVENT}/collect')
+    calls.clear()
+    state=c.get('/api/state').json()
+    assert state['local_evidence'][0]['event_id']==EVENT
+    assert EVENT+'.webm' in state['local_evidence'][0]['files']
+    assert calls==[] and not c.get('/api/demo').json()['enabled']
+
+@pytest.mark.parametrize('sf',[7,12])
+def test_two_hours_of_paced_packets_do_not_falsely_lose_a_healthy_station(tmp_path,sf):
+    from station.lora.sender import Sender
+    from station.lora.radio import DutyBudget
+    r=Receiver(tmp_path,Radio(sf),10,20)
+    clock=[0]
+    class Link:
+        def send(self,raw,airtime):r.ingest(raw,clock[0])
+    sender=Sender(Link(),Radio(sf),DutyBudget(.01),repeat_interval=5,heartbeat_seconds=4)
+    try:
+        for now in range(7201):
+            clock[0]=now
+            if now%4==0:sender.enqueue(packet(Kind.STATUS),now)
+            if now%55==3:sender.enqueue(packet(event_id=f'{now:032x}'),now)
+            sender.tick(now)
+            assert r.snapshot(now)['stations'][0]['state'] in ('online','holding','scheduled')
+    finally:r.close()
+
+def test_announced_slow_heartbeat_is_not_mislabelled_as_duty_refusal(tmp_path):
+    r=Receiver(tmp_path,Radio(),10,20)
+    try:
+        r.ingest(encode(replace(packet(),contact_after=300)),100)
+        assert r.snapshot(130)['stations'][0]['state']=='scheduled'
+    finally:r.close()

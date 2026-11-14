@@ -1,0 +1,53 @@
+{
+  "note": "Calculated three-hour simulation, not measured RF. Rolling-hour airtime integrates packet interval overlap, including partial packets. No packet loss; originals outrank repeats/heartbeats.",
+  "runs": [
+    {
+      "sf": 7,
+      "bandwidth": 125000,
+      "coding_rate": "4/5",
+      "duty_fraction": 0.01,
+      "simulated_seconds": 10800,
+      "requested_heartbeat_seconds": 4,
+      "alerts_every_seconds": 55,
+      "calculated_slot_seconds": 12,
+      "transmissions": 901,
+      "max_rolling_hour_airtime_seconds": 25.66656,
+      "max_contact_gap_seconds": 12,
+      "last_contact_seconds": 10800,
+      "remaining_budget_seconds": 10.256384,
+      "queued_at_end": 1
+    },
+    {
+      "sf": 10,
+      "bandwidth": 125000,
+      "coding_rate": "4/5",
+      "duty_fraction": 0.01,
+      "simulated_seconds": 10800,
+      "requested_heartbeat_seconds": 4,
+      "alerts_every_seconds": 55,
+      "calculated_slot_seconds": 61,
+      "transmissions": 178,
+      "max_rolling_hour_airtime_seconds": 32.07168,
+      "max_contact_gap_seconds": 61,
+      "last_contact_seconds": 10797,
+      "remaining_budget_seconds": 4.462848,
+      "queued_at_end": 197
+    },
+    {
+      "sf": 12,
+      "bandwidth": 125000,
+      "coding_rate": "4/5",
+      "duty_fraction": 0.01,
+      "simulated_seconds": 10800,
+      "requested_heartbeat_seconds": 4,
+      "alerts_every_seconds": 55,
+      "calculated_slot_seconds": 241,
+      "transmissions": 45,
+      "max_rolling_hour_airtime_seconds": 32.07168,
+      "max_contact_gap_seconds": 241,
+      "last_contact_seconds": 10604,
+      "remaining_budget_seconds": 3.92832,
+      "queued_at_end": 197
+    }
+  ]
+}

@@ -89,7 +89,7 @@ class Receiver:
         # Late packets may fill gaps but cannot roll the current budget/status backwards.
         newest = p.boot == s['boot'] and p.sequence == (tracker.high & 65535)
         if newest:
-            s.update(boot=p.boot, remaining=p.remaining_cs/100, budget_at=now)
+            s.update(boot=p.boot, remaining=p.remaining_cs/100, budget_at=now, contact_after=p.contact_after, duty_hold=p.duty_hold)
         d = p.data
         if p.kind == Kind.STATUS and newest:
             s['status'] = dict(d, timestamp=p.timestamp)
@@ -113,7 +113,13 @@ class Receiver:
             stations = []
             for s in self.stations.values():
                 age = max(0, now-s['last_heard'])
-                item = dict(s, age=age, state='lost' if age >= self.lost_after else 'stale' if age >= self.stale_after else 'online',
+                contact = s.get('contact_after', 0)
+                stale = max(self.stale_after, contact+5 if contact else 0)
+                lost = max(self.lost_after, stale+self.lost_after-self.stale_after)
+                due_in = max(0, s.get('budget_at', s['last_heard'])+contact-now) if contact else None
+                state = 'lost' if age >= lost else 'stale' if age >= stale else ('holding' if s.get('duty_hold') else 'scheduled') if contact and age >= min(self.stale_after, contact/4) else 'online'
+                item = dict(s, age=age, state=state, next_contact_in=due_in, effective_stale_after=stale,
+                            duty_hint=s.get('remaining', 65535) < self.radio.airtime(48),
                             missed=sum(t.missed for (sid, _), t in self.trackers.items() if sid == s['id']))
                 stations.append(item)
             alerts = [dict(a, acknowledged_at=self.acks.get(key)) for key, a in self.alerts.items()]

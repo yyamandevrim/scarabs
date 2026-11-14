@@ -2,3 +2,6 @@ data/
 .venv/
 __pycache__/
 .pytest_cache/
+
+# Disposable demo/ranger evidence, ledgers and lock files
+data-*/

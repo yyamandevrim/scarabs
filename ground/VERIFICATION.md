@@ -37,6 +37,10 @@ Saved to the task-requested scratchpad `lora/` directory (outside the repository
 ## Unverified
 
 - Any real LoRa radio/modem, serial command/framing integration, PHY airtime measured on hardware, output power/antenna gain, RSSI/SNR, range and radio security. The serial adapter raises `NotImplementedError` deliberately.
-- Execution/performance on a real UNO Q, live USB cameras, real MCU/flame sensor/LED or airborne balloon installation.
+- Subsequent board status: the station ran on a real UNO Q with recorded clips, MCU bridge, responding KY-026 and on-board status LED. Validated board inference speed for the demo, USB cameras, AP mode, external RGB LED, airborne installation and real LoRa remain unverified; see ../firmware/BOARD_NOTES.md for ongoing work.
 - Every UNO Q access-point command, AP capability/driver, shared DHCP, WPA interoperability, ranger phone/laptop association and network recovery procedure. Vendor/NetworkManager documentation was checked; the board procedure was not run.
 - Final national radio implementation/conformity, deployed heading/FOV calibration, power-loss reliability of unsent work, and physical internet-disconnect testing. Prototype limitations are stated in the packet specification and station README.
+
+Rehearsal 2 update: the fast-heartbeat exhaustion described above is a historical reproduction of the pre-pacing sender. The sender now spaces legal transmissions throughout the hour and announces a bounded next-contact window; use ../DEMO.md and traffic-verification.json for current behaviour. Historical test counts above describe that dated run, not a claim about the current suite size.
+
+The completed rehearsal-2 fix record and final suite counts are in [REHEARSAL2.md](REHEARSAL2.md); calculated three-hour results are in [traffic-verification.json](traffic-verification.json).

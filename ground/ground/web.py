@@ -59,7 +59,11 @@ def create_app(receiver, wifi, listener=None):
 
     @app.get('/api/state')
     def state():
-        return receiver.snapshot()
+        state = receiver.snapshot()
+        # Local collection metadata is separate from packet-derived operational state.
+        state['local_evidence'] = [saved for a in state['alerts']
+                                   if (saved := wifi.saved(a['station'], a['event_id'])) and saved['files']]
+        return state
 
     @app.post('/api/alerts/{station}/{event}/ack')
     def acknowledge(station: int, event: str):
