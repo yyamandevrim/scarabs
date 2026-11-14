@@ -1,0 +1,156 @@
+{
+  "date": "2026-11-14",
+  "model": "Merged Overview and 360\u00b0 launch map",
+  "overview": {
+    "initialTransferredBytes": 1050571,
+    "jsHeapBytesAfterLoad": 5132972,
+    "desktopLanguage": {
+      "page": "/",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    "idleDrawsPerSecond": 0,
+    "phoneVideoPlays": true,
+    "offscreenDrawsPerSecond": 0,
+    "fullPageTransferredBytes": 1241968,
+    "phoneLanguage": {
+      "page": "/",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    "touchScrolls": true,
+    "statusReportCadenceSeconds": 12,
+    "mapLanguage": {
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    "untouchedIdleDrawsPerSecond": 0,
+    "consoleErrors": [],
+    "externalRequests": [],
+    "failedResponses": [],
+    "screenshots": [
+      "desktop-realistic-hero.png",
+      "desktop-fov-360.png",
+      "desktop-camera-2-selected.png",
+      "desktop-exploded.png",
+      "desktop-part-selected.png",
+      "wifi-step-1.png",
+      "wifi-step-2.png",
+      "wifi-step-3.png",
+      "desktop-full-page.png",
+      "phone-realistic-hero.png",
+      "phone-fov-360.png",
+      "phone-wifi.png",
+      "phone-full-page.png",
+      "desktop-lora-camera-1-before.png",
+      "desktop-lora-camera-1-during.png",
+      "desktop-lora-camera-1-after.png",
+      "desktop-lora-camera-1-evidence.png",
+      "desktop-lora-camera-2-before.png",
+      "desktop-lora-camera-2-during.png",
+      "desktop-lora-camera-2-after.png",
+      "desktop-lora-camera-2-evidence.png",
+      "phone-lora-camera-1-before.png",
+      "phone-lora-camera-1-during.png",
+      "phone-lora-camera-1-after.png",
+      "phone-lora-camera-1-evidence.png",
+      "phone-lora-camera-2-before.png",
+      "phone-lora-camera-2-during.png",
+      "phone-lora-camera-2-after.png",
+      "phone-lora-camera-2-evidence.png",
+      "desktop-no-webgl.png",
+      "map-english-header.png"
+    ]
+  },
+  "map": {
+    "checks": [
+      {
+        "page": "/map",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "page": "/map",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      }
+    ],
+    "errors": [],
+    "external": []
+  },
+  "overview_sections": {
+    "checks": [
+      {
+        "state": "desktop-top",
+        "page": "/",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "state": "desktop-map-section",
+        "image": {
+          "src": "http://127.0.0.1:56232/static/demo/map-360-desktop.webp",
+          "width": 1280,
+          "height": 800,
+          "loading": "lazy"
+        },
+        "page": "/",
+        "width": 1440,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "state": "phone-top",
+        "page": "/",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      },
+      {
+        "state": "phone-map-section",
+        "image": {
+          "src": "http://127.0.0.1:56232/static/demo/map-360-phone.webp",
+          "width": 393,
+          "height": 852,
+          "loading": "lazy"
+        },
+        "page": "/",
+        "width": 393,
+        "language": "en",
+        "toggle": false,
+        "overflow": false,
+        "externalResources": 0
+      }
+    ],
+    "errors": [],
+    "external": [],
+    "failed": []
+  },
+  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/merged",
+  "previous_full_scroll_bytes": 1184230,
+  "overview_suite": "scripts/check_overview.mjs, unchanged from main a950396; copied to external temporary npm toolchain",
+  "initial_attempt": "WebGL recovery timed out once; identical assertions passed on two subsequent runs, including the final unmodified suite."
+}

@@ -121,6 +121,11 @@ def test_language_assets_force_english_on_landing_and_map():
         assert "document.documentElement.lang='en'" in js
         assert "localStorage.setItem('language','en')" in js
         assert 'translations.json' not in js
+        assert 'window.placementText=en=>en' in js
+        translations=client.get('/static/translations.json').json()
+        assert translations['Open the launch point map']=='Kalkış noktası haritasını aç'
+        assert translations['Outside FOV']=='Görüş dışında'
+        assert translations['Occluded in FOV']=='Görüş içinde perdelenmiş'
 
 def test_warmup_compiles_production_array_layout():
     from forest_placement.warmup import warmup

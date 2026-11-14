@@ -24,7 +24,7 @@ ACORN (Aerial Canopy Observation and Reporting Node) is a portable forest observ
 - **Not yet verified:** access-point mode, the external RGB LED, real LoRa delivery, and field detection accuracy. One MicroMesh arrived but its variant and firmware remain unidentified; the link is still simulated.
 - **Simulated, not measured:** placement coverage figures are geometric estimates, not a measured detection guarantee.
 
-All three repository interfaces now default to English; Ground and Placement retain their Turkish toggles. The last recorded board deployment still had the Turkish station panel; deploying the English panel remains pending.
+All three repository interfaces now default to English; Ground retains its Turkish toggle; the Placement website (Overview and map) is English only. The last recorded board deployment still had the Turkish station panel; deploying the English panel remains pending.
 
 Supplied logo sources and offline usage are documented in [asset provenance](assets/brand/README.md).
 

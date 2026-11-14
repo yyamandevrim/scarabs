@@ -1,6 +1,6 @@
-# Verification report — 360° launch map
+# Verification report — 360° launch map and Overview
 
-Verified 2026-11-14 on macOS, Python 3.12.10. **83 placement pytest tests pass**, zero failed/skipped. One upstream Starlette/httpx deprecation warning remains. The suite includes Node presentation and DOM request-sequencing checks. Playwright uses the locally cached Chromium 1255; its npm packages were installed in a temporary directory outside the repo.
+Verified 2026-11-14 on macOS, Python 3.12.10. **85 placement pytest tests pass**, zero failed/skipped. One upstream Starlette/httpx deprecation warning remains. The suite includes Node presentation and DOM request-sequencing checks. Playwright uses the locally cached Chromium 1255; its npm packages were installed in a temporary directory outside the repo.
 
 ## Current model
 
@@ -60,11 +60,11 @@ Both sites increase. Default quick headlines round to ≈8,070 and ≈26,850 sim
 ## UI and browser verification
 
 - Compare: site A/B totals and verdict; selected-site height and detail; three per-camera forest bars. Shared tilt/VFOV, position, range and smoke height are in a disclosure. Breakdown includes scenario accounting and camera rows. Data keeps real data provenance, assumed-canopy percentage and CC BY 4.0 attribution.
-- English is forced in the shared loader, saved preference is reset to en, dictionary loading is removed, and language controls are removed. URL language parameters do not affect rendering. The server strips the legacy Overview toggle without modifying its template.
+- English is forced in the shared loader, saved preference is reset to en, dictionary loading is removed, and language controls are removed. URL language parameters do not affect rendering. Overview and map templates have no language control; the server also strips any legacy toggle.
 - Playwright checks 1440×900 default, Breakdown, Data, site B, 100 m height, and 393×852 top/scrolled and each tab. All captures were visually inspected; the full ring, inner blind boundary, sector labels, balanced dock and mobile overflow were checked. Secondary place labels yield to camera/site labels. Zero console errors and external requests.
 - `scripts/check_language.js` passes at every captured state after seeding localStorage language=tr and requesting ?lang=tr&language=tr. Tests include no obsolete pair/disconnected copy.
 - Evidence: `browser-verification.json`; screenshots under `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/map/`. Clean Overview capture: `map-preview-1440.png`. The owner copy review is one level up at `claims-for-owner-map.md`.
-- Historical public browser evidence is explicitly marked superseded in `public-browser-verification.json`. No deployment was performed. The other agent owns the rebuilt Overview template/scripts/styles; its integration must supply the updated landing copy and preview.
+- Historical public browser evidence is explicitly marked superseded in `public-browser-verification.json`. No cloud deployment was performed. Overview and map are now integrated, and the Overview map section uses responsive captures of the 360° default view.
 
 ## Reproduce
 
@@ -82,4 +82,16 @@ uv run --offline --frozen python scripts/write_report.py
 
 No measured lens calibration, field detection accuracy, smoke transport, weather, refraction or balloon/tether motion model. No building-height dataset; positive canopy cover is opaque, Luke mean height is not maximum treetop height, 5.47% of forest cells use assumed 20 m canopy, and raster years differ (NLS 2019 / CORINE 2024 / Luke 2023). Land launch validation is approximate; permission/access/tether suitability remain field checks. No physical Wi-Fi-off test or cloud deployment was performed. Investor-facing limitations text removed from the map is recorded verbatim for the owner; no replacement accuracy/range claims were added.
 
-Only this worktree uses the prepared-data symlink; writes go to its own results cache. The main server on 18787 and main checkout data were left alone. Overview-owned landing.html, landing.js and site.css were not changed. Shared integration points changed here: i18n.js and forest_placement/api.py. tokens.css and shell.js were not changed.
+Integration combines the Overview renderer, link/Wi-Fi demos, English-only brand hydration and root-only WebAssembly CSP with the 360° map. The landing map section has a real responsive WebP preview and height-based copy. Its layout and all other Overview sections are retained. Prepared rasters are read-only in this worktree; analyses write only its own results cache. The approved claims list remains in the owner scratch directory. tokens.css and shell.js are unchanged.
+
+## Merged Overview acceptance
+
+The complete `scripts/check_overview.mjs` interaction suite was rerun after integration. It retains the Overview agent’s WebGL, CAD selection, all-camera view, assembly, packet codec, LoRa/evidence, video, touch/scroll, fallback/context recovery and idle-render checks. The page-specific language/title assertions and map obsolete-copy assertions are combined in `scripts/check_language.js`.
+
+Measured initial transfer: **1,050,571 B**; full scroll + phone walkthrough: **1,241,968 B**. The previous full-scroll baseline was 1,184,230 B. The increase is **57,738 B**, within the requested ~150 KB budget. These CDP development-server measurements include HTTP headers and exclude later explicit evidence collection.
+
+Preview assets: desktop 1280×800 / 119,632 B; phone 393×852 / 41,208 B; WebP quality 78, method 6. Only the matching responsive source loads, lazily, with declared dimensions. The retired source was 61,062 B. The map-section layout and style are retained.
+
+Fresh `/` and `/map` desktop/393px checks pass with zero console errors, external requests, failed responses or horizontal overflow, and English despite Turkish storage/URL preferences. Screenshots and measurements: `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/merged/`. Overview implementation/build methods remain documented in `static/vendor/README.md`.
+
+Reproduce the full Overview suite from the repository root by copying `placement/scripts/check_overview.mjs` into the temporary npm directory and running `node TEMP/check_overview.mjs BASE_URL CHROMIUM_BINARY SCREENSHOT_DIRECTORY`. It evaluates `check_language.js` in the browser; that file is not a standalone Node CLI.
