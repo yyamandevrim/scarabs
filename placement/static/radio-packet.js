@@ -1,5 +1,5 @@
-// Same v2 network-byte-order layout, CRC and pinhole projection as station/station/lora/protocol.py.
-export const fixture={station:1,boot:42,sequence:0,timestamp:1794664071,remaining:3591,contactAfter:12,event:'af27f33e9e244d9db8f18eb4276fd1ad',box:[.369347890218099,.016594286318178532,.9924474954605103,.7687586325186271],score:.5929273962974548,heading:0,hfov:80};
+// Same v2 network-byte-order layout and CRC as station/station/lora/protocol.py.
+export const fixture={station:1,boot:42,sequence:0,timestamp:1794664071,remaining:3591,contactAfter:12,event:'af27f33e9e244d9db8f18eb4276fd1ad',box:[.369347890218099,.016594286318178532,.9924474954605103,.7687586325186271],score:.5929273962974548,heading:0,hfov:120};
 export const yaws={centre:0,right:120,left:-120};
 export const cameraNames={centre:'Camera 1',right:'Camera 2',left:'Camera 3'};
 export function bearing(camera){return (fixture.heading+yaws[camera]+360)%360;}
@@ -18,7 +18,7 @@ export function encodeStatus(sequence=0,timestamp=fixture.timestamp,uptime=100,p
 }
 
 // One current demonstration record drives the report, evidence and station panel.
-export function eventId(camera){return camera==='left'?fixture.event:fixture.event.slice(0,30)+(camera==='centre'?'01':'02');}
+export function eventId(){return fixture.event;}
 export const demo=new EventTarget();
 demo.camera='left';demo.decision=null;demo.received=false;
 demo.select=function(camera){this.camera=camera;this.decision=null;this.received=false;this.dispatchEvent(new Event('change'));};

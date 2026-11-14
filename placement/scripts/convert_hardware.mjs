@@ -32,12 +32,24 @@ const collision=new BufferGeometry();collision.setAttribute('position',new Float
 const bvh=new MeshBVH(collision,{targetLeafSize:8}),ray=new Ray(),tangent=new Vector3(),bitangent=new Vector3(),n=new Vector3(),point=new Vector3();
 function ambientColours(geo){const colours=new Float32Array(geo.attributes.position.count*3);for(let i=0;i<geo.attributes.position.count;i++){
  point.fromBufferAttribute(geo.attributes.position,i);n.fromBufferAttribute(geo.attributes.normal,i).normalize();tangent.set(0,1,0);if(Math.abs(n.y)>.9)tangent.set(1,0,0);tangent.cross(n).normalize();bitangent.crossVectors(n,tangent);ray.origin.copy(point).addScaledVector(n,.00025);let occlusion=0;
- for(let j=0;j<16;j++){const t=(j+.5)/16,r=Math.sqrt(t),a=j*2.399963229728653;ray.direction.copy(n).multiplyScalar(Math.sqrt(1-t)).addScaledVector(tangent,Math.cos(a)*r).addScaledVector(bitangent,Math.sin(a)*r);const hit=bvh.raycastFirst(ray,DoubleSide,.00015,.025);if(hit)occlusion+=1-hit.distance/.025;}
- const shade=1-.38*occlusion/16;colours.set([shade,shade,shade],i*3);
+ for(let j=0;j<32;j++){const t=(j+.5)/32,r=Math.sqrt(t),a=j*2.399963229728653;ray.direction.copy(n).multiplyScalar(Math.sqrt(1-t)).addScaledVector(tangent,Math.cos(a)*r).addScaledVector(bitangent,Math.sin(a)*r);const hit=bvh.raycastFirst(ray,DoubleSide,.00015,.018);if(hit)occlusion+=1-hit.distance/.018;}
+ // Contact finish at the actual plate seams and three arm roots, tapering over 8 mm.
+ let contact=0;
+ const taper=d=>Math.max(0,Math.min(1,(.008-d)/.005));
+ for(const angle of [0,2*Math.PI/3,-2*Math.PI/3]){
+  const radial=point.x*Math.sin(angle)+point.z*Math.cos(angle),across=point.x*Math.cos(angle)-point.z*Math.sin(angle);
+  const d=Math.hypot(Math.max(0,Math.abs(across)-.0225),Math.max(0,-.068-point.y,point.y-.02),radial-.0381);
+  contact=Math.max(contact,taper(d));
+ }
+ const seam=Math.min(Math.abs(point.y-.07),Math.abs(point.y+.0726));
+ if(Math.hypot(point.x,point.z)<.065)contact=Math.max(contact,taper(seam)*.75);
+ for(const x of [-.0055,.0055]){const d=Math.hypot(point.x-x,point.z,Math.min(Math.abs(point.y-.075),Math.abs(point.y+.075)));if(d<.01)contact=Math.max(contact,taper(Math.abs(d-.0035)));}
+ const shade=(1-.62*occlusion/32)*(1-.15*contact);colours.set([shade,shade,shade],i*3);
  }return colours;}
 const doc=new Document(),buffer=doc.createBuffer(),scene=doc.createScene();
 const body=doc.createMaterial('Matte body').setBaseColorFactor([.64,.68,.70,1]).setMetallicFactor(0).setRoughnessFactor(1);
 const arm=doc.createMaterial('Secondary plastic').setBaseColorFactor([.35,.4,.43,1]).setRoughnessFactor(.55);
+const back=doc.createMaterial('Pod back').setBaseColorFactor([.65,.68,.65,1]).setRoughnessFactor(.62);
 const face=doc.createMaterial('Camera face').setBaseColorFactor([.10,.14,.17,1]).setMetallicFactor(0).setRoughnessFactor(1);
 function primitive(parts,material){
  const positions=[];
@@ -53,8 +65,9 @@ function primitive(parts,material){
 for(const [name,parts]of Object.entries(groups)){
  const mesh=doc.createMesh(name),dark=parts.filter(([id])=>[0,147,165].includes(id)),light=parts.filter(([id])=>![0,147,165].includes(id));
  const armSurfaces=light.filter(([id])=>(id>=4&&id<=16)||(id>=131&&id<=144&&id!==139)||(id>=149&&id<=162&&id!==157));
- const shell=light.filter(item=>!armSurfaces.includes(item));
- if(shell.length)mesh.addPrimitive(primitive(shell,body));if(armSurfaces.length)mesh.addPrimitive(primitive(armSurfaces,arm));if(dark.length)mesh.addPrimitive(primitive(dark,face));
+ const backs=light.filter(([id])=>[3,139,157].includes(id));
+ const shell=light.filter(item=>!armSurfaces.includes(item)&&!backs.includes(item));
+ if(backs.length)mesh.addPrimitive(primitive(backs,back));if(shell.length)mesh.addPrimitive(primitive(shell,body));if(armSurfaces.length)mesh.addPrimitive(primitive(armSurfaces,arm));if(dark.length)mesh.addPrimitive(primitive(dark,face));
  scene.addChild(doc.createNode(name).setMesh(mesh));
 }
 await doc.transform(weld(),dedup(),quantize({quantizePosition:14,quantizeNormal:10,quantizeColor:8}));

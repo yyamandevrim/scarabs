@@ -28,7 +28,10 @@ def test_server_renders_config_identity_before_javascript():
             assert 'rel="icon" href="/static/favicon.svg"' in page
             assert client.get('/static/favicon.svg').status_code==200
             if path=='/':
-                assert page.count('data-brand-logo src=')==1
+                # One shell wordmark; the station walkthrough also uses its real app wordmark.
+                header=page.split('<main>',1)[0]
+                assert header.count('data-brand-logo src=')==1
+                assert page.count('data-brand-logo src=')==2
                 assert 'data-brand-stacked' not in page
 
 
