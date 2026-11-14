@@ -1,6 +1,11 @@
 # ACORN microcontroller: KY-026 and status LED
 
-**Board run, 2026-11-14:** the station and flashed MCU sketch ran on a real Arduino UNO Q using recorded clips, with the microcontroller bridge, responding KY-026 and on-board status LED following station state. Validated board inference speed for the demo, USB cameras, access-point mode, external RGB LED and real LoRa radio remain unverified. See [BOARD_NOTES.md](BOARD_NOTES.md) for ongoing bring-up measurements. Follow the measurement gates below before connecting signal wires. Camera events remain **suspected smoke / “Duman şüphesi”**. The local sensor reports **“Alev sensörü tetiklendi”**. Neither proves a forest fire, and the sensor never confirms a camera event.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.png">
+  <img src="../assets/brand/acorn-wordmark-black.png" width="144" height="50" alt="ACORN">
+</picture>
+
+**Board run, 2026-11-14:** the station and flashed MCU sketch ran on a real Arduino UNO Q using recorded clips and subsequently two live USB cameras, with the microcontroller bridge, responding KY-026 and on-board status LED following station state. Demo-profile inference speed was measured; access-point mode, external RGB LED and real LoRa radio remain unverified. See [BOARD_NOTES.md](BOARD_NOTES.md) for bring-up measurements and validation limits. Follow the measurement gates below before connecting signal wires. Camera events remain **suspected smoke / “Duman şüphesi”**. The local sensor reports **“Alev sensörü tetiklendi”**. Neither proves a forest fire, and the sensor never confirms a camera event.
 
 ## Install on the Arduino UNO Q — first-time checklist
 

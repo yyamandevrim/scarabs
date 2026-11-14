@@ -1,5 +1,10 @@
 # ACORN ground receiver
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../assets/brand/acorn-wordmark-white.png">
+  <img src="../assets/brand/acorn-wordmark-black.png" width="144" height="50" alt="ACORN">
+</picture>
+
 The original remote dashboard is **LoRa-only**. It is a separate FastAPI process on the operator laptop. Its operational state is decoded only from packet bytes received by **LoRa link (simulated transport)**. It neither reads the station database nor calls its API during normal viewing. The compass shows approximate directions from a configured heading, yaw and FOV; no fire location or distance is measured.
 
 English is the default; the top-right button switches to Turkish and remembers that language. Fonts and every other asset are local. No model, capture worker or inference runtime is started in this process. The local `forest-station` dependency supplies the shared codec/transport modules; its Python dependencies are installed, but detection modules are not imported by the receiver.
@@ -61,6 +66,6 @@ node --test tests/panel.test.mjs
 node --test ../ground/tests/dashboard.test.mjs
 ```
 
-Tests cover the binary boundary, CRC rejection, bearing projection, airtime vectors, rolling accounting, sender priority/repeats, UDP byte identity, de-duplication/gap repair, receipt-age states, auth sessions/lockout/fail-closed setup, off-by-default demo API gating and exact-ID offline evidence collection. The station has run on a real UNO Q with recorded clips, the MCU bridge, responding KY-026 and on-board status LED. Validated board inference speed for the demo, USB cameras, AP mode, external RGB LED and real LoRa radio remain unverified; see [BOARD_NOTES.md](../firmware/BOARD_NOTES.md) for ongoing bring-up work. Screenshots and the separate-process run observations are recorded in `VERIFICATION.md` after the local run.
+Tests cover the binary boundary, CRC rejection, bearing projection, airtime vectors, rolling accounting, sender priority/repeats, UDP byte identity, de-duplication/gap repair, receipt-age states, auth sessions/lockout/fail-closed setup, off-by-default demo API gating and exact-ID offline evidence collection. The station has run on a real UNO Q with recorded clips and subsequently two live USB cameras, the MCU bridge, responding KY-026 and on-board status LED. Demo-profile inference speed was measured; AP mode, external RGB LED and real LoRa radio remain unverified; see [BOARD_NOTES.md](../firmware/BOARD_NOTES.md) for bring-up measurements and validation limits. Screenshots and the separate-process run observations are recorded in `VERIFICATION.md` after the local run.
 
 Version 2 frames are 37–42 bytes; old version-1 journals remain readable. Bearings display whole approximate degrees, Turkish uses %54 and translated transport/status/controls. Local saved-evidence metadata is explicitly separate from packet-derived operational data and causes no station HTTP request.
