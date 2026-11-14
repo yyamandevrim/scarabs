@@ -7,3 +7,6 @@ media/
 data/
 *.local.toml
 node_modules/
+
+# Disposable demo/ranger evidence, ledgers and lock files
+data-*/
