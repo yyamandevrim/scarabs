@@ -1,0 +1,653 @@
+{
+  "date": "2026-11-14",
+  "checks": [
+    {
+      "name": "desktop-default",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-site-b",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-updating",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-shared-30",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-detail",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-heights",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-breakdown",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-data",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-drawing-start",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-drawing-ready",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-priority-results",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "desktop-priority-cleared",
+      "page": "/map",
+      "width": 1440,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-default",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-site-b",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-updating",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-shared-30",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-detail",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-heights",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-breakdown",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-data",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-drawing-start",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-drawing-ready",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-priority-results",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-priority-map",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    },
+    {
+      "name": "phone-priority-cleared",
+      "page": "/map",
+      "width": 393,
+      "language": "en",
+      "toggle": false,
+      "overflow": false,
+      "externalResources": 0
+    }
+  ],
+  "normalConsoleErrors": [],
+  "externalRequests": [],
+  "failedResponses": [],
+  "recovery": {
+    "expectedNetworkErrors": [
+      "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "Failed to load resource: net::ERR_FAILED"
+    ],
+    "configReads": 3,
+    "pageNavigations": 1,
+    "readyWithoutReload": true,
+    "refreshedPresets": true,
+    "method": "Owned uvicorn process killed mid-request and restarted on its own random port. Response fixture changes config preset names/default height/data fingerprint after restart; analysis remains the actual local engine. Main port 18787 untouched."
+  },
+  "screenshots": "/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round3-map",
+  "previewAssets": [
+    {
+      "path": "static/demo/map-360-desktop.webp",
+      "width": 1280,
+      "height": 800,
+      "bytes": 96776
+    },
+    {
+      "path": "static/demo/map-360-phone.webp",
+      "width": 393,
+      "height": 852,
+      "bytes": 39096
+    }
+  ],
+  "pytest": "85 passed; one upstream Starlette/httpx deprecation warning",
+  "overviewRegression": {
+    "browsers": [
+      {
+        "browser": "chromium",
+        "version": "159.0.8154.6",
+        "width": 1440,
+        "webgl": true,
+        "camera3": true,
+        "reset": true,
+        "idleDrawsPerSecond": 0
+      },
+      {
+        "browser": "chromium",
+        "version": "159.0.8154.6",
+        "width": 393,
+        "webgl": true,
+        "camera3": true,
+        "reset": true,
+        "idleDrawsPerSecond": 0
+      },
+      {
+        "browser": "firefox",
+        "version": "159.0",
+        "width": 1440,
+        "webgl": true,
+        "camera3": true,
+        "reset": true,
+        "idleDrawsPerSecond": 0
+      },
+      {
+        "browser": "firefox",
+        "version": "159.0",
+        "width": 393,
+        "webgl": true,
+        "camera3": true,
+        "reset": true,
+        "idleDrawsPerSecond": 0
+      },
+      {
+        "browser": "webkit",
+        "version": "27.2",
+        "width": 1440,
+        "webgl": true,
+        "camera3": true,
+        "reset": true,
+        "idleDrawsPerSecond": 0
+      },
+      {
+        "browser": "webkit",
+        "version": "27.2",
+        "width": 393,
+        "webgl": true,
+        "camera3": true,
+        "reset": true,
+        "idleDrawsPerSecond": 0
+      }
+    ],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "externalRequests": [],
+    "selfOnlyCspRenders": true,
+    "tests": {
+      "touchAndWheel": true,
+      "allCameras": true,
+      "reset": true,
+      "confirmAndReject": true,
+      "evidenceDialog": true,
+      "videoPlaybackAndPause": true,
+      "statusSlotsSeconds": 12
+    }
+  },
+  "analysisRequests": [
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 30,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 30,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 30,
+      "resolution": "detailed",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 30,
+      "resolution": "detailed",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "detailed",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "detailed",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 100,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 100,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 500,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 500,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 700,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 700,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 4
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 4
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 30,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 30,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 30,
+      "resolution": "detailed",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 30,
+      "resolution": "detailed",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "detailed",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "detailed",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 100,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 100,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 500,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 500,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 700,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 700,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 3
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 3
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Forest \u00b7 Sipoonkorpi",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.32,
+      "lon": 25.19,
+      "priorityVertices": 0
+    },
+    {
+      "name": "Inland \u00b7 Nuuksio",
+      "height": 600,
+      "resolution": "coarse",
+      "lat": 60.293,
+      "lon": 24.557,
+      "priorityVertices": 0
+    }
+  ]
+}

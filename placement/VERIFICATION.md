@@ -1,6 +1,6 @@
 # Verification report — 360° launch map and Overview
 
-The Overview improvement round 2 is verified separately in [OVERVIEW_VERIFICATION.md](OVERVIEW_VERIFICATION.md), including three-engine rendering, media controls, measurements and review dispositions. The map findings below are retained.
+The Overview improvement round 2 is verified separately in [OVERVIEW_VERIFICATION.md](OVERVIEW_VERIFICATION.md), including three-engine rendering, media controls, measurements and review dispositions. The model/numeric findings below are retained. Current map UI and recovery acceptance is in [MAP-ROUND3.md](MAP-ROUND3.md); earlier browser captures are historical.
 
 Verified 2026-11-14 on macOS, Python 3.12.10. **85 placement pytest tests pass**, zero failed/skipped. One upstream Starlette/httpx deprecation warning remains. The suite includes Node presentation and DOM request-sequencing checks. Playwright uses the locally cached Chromium 1255; its npm packages were installed in a temporary directory outside the repo.
 
@@ -61,7 +61,7 @@ Both historical sites increase. The round-two defaults are Sipoonkorpi (≈19,46
 
 ## UI and browser verification
 
-- Compare: site A/B totals and verdict; selected-site height and detail; three per-camera forest bars. Shared tilt/VFOV, position, range and smoke height are in a disclosure. Breakdown includes scenario accounting and camera rows. Data keeps real data provenance, assumed-canopy percentage and CC BY 4.0 attribution.
+- Compare: site A/B totals and verdict; shared height and detail; three per-camera forest bars. Shared tilt/VFOV, position, range and smoke height are in a disclosure. Breakdown includes scenario accounting and camera rows. Data keeps real data provenance, assumed-canopy percentage and CC BY 4.0 attribution.
 - English is forced in the shared loader, saved preference is reset to en, dictionary loading is removed, and language controls are removed. URL language parameters do not affect rendering. Overview and map templates have no language control; the server also strips any legacy toggle.
 - Playwright checks 1440×900 default, Breakdown, Data, site B, 100 m height, and 393×852 top/scrolled and each tab. All captures were visually inspected; the full ring, inner blind boundary, sector labels, balanced dock and mobile overflow were checked. Secondary place labels yield to camera/site labels. Zero console errors and external requests.
 - `scripts/check_language.js` passes at every captured state after seeding localStorage language=tr and requesting ?lang=tr&language=tr. Tests include no obsolete pair/disconnected copy.
@@ -107,3 +107,7 @@ The desktop view shows both complete ring perimeters; the selected raster is min
 The height audit, live benchmark and production timings were regenerated for Sipoonkorpi and Nuuksio. The 600 m default is retained; the zero high-altitude smoke occlusion is expected from the unchanged model, and low-height controls still show strong occlusion. No numbers were invented and no new public caveats were added.
 
 The Overview preview sources were re-exported at the same 1280×800 / 393×852 dimensions and filenames. Overview templates, scripts and styles were not edited during this polish round. Evidence screenshots are under `/private/tmp/claude-501/-Users-yamandevrim--t3-projects-junction/2d00c443-8aa2-4c2c-af46-792d4247fcf0/scratchpad/overview/round2-map/`.
+
+## Round-three map acceptance
+
+See [MAP-ROUND3.md](MAP-ROUND3.md) and `map-round3-verification.json` for per-finding dispositions, 25 desktop/phone states, the real owned-server interruption/restart test and refreshed same-size map previews. Height and detail are shared; the verdict is withheld for dirty or mixed-resolution/height results. Normal browser traffic has zero errors, failed responses, external requests or horizontal overflow. Expected network failures in the deliberate outage are recorded separately. No engine/backend Python source changed, so the main server does not require a restart.
