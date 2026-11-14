@@ -21,3 +21,5 @@
 .radio-link>span{flex:none;max-width:190px;line-height:1.6}.radio-link small{display:block;font:10px/1.6 var(--font-mono);color:var(--text-3)}.status-report{font:11px/1.7 var(--font-mono);color:var(--text-2);padding:10px 0;border-top:1px solid var(--line)}
 .phone-screen{height:560px;min-height:0;display:block}.phone-screen img,.phone-screen video{width:100%;height:100%;object-fit:contain}.phone-screen img.feed-crop{object-fit:cover}.phone-screen:has(.feed-crop)::after{content:'Camera view · Wi-Fi';position:absolute;bottom:18px;left:16px;font:11px var(--font-mono);padding:5px 7px;background:var(--bg-0);color:var(--text-2)}
 @media(max-width:760px){.phone-screen{height:530px;min-height:0}.radio-link>span{font-size:10px;max-width:110px}.radio-link small{font-size:9px}.radio-link{gap:8px}.hardware-demo .model-stage{margin-bottom:68px}.hero-copy{padding-top:26px}}
+
+@media(min-width:761px){.model-stage.fallback .part-labels{position:absolute;left:20px;right:20px;bottom:38px;display:flex;justify-content:center;gap:20px}.model-stage.fallback .part-label{position:static;visibility:visible}.model-stage.fallback .part-label span{display:none}}

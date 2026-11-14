@@ -27,7 +27,7 @@
   if(!list.children.length)list.append(Object.assign(document.createElement('li'),{className:'muted',textContent:'Data unavailable'}));
  }).catch(()=>{$('sources').replaceChildren(Object.assign(document.createElement('li'),{className:'muted',textContent:'Data unavailable'}));});
  // Defer the entire 3D bundle until after the first painted frame, including restored pages.
- const fail=()=>{$('model-canvas').tabIndex=-1;$('model-fallback').hidden=false;$('drag-hint').hidden=true;$('model-stage').classList.remove('ready');};
+ const fail=()=>{$('model-canvas').tabIndex=-1;$('model-fallback').hidden=false;$('drag-hint').hidden=true;$('model-stage').classList.remove('ready');$('model-stage').classList.add('fallback');};
  requestAnimationFrame(()=>requestAnimationFrame(()=>{
   import('/static/vendor/landing-3d.js').then(module=>module.mountModel({selectPart})).then(api=>{viewer=api;for(const id of ['fov-toggle','explode-toggle','reset-model'])$(id).disabled=false;}).catch(fail);
  }));
