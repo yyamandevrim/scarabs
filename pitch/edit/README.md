@@ -22,12 +22,12 @@ Both films: 1920×1080, square pixels, 16:9, 30 fps, H.264/yuv420p. They are sil
 
 ## Current edit and provenance
 
-The master remains 20 shots. **17 are filled; 04, 13 and 20 are labelled placeholders.** In the social cut 04 and 20 remain placeholders. Replacement paths and required pictures:
+The master remains 20 shots. **19 are filled; only 20 is a labelled placeholder.** The social cut also retains only 20 as a placeholder. Replacement paths and required pictures:
 
 | Shot | Local replacement | Needs |
 |---|---|---|
-| 04 | `pitch/edit/media/shot-04-station-concept.mp4` | Six-second inert generic station concept; Illustration / not deployed. Current generated flying/solar hardware does not fit. |
-| 13 | `pitch/edit/media/shot-13-occluding-ridge.mp4` | Five-second view of a ridge visibly obscuring forest; Illustration. |
+| 04 | `pitch/photos/concept-illustration-station-ridge.png` | Selected inert tripod concept; six-second 100→103% push; Illustration / Station concept · not deployed. |
+| 13 | `pitch/photos/concept-illustration-occluding-ridge.png` | Selected occluding granite shoulder; five-second 100→103% push; Illustration. |
 | 20 | `pitch/edit/media/shot-20-prototype.jpg` | Genuine landscape assembly photograph showing board, hub, both cameras and local sensor. Record date/setup; no generated substitute. |
 
 Shots **01/02/03/16** use hardware-free forest/sky crops of `pitch/photos/concept-illustration-station-medium-v2.png`, with a restrained 100→103% push and persistent **Illustration** captions. The balloon, solar panels and generated enclosure are outside each crop; no deployment/energy claim is made. Other concept stills are preserved as context assets, not hardware evidence.
@@ -48,7 +48,7 @@ B2's native evidence plays before the first confirmation (confirmed at t=6.432 s
 
 Every accepted framed clip was fully decoded. Both final films are checked for dimensions, fps, duration, frame count and missing audio; every shot has a midpoint extracted and visually reviewed. Arrival/playback/decision/toggle/map transitions receive additional state checks. PDF/HTML deck checks are in `../deck/README.md`. Verification artefacts stay local in ignored output directories.
 
-The edit is still a rough cut: no narration/music, and three missing pictures. Shot 20 is the weakest because the physical prototype ending lacks its essential real photograph. Fine app text remains small in paired scenes; the exterior English captions carry the claims and the full-screen deck/demo supplies detail. Slide 3 is the weakest slide because its documented architecture is accompanied by a laptop capture, without a hardware photograph. No field accuracy/range, night response, complete cost, demand or endurance figure has been invented. Board centre-crop screen replay (0.62–0.76 peak scores) is separately documented evidence, not the laptop source used in these films.
+The edit is still a rough cut: no narration/music, and one missing picture. Shot 20 is the weakest because the physical prototype ending lacks its essential real photograph. Fine app text remains small in paired scenes; the exterior English captions carry the claims and the full-screen deck/demo supplies detail. Slide 3 is the weakest slide because its documented architecture is accompanied by a laptop capture, without a hardware photograph. No field accuracy/range, night response, complete cost, demand or endurance figure has been invented. Board centre-crop screen replay (0.62–0.76 peak scores) is separately documented evidence, not the laptop source used in these films.
 
 ## Credits to accompany both videos
 

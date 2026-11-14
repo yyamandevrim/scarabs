@@ -1,6 +1,6 @@
 # ACORN — shot and sound package
 
-**Current production:** English takes and the built deck supersede the earlier text-only capture plan below. See [capture index](captures/README.md), [film assembly](edit/README.md) and [deck](deck/README.md). Remaining picture gaps: 04, 13, 20.
+**Current production:** English takes and the built deck supersede the earlier text-only capture plan below. See [capture index](captures/README.md), [film assembly](edit/README.md) and [deck](deck/README.md). Remaining picture gap: 20.
 Master: **20 shots / 114 seconds**. Sources: **13 MOCKUP / 6 GENERATED / 1 REAL**. Before: **6 REAL / 8 SCREEN / 6 GENERATED**. MOCKUP is a real running-app capture inside a generic device frame, never a recreated interface. No raw SCREEN shots remain. The social cut reuses 01, 06, 08, 10, 14, 04 and 20. This file gives later production instructions only; no media has been made.
 
 ## One visual family
@@ -125,4 +125,4 @@ All current product takes are English, recorded from a fresh clone of pushed `or
 
 Detection claims follow `DEMO.md`: dense daytime smoke filling the camera view worked live on UNO Q with centre crop, three loops and peak scores 0.62–0.76; arbitrary news footage is not a reliable trigger. The new film's file-source inference is a laptop demonstration, separate from that board run. No accuracy/range/endurance claim is added.
 
-Current production overrides earlier text-only handoff language. Hardware-free crops from the existing concept illustration supply forest context in shots 01/02/03/16, with Illustration captions and slow push-ins. Shots 04 and 13 retain labelled cards because the flying/solar concepts do not fit an inert ridge station or a clearly occluding ridge. Shot 20 still needs a genuine assembly photograph. Never substitute the generated hardware. Film renders remain silent with English script subtitles pending recorded narration/music.
+Current production overrides earlier text-only handoff language. Hardware-free crops from the existing concept illustration supply forest context in shots 01/02/03/16, with Illustration captions and slow push-ins. Shots 04 and 13 now use matching generated inert-tripod and occluding-ridge stills, with Illustration captions and slow push-ins. Shot 20 still needs a genuine assembly photograph. Never substitute the generated hardware. Film renders remain silent with English script subtitles pending recorded narration/music.

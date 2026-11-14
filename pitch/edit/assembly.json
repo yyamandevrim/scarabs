@@ -124,7 +124,7 @@
           "duration": 6,
           "sources": [
             {
-              "file": "pitch/edit/media/shot-04-station-concept.mp4",
+              "file": "pitch/photos/concept-illustration-station-ridge.png",
               "in_seconds": 0,
               "out_seconds": 6
             }
@@ -497,7 +497,7 @@
           "duration": 5,
           "sources": [
             {
-              "file": "pitch/edit/media/shot-13-occluding-ridge.mp4",
+              "file": "pitch/photos/concept-illustration-occluding-ridge.png",
               "in_seconds": 0,
               "out_seconds": 5
             }

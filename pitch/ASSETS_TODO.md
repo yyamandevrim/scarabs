@@ -15,8 +15,8 @@ Updated 2026-11-14. Master: 20 shots / 114 seconds; social: 30 seconds. [English
 
 ## Pictures still needed
 
-- [ ] **04:** six-second inert generic station concept. Current flying/solar illustration does not fit. Caption Illustration · not deployed.
-- [ ] **13:** five-second ridge visibly obscuring forest, keeping the map's visibility question clear. Caption Illustration.
+- [x] **04:** inert tripod concept illustration selected from two variants; slow push, Illustration · Station concept · not deployed.
+- [x] **13:** occluding ridge illustration selected from two variants; slow push, Illustration.
 - [ ] **20:** a genuine landscape assembly photograph of board, hub, two cameras and local sensor. Record date/setup; no private screen in the background. A still can establish physical assembly, not operation. No generated substitute. This is the weakest film shot; its absence also weakens slide 3.
 
 Deck 3/9 currently use the genuine Station overview; 8 uses Placement and 7 uses evidence rows. These are openly described substitutes for the missing hardware photograph, not purported hardware evidence.
@@ -25,7 +25,7 @@ Deck 3/9 currently use the genuine Station overview; 8 uses Placement and 7 uses
 
 - [ ] Record the exact timed English narration for each cut. Current exports are silent with subtitles.
 - [ ] Supply cleared quiet music if wanted, with explicit licence/credits. No invented hardware/transmission sound.
-- [ ] Replace the three cards, rerender, inspect all shots and retain source credits. Keep annotations and time cuts honest.
+- [ ] Replace the remaining hardware card, rerender, inspect all shots and retain source credits. Keep annotations and time cuts honest.
 
 ## Evidence placeholders remain open
 

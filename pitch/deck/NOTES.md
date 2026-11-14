@@ -66,7 +66,7 @@ Evidence: `placement/brand.json`, root `README.md`, `docs/ARDUINO_UNO_Q.md`, `do
 
 ## Credits and visual provenance
 
-Forest images: generated concept-illustration-station-medium-v2.png, hardware-free crops; context only. No hardware photograph is supplied.
+Forest images: generated concept-illustration-station-medium-v2.png, hardware-free crops; context only. Film shots 04/13 use concept-illustration-station-ridge.png and concept-illustration-occluding-ridge.png. DECK.md assigns neither picture to a slide; slide visuals remain as specified. No hardware photograph is supplied.
 Product stills: 2026-11-14 English running-app recordings, fresh origin/main; own generic device frames. Phone arrival may also appear in the film as a separately credited Screeny export. See ../captures/README.md for capture provenance and chronology.
 Smoke footage inside the interface: “Wildfire Near Monserrate”, Peter Angritt / Mrtony77 (2015), CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Wildfire_Near_Monserrate.ogv. Fog: “Fog covering mountain time lapse”, Athulvis, CC BY-SA 4.0 (Commons external licence review pending), https://commons.wikimedia.org/wiki/File:Fog_covering_mountain_time_lapse.webm. Annotated/edited screenshots retain these credits; https://creativecommons.org/licenses/by-sa/4.0/.
 Map: NLS Finland / Syke / Luke, CC BY 4.0. Model: Pyronear YOLO11s ONNX, AGPL-3.0; not trained by the team. Type: IBM Plex Sans, SIL OFL (OFL-IBM-Plex-Sans.txt).
