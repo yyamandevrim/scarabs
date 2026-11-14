@@ -51,3 +51,7 @@ artifacts/
 # Partial downloads and temporary runtime output
 *.tmp
 *.part
+
+# Local Screeny handoff: recordings, frame checks and private capture logs
+pitch/captures/*
+!pitch/captures/README.md
