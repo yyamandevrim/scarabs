@@ -152,3 +152,13 @@ test('Wi-Fi status authentication failure clears saved media as well as live fra
  p.$('.wifi-feeds').open=true;p.$('.wifi-feeds').dispatchEvent(new p.w.Event('toggle'));await flush();
  assertOff(p);
 });
+test('a real radio that is not ready marks the transport label as failed',async()=>{
+ const p=await dashboard();
+ assert.equal(p.$('#transport-label').classList.contains('lost'),false);
+ p.state.transport='LoRa link (Meshtastic radio · radio absent)';p.state.link={transport:'meshtastic',state:'absent',ready:false};
+ await p.poll();
+ assert.equal(p.$('#transport-label').textContent,'LoRa link (Meshtastic radio · radio absent)');
+ assert.equal(p.$('#transport-label').classList.contains('lost'),true);
+ p.state.link={transport:'meshtastic',state:'ready',ready:true};await p.poll();
+ assert.equal(p.$('#transport-label').classList.contains('lost'),false);
+});

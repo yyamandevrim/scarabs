@@ -50,7 +50,8 @@ def create_app(station, manage_lifecycle=True):
 
     @app.get("/api/status")
     def status():
-        return station.status()
+        # LoRa link state rides along without touching the runtime status builder.
+        return {**station.status(), "lora": station.lora.radio_status()}
 
     @app.get("/api/events")
     def events(kind: Literal["smoke", "flame_sensor", "all"] = "smoke"):
@@ -99,7 +100,8 @@ def create_app(station, manage_lifecycle=True):
         link = station.lora
         sender = link.sender
         return {"station_id": station.config.lora.station_id, "role": "Ranger Wi-Fi full-detail panel",
-                "link": {"enabled": sender is not None, "transport": link.link.label if sender else "disabled",
+                "radio": link.radio_status(),
+                "link": {"enabled": link.link is not None, "transport": link.link.label if link.link is not None else "disabled",
                          "sent": sender.sent if sender else 0, "duty_refusals": sender.refused if sender else 0,
                          "queued": len(sender.queue) if sender else 0, "queue_drops": sender.dropped if sender else 0,
                          "error": link.error,

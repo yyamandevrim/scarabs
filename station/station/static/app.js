@@ -135,6 +135,19 @@ function updateCoverage() {
     warning.replaceChildren(text('strong', `${title} · ${receiving.length}/${active.length} inputs`), text('span', reason));
   }
 }
+// Real radios show their read-back state; nothing but "radio connected" looks healthy.
+function renderRadio(lora) {
+  const element = $('#lora-link');
+  if (!lora || typeof lora !== 'object' || !lora.label) { element.hidden = true; return; }
+  element.hidden = false;
+  const real = lora.transport === 'meshtastic';
+  const parts = [lora.label];
+  if (real && lora.ready) parts.push(`${lora.region} · ${lora.sub_band} MHz · delivery not confirmed`);
+  else if (real && lora.detail) parts.push(lora.detail);
+  if (lora.error) parts.push(lora.error);
+  element.textContent = parts.join(' · ');
+  element.className = real && !lora.ready || lora.error ? 'lost' : '';
+}
 function renderStatus(status) {
   const active = status.cameras.filter(camera => camera.active);
   $('#cameras').querySelectorAll('.loading').forEach(element => element.remove());
@@ -165,6 +178,7 @@ function renderStatus(status) {
     ? `Model ${profile.input_size}px · confidence threshold ${parameter(profile.confidence * 100)}% · target ${parameter(profile.interval_seconds)} s/camera · event timeout ${parameter(profile.event_timeout_seconds)} s`
     : '';
   renderModule(status.mcu);
+  renderRadio(status.lora);
   $('#measured-on').textContent = status.measured_on?.label || 'Measurement device unavailable';
   updateCoverage();
 }

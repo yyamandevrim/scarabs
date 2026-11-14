@@ -79,3 +79,10 @@ repeats = 2  # two repeats after the original, all charged to the budget
 repeat_seconds = 30
 loss = 0.0
 airtime_delay = true
+# Real Meshtastic node (implemented, never run on hardware; see LORA_HARDWARE.md).
+# Put these only in an ignored *.local.toml; region/PHY/sub-band are read from
+# the node and the sf/bandwidth/sub_band/frequency lines above are then unused.
+# transport = "meshtastic"
+# mesh_port = "/dev/cu.usbmodemXXXX"  # from `ls /dev/cu.*`; or mesh_ble = "address"
+# mesh_channel_index = 1  # a private channel configured on the node
+# mesh_hop_limit = 0

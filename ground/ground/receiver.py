@@ -45,7 +45,8 @@ class Receiver:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
         self.radio, self.stale_after, self.lost_after = radio, stale_after, lost_after
-        self.transport_label = transport_label
+        self._label = transport_label
+        self.link = None  # set by Listener; a real radio reports its live state
         self.lock = RLock()
         self.stations = {}
         self.alerts = {}
@@ -60,6 +61,18 @@ class Receiver:
         self.acks = {(s, e): at for s, e, at in self.db.execute('SELECT * FROM acknowledgements')}
         for received, raw in self.db.execute('SELECT received,raw FROM packets ORDER BY id'):
             self._apply(decode(raw), received, len(raw))
+
+    @property
+    def transport_label(self):
+        return self.link.label if self.link is not None else self._label
+
+    @transport_label.setter
+    def transport_label(self, label):
+        self._label = label
+
+    def link_status(self):
+        status = getattr(self.link, 'status', None)
+        return status() if callable(status) else None
 
     def ingest(self, raw, now=None):
         now = time.time() if now is None else now
@@ -132,7 +145,7 @@ class Receiver:
                 stations.append(item)
             alerts = [dict(a, acknowledged_at=self.acks.get(key)) for key, a in self.alerts.items()]
             return dict(stations=stations, alerts=sorted(alerts, key=lambda a: a['timestamp'], reverse=True), invalid_packets=self.invalid,
-                        radio=asdict(self.radio), transport=self.transport_label)
+                        radio=asdict(self.radio), transport=self.transport_label, link=self.link_status())
 
     def acknowledge(self, station, event, now=None):
         key = (station, event)
@@ -152,6 +165,7 @@ class Listener:
     def __init__(self, receiver, link):
         self.receiver, self.link = receiver, link
         self.receiver.transport_label = link.label
+        self.receiver.link = link
         self.stop_event = Event()
         self.thread = Thread(target=self.run, name='lora-receiver', daemon=True)
         self.error = None
@@ -160,6 +174,11 @@ class Listener:
         while not self.stop_event.is_set():
             try:
                 raw = self.link.receive()
+                # A real node's read-back PHY replaces the configured one for airtime.
+                radio = getattr(self.link, 'radio', None)
+                if radio is not None and radio != self.receiver.radio:
+                    with self.receiver.lock:
+                        self.receiver.radio = radio
                 if raw is not None:
                     self.receiver.ingest(raw)
             except Exception as exc:

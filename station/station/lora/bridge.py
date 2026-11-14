@@ -32,6 +32,13 @@ class LoraConfig:
     payload_limit: int = 48
     seed: int | None = None
     serial_port: str = ''
+    # transport = "meshtastic": PHY, region and sub-band are read from the node.
+    mesh_port: str = ''  # USB serial device of the node (local config only)
+    mesh_ble: str = ''  # alternatively a BLE address
+    mesh_channel_index: int = 0
+    mesh_hop_limit: int = 0
+    mesh_destination: str = '^all'
+    mesh_retry_seconds: float = 5.
 
     def __post_init__(self):
         radio = Radio(self.sf, self.bandwidth, self.coding_rate)
@@ -42,8 +49,10 @@ class LoraConfig:
             raise ValueError('Invalid station ID or configured heading')
         if self.heartbeat_seconds < 2 or not 0 <= self.loss <= 1 or not 0 <= self.repeats <= 3 or self.repeat_seconds < 1 or not 42 <= self.payload_limit <= 48:
             raise ValueError('Invalid LoRa queue/link configuration')
-        if self.transport not in ('simulated', 'serial'):
+        if self.transport not in ('simulated', 'serial', 'meshtastic'):
             raise ValueError('Unknown LoRa transport')
+        if self.transport == 'meshtastic' and bool(self.mesh_port) == bool(self.mesh_ble):
+            raise ValueError('Meshtastic transport needs exactly one of mesh_port or mesh_ble')
 
 class LoraBridge:
     def __init__(self, station):
@@ -59,13 +68,46 @@ class LoraBridge:
         self.decision_cursor = None
         self.error = None
         self.next_heartbeat = 0
+        self.sender = None
+        self.link = None
         if not c.enabled:
-            self.sender = None
+            return
+        if c.transport == 'meshtastic':
+            # Sender waits for the node's real region/PHY; see attach_radio().
+            from .mesh import MeshtasticLink
+            self.link = MeshtasticLink(port=c.mesh_port, ble=c.mesh_ble, channel_index=c.mesh_channel_index,
+                                       hop_limit=c.mesh_hop_limit, destination=c.mesh_destination,
+                                       retry_seconds=c.mesh_retry_seconds)
             return
         self.link = SimulatedLink(peer=(c.peer_host, c.peer_port), loss=c.loss, delay=c.airtime_delay, payload_limit=c.payload_limit, seed=c.seed) if c.transport == 'simulated' else SerialModem(c.serial_port, sf=c.sf, bandwidth=c.bandwidth, coding_rate=c.coding_rate, frequency=c.frequency)
         self.sender = Sender(self.link, Radio(c.sf, c.bandwidth, c.coding_rate),
                              DutyBudget(c.duty_fraction, path=station.config.data_dir/'lora-duty.json'),
                              c.repeats, c.repeat_seconds, heartbeat_seconds=c.heartbeat_seconds)
+
+    def attach_radio(self):
+        """Build the sender from the node's read-back band once; refuse a changed PHY."""
+        link, c = self.link, self.config
+        status = link.status()
+        if not status['ready']:
+            return False
+        if self.sender is not None:
+            if self.sender.radio != link.radio:
+                raise RuntimeError('Meshtastic PHY changed since start; restart the station to re-account airtime')
+            return True
+        if c.duty_fraction > status['duty_limit']:
+            raise RuntimeError(f"duty_fraction exceeds the {status['sub_band']} MHz sub-band limit")
+        # One ledger per real sub-band, separate from the simulated ledger.
+        path = self.station.config.data_dir/f"lora-duty-meshtastic-{status['sub_band']}.json"
+        self.sender = Sender(link, link.radio, DutyBudget(c.duty_fraction, path=path),
+                             c.repeats, c.repeat_seconds, heartbeat_seconds=c.heartbeat_seconds)
+        return True
+
+    def radio_status(self):
+        """Displayed link state; never reports a healthy real radio it has not read back."""
+        if self.link is None:
+            return None
+        status = self.link.status() if hasattr(self.link, 'status') else dict(transport=self.config.transport, state='simulated', ready=True, label=self.link.label)
+        return dict(status, error=self.error)
 
     def packet(self, kind, now, data):
         return Packet(kind, self.config.station_id, self.boot, 0, int(now), data=data)
@@ -106,12 +148,14 @@ class LoraBridge:
         self.sender.enqueue(self.packet(Kind.STATUS, now, d), now)
 
     def start(self):
-        if not self.sender:
+        if self.link is None:
             return
         self.thread = Thread(target=self.run, name='lora-outbox', daemon=True)
         self.thread.start()
 
     def step(self, now):
+        if hasattr(self.link, 'status') and not self.attach_radio():
+            return None  # radio absent/refused: events stay unseen and are scanned once ready
         self.poll(now)
         if now >= self.next_heartbeat:
             self.heartbeat(now)
@@ -136,5 +180,5 @@ class LoraBridge:
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=15)
-        if self.sender:
+        if self.link is not None:
             self.link.close()

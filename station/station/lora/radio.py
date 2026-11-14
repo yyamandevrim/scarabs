@@ -5,8 +5,14 @@ import math
 from pathlib import Path
 
 # ERC/REC 70-03 Annex 1 h1.5, h1.6, h1.7, h1.9 (duty-cycle path, not LBT).
+# Annex 1 g1: 433.05-434.79 MHz, 10 mW e.r.p., <= 10% duty cycle.
 BANDS = {'868.0-868.6': (868.0, 868.6, .01), '868.7-869.2': (868.7, 869.2, .001),
-         '869.4-869.65': (869.4, 869.65, .1), '869.7-870.0': (869.7, 870., .01)}
+         '869.4-869.65': (869.4, 869.65, .1), '869.7-870.0': (869.7, 870., .01),
+         '433.05-434.79': (433.05, 434.79, .1)}
+
+def sub_band_for(low, high):
+    """The single listed sub-band containing the whole occupied span, else None."""
+    return next((name for name, (start, end, _) in BANDS.items() if start-1e-9 <= low and high <= end+1e-9), None)
 
 @dataclass(frozen=True)
 class Radio:
@@ -14,13 +20,17 @@ class Radio:
     bandwidth: int = 125000
     coding_rate: int = 1  # 1..4 means 4/5..4/8
     preamble: int = 8
+    overhead: int = 0  # bytes another protocol adds on air around ACORN's payload
 
     def __post_init__(self):
-        if self.sf not in range(7, 13) or self.bandwidth not in (125000, 250000, 500000) or self.coding_rate not in range(1, 5) or self.preamble < 6:
+        if self.sf not in range(7, 13) or self.bandwidth not in (125000, 250000, 500000) or self.coding_rate not in range(1, 5) or self.preamble < 6 or not 0 <= self.overhead <= 200:
             raise ValueError('Unsupported radio parameters')
 
     def airtime(self, size):
         if not 0 <= size <= 255:
+            raise ValueError('Invalid payload length')
+        size += self.overhead
+        if size > 255:
             raise ValueError('Invalid payload length')
         symbol = 2**self.sf/self.bandwidth
         de = int(symbol >= .016)  # automatic low-data-rate optimisation

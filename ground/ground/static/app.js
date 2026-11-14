@@ -20,6 +20,7 @@ function station(){return current?.stations.find(s=>s.id===selectedStation);}
 function alerts(){return (current?.alerts||[]).filter(a=>a.station===selectedStation);}
 function render(){
  $('transport-label').textContent=P.transport(current.transport,language);
+ $('transport-label').classList.toggle('lost',!!current.link&&!current.link.ready);
  document.querySelector('.workspace').setAttribute('aria-label',language==='tr'?'LoRa gözlemleri':'LoRa observations');
  $('language').setAttribute('aria-label',t('changeLanguage'));$('station-select').setAttribute('aria-label',t('station'));$('compass').setAttribute('aria-label',t('compassLabel'));
  const all=current.stations;

@@ -9,11 +9,14 @@ from .wifi import Wifi
 from .web import create_app
 
 def main():
-    p = argparse.ArgumentParser(description='ACORN LoRa link (simulated transport) ground receiver')
+    p = argparse.ArgumentParser(description='ACORN LoRa ground receiver (simulated transport by default)')
     p.add_argument('--host', default='127.0.0.1')
     p.add_argument('--port', type=int, default=8092)
-    p.add_argument('--transport', choices=('simulated', 'serial'), default='simulated')
+    p.add_argument('--transport', choices=('simulated', 'serial', 'meshtastic'), default='simulated')
     p.add_argument('--serial-port', default='')
+    p.add_argument('--mesh-port', default=os.environ.get('ACORN_MESH_PORT', ''), help='Meshtastic node USB serial device')
+    p.add_argument('--mesh-ble', default='', help='Meshtastic node BLE address instead of a serial port')
+    p.add_argument('--mesh-channel-index', type=int, default=0)
     p.add_argument('--udp-host', default='127.0.0.1')
     p.add_argument('--udp-port', type=int, default=9901)
     p.add_argument('--data', type=Path, default=Path('data'))
@@ -25,7 +28,12 @@ def main():
     p.add_argument('--lost-after', type=float, default=1200)
     a = p.parse_args()
     radio = Radio(a.sf, a.bandwidth, a.coding_rate)
-    link = SimulatedLink(bind=(a.udp_host, a.udp_port)) if a.transport == 'simulated' else SerialModem(a.serial_port, sf=a.sf, bandwidth=a.bandwidth, coding_rate=a.coding_rate)
+    if a.transport == 'meshtastic':
+        # Receive-only; region and PHY are read back from the node.
+        from station.lora.mesh import MeshtasticLink
+        link = MeshtasticLink(port=a.mesh_port, ble=a.mesh_ble, channel_index=a.mesh_channel_index, transmit=False)
+    else:
+        link = SimulatedLink(bind=(a.udp_host, a.udp_port)) if a.transport == 'simulated' else SerialModem(a.serial_port, sf=a.sf, bandwidth=a.bandwidth, coding_rate=a.coding_rate)
     receiver = Receiver(a.data, radio, a.stale_after, a.lost_after, transport_label=link.label)
     wifi = Wifi(a.station_url, os.environ.get('ACORN_STATION_SECRET'), a.data)
     uvicorn.run(create_app(receiver, wifi, Listener(receiver, link)), host=a.host, port=a.port)

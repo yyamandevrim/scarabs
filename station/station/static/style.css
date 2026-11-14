@@ -4,6 +4,8 @@ body{min-height:100dvh}
 .station-bar h1{font-size:18px;letter-spacing:.04em;font-weight:600}
 .station-section{font-size:14px;color:var(--text-2)}
 #connection{margin-left:auto;font-size:12px;color:var(--text-2)}
+#lora-link{margin:0;font-size:12px;color:var(--text-2)}
+#lora-link.lost{color:var(--fail)}
 #pending-summary{font-size:13px;color:var(--text-2);text-decoration:none}
 #pending-summary.has-pending{color:var(--smoke)}
 #connection.lost,.lost,.error,.pipeline-error{color:var(--fail)}

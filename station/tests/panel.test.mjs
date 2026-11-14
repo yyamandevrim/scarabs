@@ -586,3 +586,23 @@ for (const [status, expected] of [
     await window.happyDOM.close();
   });
 }
+
+test('LoRa radio line stays hidden when disabled and never shows an unread real radio as healthy', async () => {
+  const p = await panel();
+  assert.equal(p.$('#lora-link').hidden, true);
+  p.state.status.lora = {transport: 'simulated', state: 'simulated', ready: true, label: 'LoRa link (simulated transport)', error: null};
+  await p.refresh();
+  assert.equal(p.$('#lora-link').hidden, false);
+  assert.equal(p.$('#lora-link').textContent, 'LoRa link (simulated transport)');
+  assert.equal(p.$('#lora-link').className, '');
+  for (const [state, text, detail] of [['absent', 'radio absent', 'Serial port not found'], ['refused', 'radio refused', 'Node region is unset; set EU_433 or EU_868 to match the radio hardware'], ['disconnected', 'radio disconnected', 'Node connection lost; retrying']]) {
+    p.state.status.lora = {transport: 'meshtastic', state, ready: false, label: `LoRa link (Meshtastic radio · ${text})`, detail, error: null};
+    await p.refresh();
+    assert.equal(p.$('#lora-link').textContent, `LoRa link (Meshtastic radio · ${text}) · ${detail}`);
+    assert.equal(p.$('#lora-link').className, 'lost');
+  }
+  p.state.status.lora = {transport: 'meshtastic', state: 'ready', ready: true, label: 'LoRa link (Meshtastic radio · radio connected)', region: 'EU_868', sub_band: '869.4-869.65', detail: '', error: null};
+  await p.refresh();
+  assert.match(p.$('#lora-link').textContent, /EU_868 · 869\.4-869\.65 MHz · delivery not confirmed/);
+  assert.equal(p.$('#lora-link').className, '');
+});
