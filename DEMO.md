@@ -2,15 +2,15 @@
 
 ACORN — Aerial Canopy Observation and Reporting Node. Scarabs, Junction 2026 Helsinki, Green European Renaissance challenge. This replaces the rehearsal-2 draft and its short-lived-ledger workaround.
 
-The laptop demo uses real recorded smoke/fog footage and real on-device inference, **LoRa link (simulated transport)** over UDP, plus an explicit Wi-Fi imagery aid. No radio range, calibrated bearing, fire location, battery percentage or confirmed fire is claimed. One MicroMesh has arrived, but its physical variant/firmware and real ACORN link remain unverified; see [the hardware investigation and single-radio demo limits](station/LORA_HARDWARE.md).
+The laptop demo uses real recorded smoke/control footage and real local inference, **LoRa link (simulated transport)** over UDP, plus an explicit Wi-Fi imagery aid. No radio range, calibrated bearing, fire location, battery percentage or confirmed fire is claimed. One MicroMesh has arrived, but its physical variant/firmware and real ACORN link remain unverified; see [the hardware investigation and single-radio demo limits](station/LORA_HARDWARE.md).
 
 | App | Purpose | Demo address |
 |---|---|---|
-| Station, Turkish | Full-detail ranger Wi-Fi panel: feeds, evidence, decisions | http://127.0.0.1:18091 |
-| Ground, English/Turkish | Remote packet-only view; explicit Wi-Fi demo switch | http://127.0.0.1:18092 |
-| Placement, English/Turkish | Simulated geometric launch-point comparison | http://127.0.0.1:18787 |
+| Station, English | Full-detail ranger Wi-Fi panel: feeds, evidence, decisions | http://127.0.0.1:18091 |
+| Ground, English by default | Remote packet-only view; explicit Wi-Fi demo switch | http://127.0.0.1:18092 |
+| Placement, English by default | Simulated geometric launch-point comparison | http://127.0.0.1:18787 |
 
-UDP is 19901 in this runbook. These ports avoid existing 8080/8787 demos. Change a port and all matching URLs/configuration together.
+The stage commands in section B use UDP 19901 and the addresses above. The laptop-only fallback below uses separate ports because these stage ports were occupied during rehearsal. Change a port and all matching URLs/configuration together.
 
 ## Live camera screen demonstration — working recipe, 2026-11-14
 
@@ -62,6 +62,34 @@ cd ..
 
 The footage fetcher retries 429/503 politely: up to five attempts, 30/60/120/240 s exponential waits, longer if Retry-After requires it. Verified completed files are skipped, partial files are discarded, hashes still checked. If all retries fail, try later. Do downloads/data preparation before reaching the venue. Keep local model/media/prepared-data backups and screenshots of the successful walkthrough.
 
+## Laptop only, no board
+
+**Use Recorded demo for the jury if the UNO Q is not healthy.** Complete section A while online first. From the repository root, start all three offline services with:
+
+```sh
+uv run --offline --frozen --project station python station/scripts/laptop_demo.py
+```
+
+The launcher privately prompts for one panel secret and supplies it to ground too (or reuses exported `ACORN_PANEL_SECRET`). Sign into station with it. **Ctrl+C stops all three services**; a service failure also stops the others. Station is http://127.0.0.1:28091, ground http://127.0.0.1:28092, placement http://127.0.0.1:38787/map. These ports and UDP **49173** avoid the occupied stage ports found in rehearsal. If changing ports, update the launcher, station peer port and matching ground URLs/UDP binding together.
+
+`station/demo-laptop.toml` runs two real file sources, `smoke.ogv` and `cloud.webm`, labelled **Recorded demo**. Station and ground each persist their own `data/laptop/`. Leave duty accounting intact. The Mac rehearsal opened a suspicion after **2.085 s**, score **0.354259**, and ground received it at **8.25 s** after startup with an existing ledger. These are **laptop timings, not board measurements**, and are not delivery guarantees.
+
+**Live native Mac camera — separate form:**
+
+```sh
+uv run --offline --frozen --project station python station/scripts/laptop_demo.py --live
+```
+
+Stop the recorded run first. This selects `station/demo-mac-camera.toml`, with only **Left** active: `kind = "avfoundation"`, string `source = "0"`, requested **1280×720 / 30 capture fps**, **`center_crop`**, input **192**, **1 analysis/s**, confidence **0.35**, unchanged spatial **3 of 5 / IoU 0.25**, timeout **12 s**. The panel labels it **Live camera** and its clip **Camera recording**. Live station/ground data is in their separate `data/laptop-live/` directories; do not switch directories to bypass a duty wait.
+
+AVFoundation is macOS-only; Linux USB persistent paths, V4L2 and YUYV negotiation are unchanged. Index 0 is normally built-in; change `source` in the live config if another camera is selected. Keep `capture_format` empty. Check the actual preview and authenticated `/api/status`: connected, counters advancing, measured dimensions/fps, `center_crop`, no pipeline error. Native launcher/capture was checked at 1280×720, about 30 fps, with advancing analyses and no pipeline error. Requested capture fps is not a measurement. If macOS requests camera access, grant it to the terminal/app running Python, restart and sign in again.
+
+**Live smoke through the Mac camera remains unverified: nobody held the footage in front of it.** Play the local Crane loop on a phone/second screen, hide controls, fill the central square with plume and forest, and time a new suspicion; then run dedicated hall and ordinary-video controls without changing thresholds. The board recipe above supplies framing guidance, not a Mac latency promise. The earlier private Mac adapter's **180.148 s / 179-analysis** ordinary-hall control at actual **1280×720 / approximately 30 fps** had peak raw score **0.003035** and zero detections/suspicions. That is not a live smoke-positive result.
+
+**The laptop cannot show the real flame sensor, physical LED or UNO Q board.** Both configs set MCU **off**: **Flame sensor not configured**, **Status LED: unavailable**; no trigger or LED response is silently simulated. Radio stays explicitly simulated UDP. Ground imagery needs **Show Wi-Fi demo**; its **Camera feeds · Wi-Fi** disclosure starts the separate feeds. Placement remains geometric simulation.
+
+Section D's flame simulation commands deliberately return **409** with these hardware-off configs. Its recorded dropout commands use `stage.local.toml`; substitute `--config demo-laptop.toml` for the recorded laptop run. Live Mac's sole input is `left`, and file-dropout commands do not apply.
+
 ## B. Configure once; rehearse as long as needed
 
 The sustainable demo uses **SF7/BW125/CR4/5 and a strict 1% duty limit**. A four-second heartbeat is a request, not an impossible transmission promise: the sender spaces transmissions into **12-second calculated slots**, with new alerts first, then decisions, due limited repeats and heartbeats. The rolling ledger and next legal slot survive restart. It does not go silent after four minutes. No “start one minute before going on” workaround or ledger-reset command is needed.
@@ -107,20 +135,20 @@ read -s 'ACORN_PANEL_SECRET?Station secret: '; export ACORN_PANEL_SECRET; echo
 uv run --offline --frozen forest-station --config stage.local.toml serve --port 18091
 ```
 
-Open the three addresses above. Sign into the station panel. Ground defaults to **demo off**, English, with zero camera images/video. Leave the apps running during rehearsal; prepare a clean review list by archiving if useful, rather than resetting a budget. A smoke suspicion generally opens after a few analyses; packet delivery waits for the next legal slot, up to about 12 s without backlog. The recorded smoke loop can create another distinct suspicion about every 55 s.
+Open the three addresses above. Sign into the station panel. Ground defaults to **demo off**, English, with zero camera images/video. Leave the apps running during rehearsal; prepare a clean review list by archiving if useful, rather than resetting a budget. A smoke suspicion generally opens after a few analyses; packet delivery waits for the next legal slot, up to about 12 s without backlog. Do not promise a fresh suspicion on every recorded loop: the Mac rehearsal kept one suspicion open for more than six minutes. A new event needs the unchanged tracker to expire; existing decisions can still be corrected.
 
 For a long-range configuration use SF12 on **both** station and ground: the same 1% limit requires **241-second slots**. Ground receives the calculated contact window in every packet and shows a duty-cycle wait. Alerts have longer latency and may queue under sustained overload; no legitimate setting can carry two-second frames every ten seconds at 1%. All radio figures remain calculated/simulated.
 
-## C. Three-minute walkthrough
+## C. Three-minute recorded-source walkthrough
 
 | Step | Action | Explain |
 |---|---|---|
-| 1 | Show both station feeds and the inactive third-slot status | “Real recorded footage, not live airborne cameras; two inputs active, three mounted.” |
+| 1 | Show both station feeds and the inactive third-slot status | “Real recorded footage, not live airborne cameras; two active inputs and a third configured inactive slot. No camera hardware is attached in the laptop fallback.” |
 | 2 | Open a “Smoke suspicion” card and play its clip | “A consistent smoke suspicion saves evidence; this is not confirmed fire.” |
-| 3 | Confirm or reject that specific card | “The operator annotates the suspicion.” Queue arrivals are deferred while pointer or focus is inside; the new-record notice means pending arrivals will appear after leaving the queue. Use Değiştir to correct a decision. |
+| 3 | Confirm or reject that specific card | “The operator annotates the suspicion.” Queue arrivals are deferred while pointer or focus is inside; the new-record notice means pending arrivals will appear after leaving the queue. Use **Change** to correct a decision. |
 | 4 | Show ground with the Wi-Fi switch **off** | “The original remote view contains only received packet data: approximate whole-degree direction, confidence, camera/source and decisions. No imagery over LoRa.” Decision updates also wait for a legal slot. |
 | 5 | Expand link details | “Version-2 smoke alerts are 42 bytes, status 40, flame/decision 37. At demo SF7 airtime is about 82–87 ms, calculated. The sender obeys a 36 s rolling-hour budget and announces the expected contact window.” |
-| 6 | Enable **Show Wi-Fi demo** | Point to the bounded label: “Demo only: shown over Wi-Fi, not available over LoRa.” Untick it and show imagery disappears. |
+| 6 | Enable **Show Wi-Fi demo** | Point to **Imagery & evidence · Wi-Fi only** and its note: “Images and clips are not carried by LoRa.” Untick it and show imagery disappears; expand **Camera feeds · Wi-Fi** only when showing the separate feeds. |
 | 7 | Open placement map | “These hectare figures are simulated geometric visibility over real terrain/canopy, not optical detection range.” The simulation label sits beside the figures. |
 | 8 | Change Haukilahti heading 180° → 0°, then restore | Compare the changed simulated visible forest; use Recalculate both sites if an edit is still pending. |
 | 9 | Compare/select camera pairs | Explain which two of three mounted cameras to connect. Rounded-zero priority values have empty bars and no arbitrary Best badge. |
