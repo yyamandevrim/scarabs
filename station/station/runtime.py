@@ -12,6 +12,7 @@ from . import clip, datalock
 from .alarm import EventTracker
 from .capture import CaptureWorker
 from .detector import SmokeDetector, annotate
+from .centre_views import build_detector
 from .led import LedHook
 from .machine import machine_identity
 from .mcu_bridge import McuBridge
@@ -21,7 +22,7 @@ from .lora.bridge import LoraBridge
 class Station:
     def __init__(self, config, detector=None, capture_factory=None):
         self.config = config
-        self.detector = detector if detector is not None else SmokeDetector(config.model, config.input_size, config.confidence, config.nms_iou, config.ort_threads, view=config.detector_view)
+        self.detector = detector if detector is not None else build_detector(config, SmokeDetector)
         self.data_lock = datalock.acquire(config.data_dir)
         try:
             self.store = EventStore(config.data_dir)

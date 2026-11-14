@@ -10,10 +10,11 @@ import numpy as np
 from .alarm import AlarmRule
 from .config import load_config
 from .detector import SmokeDetector
+from .centre_views import build_detector
 
 
 def benchmark(config, clip, frames, stride, warmup):
-    detector = SmokeDetector(config.model,config.input_size,config.confidence,config.nms_iou,config.ort_threads,view=config.detector_view)
+    detector = build_detector(config, SmokeDetector)
     capture = cv2.VideoCapture(str(clip))
     if not capture.isOpened():
         raise ValueError(f"Cannot open clip: {clip}")

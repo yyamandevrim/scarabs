@@ -37,7 +37,7 @@ class Config:
     profile: str = "field"
     analysis_hz: float | None = None
     input_size: int | None = None
-    detector_view: str = "full"  # Optional centre square; excludes outer strips.
+    detector_view: str = "full"  # "center_crop" or "centre_zoom": both exclude the frame border.
     confidence: float | None = None
     nms_iou: float = .45
     similarity_iou: float = .25
@@ -76,8 +76,8 @@ class Config:
                 "required_detections": 3, "window_analyses": 5}
 
     def __post_init__(self):
-        if self.detector_view not in ("full", "center_crop"):
-            raise ValueError("detector_view must be full or center_crop")
+        if self.detector_view not in ("full", "center_crop", "centre_zoom"):
+            raise ValueError("detector_view must be full, center_crop or centre_zoom")
         if self.profile not in ANALYSIS_PROFILES:
             raise ValueError("profile must be field or demo")
         for name, value in ANALYSIS_PROFILES[self.profile].items():
