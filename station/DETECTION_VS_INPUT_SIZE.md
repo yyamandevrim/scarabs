@@ -144,18 +144,18 @@ What the threshold sweep shows:
 
 **Scaling assumption.** Inference time = a + b·s² (s = input side). Convolution work is proportional to pixel count, plus a fixed overhead. Fitted to the two standalone UNO Q benchmarks, 640 → 2545 ms and 320 → 665 ms, this gives a ≈ 38 ms, b ≈ 0.00612 ms/px². The fit predicts 264 ms at 192. The board measured about 277–279 ms there, under live two-camera capture, so the fit is within about 5%. Treat estimates as ±15%.
 
-The two-camera ceiling below assumes both cameras share one model instance, as in the application: rate per camera ≤ 1 / (2 × (inference + preprocessing)), ignoring capture, encoding and panel load. That ceiling is optimistic. At 640 with 1280×720 clip decoding, the board achieved only **0.105 Hz** per source, against a ceiling of 0.195 Hz.
+**Live-camera timing update:** the [board record](../firmware/BOARD_NOTES.md#2026-11-14-live-camera-input-size-curve--measured-on-the-uno-q) now measures 640, 416 and 320 with two live 320×240 YUYV cameras, UVC quirk 128, confidence 0.35 and two ORT threads. These replace the earlier ceiling estimates at those sizes. Pairs are left / centre; inference is the mean of sampled completed analyses, excluding capture/decode. The earlier 0.105 Hz result used recorded 1280×720 clips, not live cameras.
 
-| Input | Mac inference mean [Mac] | UNO Q inference | Two-camera ceiling per camera [Board] | Interval per camera |
+| Input | Mac inference mean [Mac] | UNO Q inference [Board, measured live] | Sustained rate per camera [Board, measured live] | Requested interval per camera |
 |---|---|---|---|---|
-| 640 | 68 ms | **2545 ms [measured]** | 0.19 Hz [estimate]; **0.105 Hz measured live** at 1280×720 | 5–10 s |
-| 512 | 44 ms | ~1640 ms [estimate] | ~0.30 Hz [estimate] | ~3.3 s |
-| 416 | 28 ms | ~1100 ms [estimate] | ~0.45 Hz [estimate] | ~2.2 s |
-| 320 | 17 ms | **665 ms [measured]** | ~0.75 Hz [estimate] | ~1.3 s |
-| 256 | 12 ms | ~440 ms [estimate] | ~1.1 Hz [estimate] | ~0.9 s |
-| 224 | 10 ms | ~345 ms [estimate] | ~1.4 Hz [estimate] | ~0.7 s |
-| 192 | 9 ms | **~278 ms [measured live]** | ~1.8 Hz [estimate]; **0.99 Hz measured at the 1 Hz target** | 1 s |
-| 160 | 7 ms | ~195 ms [estimate] | ~2.5 Hz [estimate] | ~0.4 s |
+| 640 | 68 ms | 2719.54 / 2738.86 ms | 0.167 / 0.167 Hz | 6 s |
+| 416 | 28 ms | 1170.39 / 1163.29 ms | 0.333 / 0.333 Hz | 3 s |
+| 320 | 17 ms | 701.81 / 694.58 ms | 0.500 / 0.497 Hz | 2 s |
+| 192 | 9 ms | 279.32 / 276.53 ms | 0.990 / 0.990 Hz | 1 s |
+
+640, 416 and 320 used 30 seconds warm-up plus approximately 300 seconds of sampled running each; 192 used the earlier 180.7-second window. Six seconds was the shortest validated 640 interval on the tested grid; 5.5 seconds failed. The 416/320 choices are not boundary-search minima. Other input sizes remain extrapolations from the scaling fit, not live-camera measurements.
+
+Resource use was also measured: at 640, mean station RSS was 306.3 MiB, machine / station CPU 57.6% / 209.9%, and CPU temperatures 46.4–52.9°C. The board record includes the other sizes' resources and measurement limits. The exact repository field profile uses confidence 0.25 and remains unmeasured; this curve used 0.35. None of these timings validates detection quality on the board.
 
 The board is about 32–40× slower than this Mac per inference. Mac times must never be quoted as board times.
 
@@ -174,7 +174,7 @@ Smoke results by analysis rate. Negatives: no alarm at any rate.
 
 Slowing down mainly delays the first alarm: the 3-of-5 window spans 5 analyses, so roughly 10–25 s at these rates. Here it never turned an alarm into a miss. For smoke that develops over minutes, a 5–20 s delay is small. Missing a small plume altogether, as 192 does in section 5, is not small.
 
-**Config interaction.** If the interval grows toward the 12 s `event_timeout` (for example 640 at ~0.1 Hz), a single missed analysis can close an event and reopen it as a duplicate. `event_timeout` would need to be at least about 3 analysis intervals. This is a configuration value; it was not changed here. Stale-frame reset uses `max(stale_seconds, 2/analysis_hz)`, so it scales with the rate already.
+**Config interaction.** If the interval grows toward the 12 s `event_timeout` (for example 640 at ~0.1 Hz), a single missed analysis can close an event and reopen it as a duplicate. `event_timeout` would need to be at least about 3 analysis intervals. This is a configuration value; it was not changed in the Mac study. The later board timing curve used 36 s at input 640 and a 6 s interval; the repository field profile now follows those values. Stale-frame reset uses `max(stale_seconds, 2/analysis_hz)`, so it scales with the rate already.
 
 ## 9. Plain-language reading
 
@@ -186,14 +186,16 @@ Slowing down mainly delays the first alarm: the 3-of-5 window spans 5 analyses, 
 
 ## 10. Recommendation (a trade-off to choose from)
 
+Detection-quality evidence in this table is from the Mac clips and synthetic proxy; board rates measure throughput only.
+
 | Option | Setting | Board rate per camera, two cameras | Evidence for | Evidence against |
 |---|---|---|---|---|
 | A. Current | 192, 320×240, 0.35, 1 Hz | **0.99 Hz [measured]** | Real clip alarms at 3 s; quiet on all negatives | Detects nothing once the plume is ≥2× smaller (proxy) |
-| B. Smallest "every real clip alarms, no false alarms" | 160–192 | 1–2.5 Hz [192 measured; 160 estimated] | Same as A | Same weakness as A; smallest setting is not the safest |
-| C. Middle | 320 (0.35), or 416 at 0.25 | ~0.75 Hz / ~0.45 Hz [estimate] | 320 alarms on the real clip at native working size; 416 at 0.25 does too | Each covers only one plume-size band in the proxy (320 misses the real clip from 320×240 frames at 0.35); neither is robust |
-| **D. Recommended for smoke that develops over minutes** | **640, 320×240 cameras, 0.35 (0.25 is worth testing), one analysis every 5–10 s per camera, `event_timeout` ≥ 3 intervals** | **~0.1–0.19 Hz [estimate]**; 0.105 Hz measured live with heavier 1280×720 clip decoding | Only setting that alarms at every plume scale tested, at both working sizes; no false alarms; first alarm expected roughly 10–50 s after smoke is visible | About 10× fewer analyses; per-analysis CPU is near the measured 640 load (high CPU and heat); 3-of-5 then spans about 25–50 s |
+| B. Smallest "every real clip alarms, no false alarms" | 160–192 | 0.990 Hz at 192 [measured]; 160 unmeasured | Same as A | Same weakness as A; smallest setting is not the safest |
+| C. Middle | 320 (0.35), or 416 at 0.25 | 0.500 / 0.497 Hz at 320; 0.333 Hz each at 416 [measured at 0.35; 416 at 0.25 unmeasured] | 320 alarms on the real clip at native working size; 416 at 0.25 does too | Each covers only one plume-size band in the proxy (320 misses the real clip from 320×240 frames at 0.35); neither is robust |
+| **D. Recommended for smoke that develops over minutes** | **640, 320×240 cameras, 0.35 (0.25 is worth testing), one analysis every 6 s per camera, `event_timeout` 36 s** | **0.167 Hz each [measured at 0.35]**; exact field profile at 0.25 unmeasured | Only setting that alarms at every plume scale tested on the Mac, at both working sizes; no alarms on the tested negatives; board alarm latency unmeasured | Slower sampling; measured board CPU, RAM and thermals are in section 7; field sensitivity remains unverified |
 
-A compromise between C and D is 416–512 at threshold 0.25, every ~2–3 s. It is cheaper than 640, but it covered fewer plume scales in the proxy, and its threshold change was tuned on one clip.
+A compromise between C and D is 416 at threshold 0.25, every 3 s (cadence measured only at 0.35); 512 remains unmeasured. It is cheaper than 640, but it covered fewer plume scales in the proxy, and its threshold change was tuned on one clip.
 
 ## 11. Limits of the evidence
 
@@ -201,5 +203,5 @@ A compromise between C and D is 416–512 at threshold 0.25, every ~2–3 s. It 
 - The distant-smoke result is synthetic. It has hard-edged pasting, artificial background texture and no atmospheric haze. Real distant smoke is fainter as well as smaller, which would likely make small inputs worse, not better.
 - The 320×240 test squashes a 16:9 clip. The real 4:3 cameras have a different field of view and optics, and USB YUYV sensor noise and compression were not modelled.
 - Detection numbers are Mac ORT results. The board's ARM build gave slightly different counts at 640 and 320. Detection on the board at sizes other than 640 and 320 is unmeasured.
-- Board times other than 640, 320 and 192 are estimates. Two-camera rates are ceilings that ignore capture, encoding, panel and thermal load. The live 640 run reached about half its ceiling. CPU load, RAM and temperature at 640 with live 320×240 cameras were not measured.
+- Board live-camera timings and resources were measured at 192, 320, 416 and 640. Other sizes remain estimates. The exact field profile at confidence 0.25, longer hot-ambient operation and event-encoding load remain unmeasured; the controlled curve used 0.35.
 - Slow-rate results use a single sampling phase. Different phases could shift first-alarm times by a few analyses.

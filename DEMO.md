@@ -152,7 +152,7 @@ This is a recorded-file dropout simulation. It is not a verified USB unplug on t
 
 ## E. Hardware truth and fallbacks
 
-The team has run station on a **real Arduino UNO Q using recorded clips**, with the MCU bridge, KY-026 responding and the **on-board status LED** following station state. This is separate from the laptop rehearsal. See `firmware/BOARD_NOTES.md` for dated bring-up and ongoing measurements. This runbook does not claim validated board inference speed, USB cameras, AP mode, the external RGB LED or any real LoRa radio. Mac timing figures remain Mac measurements; reduced-resolution experiments do not validate detection accuracy.
+The team has run station on a **real Arduino UNO Q using recorded clips and subsequently two live USB cameras**, with the MCU bridge, KY-026 responding and the **on-board status LED** following station state. This is separate from the laptop rehearsal. See `firmware/BOARD_NOTES.md` for dated bring-up and ongoing measurements. Board timing and resource use were measured at inputs 192, 320, 416 and 640 with two live cameras after the USB bandwidth fix. Automatic startup and orderly power-cycle recovery were verified; the later direct Wi-Fi bind was not power-cycle tested. The controlled timing curve used confidence 0.35; the exact field profile at 0.25 remains unmeasured. AP mode, the external RGB LED and any real LoRa radio remain unverified. Mac timing figures remain Mac measurements; reduced-resolution experiments do not validate detection accuracy.
 
 For a future ranger AP demonstration, follow the explicitly unverified NetworkManager procedure in `station/README.md`; do not present AP mode as tested. No board or firmware change is required for this laptop runbook.
 

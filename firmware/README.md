@@ -18,7 +18,7 @@
    ```sh
    uv run --offline --frozen forest-station --config config.toml benchmark media/smoke.ogv --frames 60 --stride 25
    ```
-   Save the JSON and the machine/board identification. This measures one detector on a file, not simultaneous USB capture or thermals. Existing published numbers are **Apple M5 Mac only**. Adjust `analysis_hz` after checking sustained two-camera operation; 1 Hz per camera is a target, not a board measurement.
+   Save the JSON and the machine/board identification. This measures one detector on a file, not simultaneous USB capture or thermals. Published [board measurements](BOARD_NOTES.md) include standalone benchmarks and two-live-camera timing/resources at inputs 192, 320, 416 and 640. Input 192 sustained 0.990 analyses/s per camera; input 640 sustained 0.167 at confidence 0.35. The exact field profile at 0.25 remains unmeasured. Recheck sustained operation for a different configuration; these timings do not validate detection quality.
 3. Choose the LED type and pins below. For the simplest first bring-up use on-board LED4: set `LED_EXTERNAL` to `0` in [acorn_config.h](acorn_mcu/acorn_config.h), leaving `LED_ONBOARD` at `4`.
 4. With external parts disconnected, [build and upload the sketch](#build-and-upload). Record success/failure; compilation alone does not prove it runs.
 5. Shut Linux down normally, remove all board power, then [wire and measure](#wiring-and-voltage-rules). Reconnect power only at the stated checks.
@@ -27,7 +27,7 @@
 
 ## What runs where
 
-Linux runs camera inference, the operator panel and SQLite. The STM32 MCU runs [acorn_mcu.ino](acorn_mcu/acorn_mcu.ino): it samples the KY-026, smooths analog readings, debounces the digital comparator and drives status LEDs. MCU logic and LED sensing run in a separate Zephyr thread, started before `Bridge.begin()`. Actual thread/ADC behaviour and vendor loader startup timing need a board check.
+Linux runs camera inference, the operator panel and SQLite. The STM32 MCU runs [acorn_mcu.ino](acorn_mcu/acorn_mcu.ino): it samples the KY-026, smooths analog readings, debounces the digital comparator and drives status LEDs. MCU logic and LED sensing run in a separate Zephyr thread, started before `Bridge.begin()`. Live ADC telemetry and MCU operation were verified on the board. Exact vendor loader startup timing remains unmeasured.
 
 Defaults in [acorn_config.h](acorn_mcu/acorn_config.h): 12-bit ADC (`0..4095`), sample loop about 5 ms, exponential smoothing α=1/8, digital trigger after 150 ms continuously active, release after 1 s continuously inactive, then 3 s of red LED hold. Analog triggering is disabled; analog intensity is displayed only. The scaled level is approximately `1000 × (4095 − smoothed_raw) / 4095`, rounded, **not confidence, distance or flame size**.
 
@@ -129,8 +129,8 @@ These steps follow the [official UNO Q user manual's Arduino IDE section](https:
 2. In IDE Boards Manager, search `UNO Q` and install **Arduino Zephyr Boards / Arduino UNO Q Zephyr Core**. If absent, add `https://downloads.arduino.cc/packages/package_zephyr_index.json` under Preferences → Additional Boards Manager URLs. Our tested core is **1.1.0**.
 3. In Library Manager install **Arduino_RouterBridge**, including all dependencies. Our tested version is **0.4.4**; it is a separate library, not bundled with the core. See Arduino's [library/core compatibility guidance](https://support.arduino.cc/hc/en-us/articles/27251870677916-Migrating-to-Zephyr-core-0-55-0-on-UNO-Q) if the installed board image reports a mismatch. Follow the vendor's version-specific recovery instructions rather than burning a bootloader speculatively.
 4. Open `firmware/acorn_mcu/acorn_mcu.ino`. Keep `acorn_logic.h` and `acorn_config.h` alongside it. Set LED/polarity/pins in the config before upload.
-5. Select **Arduino UNO Q** under the installed Zephyr board package, and its detected USB port under Tools → Port. Select **Verify**, then **Upload**. Wait for success, retaining the log. Port discovery and upload have **not** been tested here. Do not select a classic AVR UNO or invent `/dev/ttyACM0` as a substitute.
-6. If discovery fails, check cable, completed Linux boot and board selection. For a Linux development computer, follow the user manual's **Linux users: USB permissions required** section, then reconnect. If upload reports firmware/loader incompatibility, use the linked Arduino guidance for that installed version; this guide does not prove loader compatibility on the borrowed board.
+5. Select **Arduino UNO Q** under the installed Zephyr board package, and its detected USB port under Tools → Port. Select **Verify**, then **Upload**. Wait for success, retaining the log. CLI port discovery and upload were verified; the IDE workflow itself remains untested. Do not select a classic AVR UNO or invent `/dev/ttyACM0` as a substitute.
+6. If discovery fails, check cable, completed Linux boot and board selection. For a Linux development computer, follow the user manual's **Linux users: USB permissions required** section, then reconnect. If upload reports firmware/loader incompatibility, use the linked Arduino guidance for that installed version; the pinned core and successful loader initialization on the borrowed board are recorded in [BOARD_NOTES.md](BOARD_NOTES.md).
 
 ### Arduino CLI alternative
 
@@ -227,7 +227,7 @@ On-board LED4 mirrors these rhythms; its pending-smoke colour is **yellow (red+g
 
 ## Bring-up and fault finding
 
-These are **expected software behaviours to check on the board**, not completed hardware tests. Keep a log of time, MCU API output, meter readings and observed LED. Never rewire a powered board.
+These are **expected software behaviours to check on each board**; completed hardware checks and their limits are recorded in [BOARD_NOTES.md](BOARD_NOTES.md). Keep a log of time, MCU API output, meter readings and observed LED. Never rewire a powered board.
 
 For an uncontaminated LED test, make `bringup.local.toml` from your board config in `station/`: use `data_dir = "data/bringup"`, `[mcu] mode = "router"`, and temporarily set the two active cameras to `kind = "file"`, **left** with `source = "media/fog.webm"`, **centre** with `source = "media/cloud.webm"`. Use different files so `unplug centre` does not also remove left's source. Keep the third inactive. Stop the normal server first. This provides camera-health inputs without the repeating smoke clip immediately masking every state. No model is guaranteed negative; decide any unexpected smoke records before checking `normal` or `degraded`.
 
@@ -242,7 +242,7 @@ For an uncontaminated LED test, make `bringup.local.toml` from your board config
 | 7 — recovery | Restart the same station command | Fresh telemetry, acknowledged protocol 1; quiet state recovers automatically | Check router logs/reconnect errors. A green LED alone does not prove sensor wiring. |
 | 8 — smoke | Stop; change left file to `media/smoke.ogv`; restart | After the camera voting rule, a separate `kind: "smoke"` record titled “Duman şüphesi”; amber/yellow double blink. Flame reading stays independent | Check model/media, analysis counters and pending records. Review smoke via Doğrula/Reddet; no flame event should be fabricated. |
 | 9 — camera loss | Return left to fog (keep centre on its separate cloud file), restart, clear pending smoke. In a second terminal run `unplug centre`, then `replug centre`, both with the same config | Centre disconnects, other feed continues; slow blue while no higher-priority state; recovery after retry | Use CLI commands below. If amber persists, inspect pending smoke. Commands accept active file sources only. |
-| 10 — actual USB | Stop; return to `usb.local.toml`, with the intended two real USB paths. Repeat physical unplug/replug of the same port | One camera drops/retries; other continues. Check real fps, inference, evidence encoding and heat under sustained load | Board/hub/driver bandwidth, permissions and thermals are unverified. Use persistent device paths and inspect actual negotiated formats per station guide. |
+| 10 — actual USB | Stop; return to `usb.local.toml`, with the intended two real USB paths. Repeat physical unplug/replug of the same port | One camera drops/retries; other continues. Check real fps, inference, evidence encoding and heat under sustained load | Two-camera capture, physical-path mapping and short-run thermals were measured after the persistent UVC quirk 128 bandwidth fix; isolated physical dropout/recovery and long-duration thermals remain unverified. Use persistent device paths and inspect actual negotiated formats per station guide. |
 
 From `station/`, the step 2/7 start command is:
 
@@ -301,6 +301,8 @@ c++ -std=c++17 -Wall -Wextra -I../acorn_mcu test_logic.cpp -o /tmp/acorn-test-lo
 /tmp/acorn-test-logic vectors.txt
 ```
 
-**Unverified on real hardware:** upload and vendor loader/core/image compatibility; reboot persistence/startup delay; `Bridge.begin()` when router is absent; real router registration, notification payload and `provide_safe(int,int)` round trips; ADC from the separate Zephyr thread; actual 3.3 V KY-026 polarity/levels/threshold stability and IR response; external PWM and on-board LED4 colours/brightness; heartbeat timing/recovery; real UNO Q device-tree model identification; Linux ARM64 installation, USB mapping/dropout/bandwidth, VP8 encoding, sustained inference, memory/thermals/power and any field performance. API “sensor connected” cannot detect sensor-wire removal.
+**Verified on this board:** CLI upload, aligned core and vendor loader initialization, Linux ARM64 installation, real router protocol/notifications, live ADC telemetry, owner-observed KY-026 trigger with active-high polarity, on-board LED state and heartbeat recovery, UNO Q identification, two-camera USB mapping/capture after the bandwidth fix, and short-run inference/resources at inputs 192, 320, 416 and 640. Cron auto-start and orderly power-cycle recovery succeeded without reflashing or manual launch; the later direct Wi-Fi bind has not been power-cycle tested. See [BOARD_NOTES.md](BOARD_NOTES.md).
+
+**Still unverified on real hardware:** exact power-to-panel startup delay; `Bridge.begin()` when router is absent; measured sensor voltage levels, calibrated IR range and threshold stability; external RGB wiring/polarity/PWM; Wi-Fi AP mode; real LoRa radio; isolated USB dropout/recovery; VP8 per-event encoding performance; long-duration thermals/supply headroom; unexpected-power-loss recovery; exact field-profile performance at confidence 0.25; field detection sensitivity/false alarms. Limited standalone clip counts are not board detection-quality validation. API “sensor connected” cannot detect sensor-wire removal.
 
 **Team must choose and record before wiring:** on-board-only versus exact external RGB part; common cathode/anode and resistor provision/current; keep A0/D2 and D9/D10/D11 or change matching config pins; ambient comparator threshold/polarity; permitted indoor demonstration. Default pins are a proposed allocation, not confirmation that another team's shield leaves them free.
