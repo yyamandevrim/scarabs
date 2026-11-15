@@ -1,0 +1,5 @@
+name: ACORN
+description: Two-camera wildfire smoke observation, human review, local evidence and MCU sensing.
+icon: 🌲
+ports: [8080]
+bricks: []

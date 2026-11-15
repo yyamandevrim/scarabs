@@ -11,6 +11,34 @@ from . import overlay_text
 VIEWS = ("full", "center_crop")
 
 
+def nms_boxes(boxes, scores, score_threshold, nms_threshold):
+    """Use OpenCV NMS when available; App Lab's minimal OpenCV omits dnn.
+
+    The fallback uses the same continuous xywh IoU, strict score cutoff,
+    stable descending score order, and suppression when IoU > threshold.
+    Inference itself always runs through ONNX Runtime, independently of dnn.
+    """
+    if hasattr(cv2, "dnn"):
+        return cv2.dnn.NMSBoxes(boxes, scores, score_threshold, nms_threshold)
+    order = sorted((i for i, score in enumerate(scores) if score > score_threshold),
+                   key=lambda i: -scores[i])
+    kept = []
+    for i in order:
+        x, y, w, h = boxes[i]
+        suppress = False
+        for j in kept:
+            a, b, c, d = boxes[j]
+            intersection = max(0, min(x+w, a+c)-max(x, a)) * max(0, min(y+h, b+d)-max(y, b))
+            union = w*h + c*d - intersection
+            overlap = intersection / union if union > 0 else 1.0
+            if overlap > nms_threshold:
+                suppress = True
+                break
+        if not suppress:
+            kept.append(i)
+    return kept
+
+
 class SmokeDetector:
     """Pyronear export on one frame.
 
@@ -73,7 +101,7 @@ class SmokeDetector:
             boxes.append([float(cx-bw/2), float(cy-bh/2), float(bw), float(bh)])
             scores.append(float(score))
         detections = []
-        indices = cv2.dnn.NMSBoxes(boxes, scores, self.confidence, self.nms_iou)
+        indices = nms_boxes(boxes, scores, self.confidence, self.nms_iou)
         for index in np.asarray(indices).reshape(-1):
             x, y, bw, bh = boxes[index]
             # Clip inside the analysed region, then express in full-frame coordinates.

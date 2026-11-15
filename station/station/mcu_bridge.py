@@ -18,6 +18,9 @@ log = logging.getLogger(__name__)
 
 
 def make_link(cfg: McuConfig):
+    if cfg.mode == "applab":
+        from .applab_link import AppLabLink
+        return AppLabLink(cfg.request_timeout)
     if cfg.mode == "router":
         return RouterLink(cfg.socket, cfg.request_timeout, cfg.reconnect_seconds)
     if cfg.mode == "simulated":

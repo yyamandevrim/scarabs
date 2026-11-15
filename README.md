@@ -28,6 +28,7 @@ Screen recordings and more stills for every interface are in [`pitch/captures/br
 - [`placement/`](placement/README.md): Python line-of-sight analysis and offline map UI. See its README for data preparation and usage.
 - [`ground/`](ground/README.md): LoRa-only remote dashboard for compact alert packets over simulated transport, with optional Wi-Fi evidence collection.
 - [`tools/`](tools/README.md): upload and restore scripts for large artifacts kept in object storage, with a committed manifest. See its README for usage.
+- [`applab/`](applab/README.md): build the full station as an Arduino App Lab app and ZIP for UNO Q; includes container verification and pending board checks.
 - [`firmware/`](firmware/README.md): MCU sketch designed for the Arduino UNO Q's local KY-026 flame sensor and RGB status LED, with wiring and bring-up instructions.
 
 ## What has been verified so far

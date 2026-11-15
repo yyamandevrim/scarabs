@@ -48,7 +48,7 @@ def led_info(code):
 class McuConfig:
     # off: no microcontroller; simulated: in-process model of the firmware
     # (demo without hardware, clearly marked simulated); router: the real
-    # board through arduino-router's Unix socket.
+    # board through arduino-router's Unix socket. applab: App Lab Bridge API.
     mode: str = "off"
     socket: str = DEFAULT_SOCKET
     state_interval: float = 1.0    # seconds between state messages (heartbeat)
@@ -57,8 +57,8 @@ class McuConfig:
     reconnect_seconds: float = 2.0
 
     def __post_init__(self):
-        if self.mode not in ("off", "simulated", "router"):
-            raise ValueError("mcu.mode must be off, simulated or router")
+        if self.mode not in ("off", "simulated", "router", "applab"):
+            raise ValueError("mcu.mode must be off, simulated, router or applab")
         if min(self.state_interval, self.reading_timeout, self.request_timeout, self.reconnect_seconds) <= 0:
             raise ValueError("mcu intervals and timeouts must be positive")
         if self.reading_timeout <= self.state_interval / 2:

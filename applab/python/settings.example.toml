@@ -1,0 +1,6 @@
+# Copy to APP_ROOT/data/settings.toml on the board. No password belongs here.
+profile = "demo" # field is also available: 640 / 0.25 / one analysis per six seconds
+bridge = "applab" # router retains the standalone transport; off is hardware-free
+left = "/dev/v4l/by-path/REPLACE_LEFT_PORT-video-index0"
+centre = "/dev/v4l/by-path/REPLACE_CENTRE_PORT-video-index0"
+# Both cameras request 320x240 YUYV, 5 capture fps (latest board screen-demo setting).

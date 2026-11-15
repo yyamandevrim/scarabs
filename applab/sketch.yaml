@@ -1,0 +1,14 @@
+default_profile: default
+profiles:
+  default:
+    fqbn: arduino:zephyr:unoq
+    platforms:
+      - platform: arduino:zephyr (1.1.0)
+        platform_index_url: https://downloads.arduino.cc/packages/package_zephyr_index.json
+    libraries:
+      - Arduino_RouterBridge (0.4.4)
+      - Arduino_RPClite (0.3.1)
+      - MsgPack (0.4.2)
+      - ArxContainer (0.7.0)
+      - ArxTypeTraits (0.3.2)
+      - DebugLog (0.8.4)

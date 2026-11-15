@@ -3,6 +3,8 @@
 **Aerial Canopy Observation and Reporting Node · Junction 2026**  
 Portable forest smoke observation: camera events are **smoke suspicions for human review**, never confirmed fire.
 
+**App Lab package.** See [`applab/`](../applab/README.md) to assemble the complete station and MCU sketch into an importable ZIP. Packaging was compiled and tested with recorded footage in Arduino’s arm64 container; real-board App Lab import, cameras, bridge and performance remain pending.
+
 **What runs where.** UNO Q Linux captures two USB cameras, runs the Pyronear YOLO11s ONNX smoke model on CPU, serves the local authenticated web panel, and stores event records/decisions in SQLite plus JPEG and video evidence. The STM32 microcontroller reads the Joy-IT KY-026 and drives on-board RGB LED4. Arduino RouterBridge joins them: Linux uses MessagePack-RPC through the router's Unix socket; `acorn_reading` carries sensor/LED telemetry up and `acorn_state` carries station state/heartbeats down. Sensing and LED control have their own MCU thread, including while the bridge waits for Linux.
 
 **Measured on this UNO Q.** Board notes record two simultaneous live 320×240 YUYV cameras, requested capture 30 fps, UVC quirk 128, CPUExecutionProvider, two ORT threads and confidence 0.35. Pairs below are left/centre. Analysis means include preprocessing and inference, exclude capture/decode; intervals are requested per camera, rates are measured. Input 192: 30-second warm-up + 180.7-second window; other sizes: 30-second warm-up + about 300 seconds each. These are speed tests, not accuracy tests.
