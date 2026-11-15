@@ -1,3 +1,21 @@
+# Public site on Vercel
+
+Deployed 2026-11-15 as the Vercel project `acorn-forest-watch`. The same FastAPI app serves `/`, `/map` and the calculation API from one Python function.
+
+```sh
+cd placement
+sh scripts/build_vercel.sh
+cd .vercel-build && vercel deploy --prod
+```
+
+`scripts/build_vercel.sh` stages a self-contained bundle in the git-ignored `.vercel-build/`: the app, `static/`, `brand.json`, the seven prepared map/raster files, a pinned `requirements.txt` and a `main.py` entrypoint. Nothing else from the repository is uploaded. The entrypoint turns on production mode (rate limits, startup warm-up), points the result and Numba caches at `/tmp`, and trusts one proxy hop for the visitor address.
+
+Vercel's Python runtime has no system `libexpat`, which rasterio's GDAL needs. The script downloads the official Debian 11 `libexpat1` package, checks its SHA-256 and the entrypoint loads the library before the app is imported.
+
+Measured on the first deployment: cold start about 9 s for the first request, then 0.2–0.9 s for pages and assets; a coarse analysis 0.8 s and a detailed one 2.4 s, uncached. Generated overlays live in the instance's `/tmp`, so a request served by a different instance has to recompute them; the map already reruns an analysis whose images are gone. Rate limits are per instance.
+
+The Modal route below was prepared earlier and has not been deployed.
+
 # Dynamic public site on Modal
 
 The same `forest_placement.api:app` serves the landing page at `/`, the live map at `/map`, and the calculation API. No static export or station-feed proxy is involved. Local offline use remains available with the original uvicorn command.

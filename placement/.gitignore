@@ -7,3 +7,4 @@ artifacts/
 
 # Disposable demo/ranger evidence, ledgers and lock files
 data-*/
+.vercel-build/
